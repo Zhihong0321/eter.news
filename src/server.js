@@ -60,6 +60,7 @@ async function serveStatic(req, res, pathname) {
   const relative = pathname === '/' ? '/index.html'
     : pathname === '/read' || pathname === '/read/' ? '/read.html'
     : pathname === '/article' || pathname === '/article/' ? '/article.html'
+    : pathname === '/about-0pc' || pathname === '/about-0pc/' ? '/about-0pc.html'
     : pathname;
 
   const filePath = path.resolve(PUBLIC_DIR, `.${relative}`);
@@ -188,5 +189,4 @@ if (!invokedPath || invokedPath.toLowerCase().endsWith('server.js')) {
     console.log(`[eter.news] Public news portal running on 0.0.0.0:${PORT}`);
   });
 }
-
 
