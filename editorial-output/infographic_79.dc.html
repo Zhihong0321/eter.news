@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+(function() {
+  function getVal(k) {
+    try {
+      var ca = document.cookie.split(';');
+      for (var i = 0; i < ca.length; i++) {
+        var c = ca[i].trim();
+        if (c.indexOf(k + '=') === 0) return decodeURIComponent(c.substring(k.length + 1));
+      }
+    } catch (e) {}
+    try { return localStorage.getItem(k); } catch (e) { return null; }
+  }
+  try {
+    var l = getVal('meridian-language') || getVal('infographic-lang') || 'en';
+    var t = getVal('meridian-theme') || getVal('infographic-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-lang', l);
+    document.documentElement.setAttribute('lang', l === 'cn' ? 'zh-Hans' : 'en');
+    document.documentElement.setAttribute('data-theme', t);
+  } catch(e) {}
+})();
+</script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Malaysian Corporate Recap: Earnings Growth, Legal Disputes, and Contract Awards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500;600&family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5f4f1;--paper2:#ecebe6;--card:#fdfdfb;
+  --ink:#14161a;--ink2:#4c505a;--ink3:#878b94;--line:#e0dfd9;
+  --a3:#0a2d6e;--a1:#1553cf;--a2:#2fa6d9;--aink:#1043a8;
+  --ia3:#cfe6ff;--ia1:#7fb0ff;--ia2:#3f7bf0;
+  --inv-bg:#14161a;--inv-ink:#eceef2;
+  --wash:radial-gradient(120% 60% at 50% 0%,rgba(21,83,207,.08),rgba(10,45,110,.03) 45%,transparent 75%);
+  --shadow:0 1px 2px rgba(15,25,50,.04),0 10px 30px -14px rgba(15,25,50,.12);
+  --gdir:135deg;
+  --gh:linear-gradient(var(--gdir),var(--a3) 0%,var(--a1) 48%,var(--a2) 100%);
+  --gr:linear-gradient(90deg,var(--a1),var(--a2) 60%,transparent);
+  --gi:linear-gradient(var(--gdir),var(--ia3) 0%,var(--ia1) 48%,var(--ia2) 100%);
+  --df:"Gloock",georgia,serif;
+  --if:"Instrument Serif",georgia,serif;
+  --bf:"Hanken Grotesk","Helvetica Neue",arial,sans-serif;
+  --mf:"Spline Sans Mono",ui-monospace,monospace;
+}
+[data-theme="dark"]{
+  --paper:#0c0e12;--paper2:#12151b;--card:#141821;
+  --ink:#eceef2;--ink2:#b3b8c2;--ink3:#7d828c;--line:#232833;
+  --a3:#cfe6ff;--a1:#7fb0ff;--a2:#3f7bf0;--aink:#8ab4ff;
+  --ia3:#0a2d6e;--ia1:#1553cf;--ia2:#2fa6d9;
+  --inv-bg:#e9ecf2;--inv-ink:#14161a;
+  --wash:radial-gradient(120% 60% at 50% 0%,rgba(127,176,255,.08),rgba(63,123,240,.03) 45%,transparent 75%);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -14px rgba(0,0,0,.55);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--bf);font-size:17px;line-height:1.6;overflow-x:hidden;transition:background .35s,color .35s}
+a{color:var(--aink)}a:hover{color:var(--a1)}
+::selection{background:var(--a2);color:#fff}
+html:not([data-lang="cn"]) .cn{display:none!important}
+[data-lang="cn"] .en{display:none!important}
+[data-lang="cn"]{--gdir:315deg;--df:"Noto Serif SC",serif;--if:"Noto Serif SC",serif;--bf:"Noto Sans SC",sans-serif}
+[data-lang="cn"] [data-cjk="title"]{line-height:1.3!important;letter-spacing:.02em!important;font-style:normal!important}
+[data-lang="cn"] [data-cjk="body"]{line-height:1.9!important;letter-spacing:.01em!important}
+[data-lang="cn"] [data-cjk="hero"]{font-size:clamp(32px,9vw,40px)!important;line-height:1.25!important;letter-spacing:.02em!important}
+[data-lang="en"] #btnEN,html:not([data-lang="cn"]) #btnEN,[data-lang="cn"] #btnCN{background:var(--ink)!important;color:var(--paper)!important}
+@keyframes heroIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<div id="mProgress" aria-hidden="true" style="position:fixed;top:0;left:0;height:3px;width:0%;background:var(--gh);z-index:60"></div>
+
+<nav aria-label="Controls" style="position:fixed;top:12px;right:12px;z-index:50;display:flex;align-items:center;gap:8px">
+  <div style="display:flex;border:1px solid var(--line);border-radius:999px;background:var(--card);box-shadow:var(--shadow);overflow:hidden">
+    <button id="btnEN" onClick="{{ toEN }}" style="font-family:var(--mf);font-size:12px;font-weight:600;letter-spacing:.06em;padding:7px 13px;border:0;background:none;color:var(--ink3);cursor:pointer">EN</button>
+    <button id="btnCN" onClick="{{ toCN }}" style="font-family:'Noto Sans SC',var(--mf);font-size:12px;font-weight:600;letter-spacing:.06em;padding:7px 12px;border:0;background:none;color:var(--ink3);cursor:pointer;white-space:nowrap">中文</button>
+  </div>
+  <button onClick="{{ flipTheme }}" aria-label="Toggle theme" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:conic-gradient(var(--ink) 0 50%,var(--card) 50% 100%);box-shadow:var(--shadow);cursor:pointer"></button>
+</nav>
+
+<header data-screen-label="Hero" style="position:relative;padding:96px 22px 40px;background:var(--wash)">
+  <div style="max-width:460px;margin:0 auto;animation:heroIn .9s cubic-bezier(.22,1,.36,1) both">
+    <p style="font-family:var(--mf);font-size:11.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--aink);display:flex;align-items:center;gap:10px;margin-bottom:24px" style-before="content:'';width:26px;height:2px;background:var(--gr)">
+      <span class="en">Enriched Analysis &middot; Malaysia</span>
+      <span class="cn">深度解析 &middot; Malaysia</span>
+    </p>
+    <h1 data-cjk="hero" style="font-family:var(--df);font-size:clamp(38px,10.5vw,48px);font-weight:400;line-height:1.06;letter-spacing:-.01em;background:var(--gh);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;margin-bottom:10px;text-wrap:pretty">
+      <span class="en">Malaysian Corporate Recap: Earnings Growth, Legal Disputes, and Contract Awards</span><span class="cn">马来西亚企业动向：业绩增长、法律纠纷与项目中标</span>
+    </h1>
+    <p data-cjk="body" style="font-family:var(--if);font-style:italic;font-size:20px;line-height:1.45;color:var(--ink2);margin:16px 0 28px;text-wrap:pretty">
+      <span class="en">Malaysian listed companies announced earnings, contract wins, and corporate governance actions on July 21, 2026. Ancom Nylex recorded strong quarterly profits, while construction firms secured major domestic and overseas contracts.</span><span class="cn">2026年7月21日，多家马来西亚上市企业公布最新业绩、项目中标及治理动向。安康耐力斯季度净利达近四年新高，多家建筑商斩获国内外订单。</span>
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--mf);font-size:12px;color:var(--ink3);border-top:1px solid var(--line);padding-top:14px">
+      <span style="color:var(--ink2);font-weight:600">The Edge Malaysia</span>
+      <span class="en">21 Jul 2026</span>
+      <span class="cn">2026年7月21日</span>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px;border-top:1px solid var(--line);padding-top:20px">
+      
+        <div >
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>36.2M</span></span><span class="cn"><span data-count>3623万</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">Land Refund Amount</span><span class="cn">土地退款金额</span></p>
+        </div>
+        <div style="border-left:1px solid var(--line);padding-left:14px">
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>25M</span></span><span class="cn"><span data-count>2503万</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">4QFY2026 Net Profit</span><span class="cn">2026财年第4季净利润</span></p>
+        </div>
+        <div style="border-left:1px solid var(--line);padding-left:14px">
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>10</span></span><span class="cn"><span data-count>10</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">EGM Statutory Ownership Threshold</span><span class="cn">特别股东大会法定持股门槛</span></p>
+        </div>
+    </div>
+  </div>
+</header>
+
+<main style="max-width:460px;margin:0 auto;padding:0 22px 40px">
+
+<section data-screen-label="The Story" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:18px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">01</span><span class="en">The Story</span><span class="cn">新闻事实</span></p>
+  <p data-cjk="body" style="font-size:18px;line-height:1.65;text-wrap:pretty"><span class="en">Malaysian listed companies announced earnings, contract wins, and corporate governance actions on July 21, 2026. Ancom Nylex recorded strong quarterly profits, while construction firms secured major domestic and overseas contracts.</span><span class="cn">2026年7月21日，多家马来西亚上市企业公布最新业绩、项目中标及治理动向。安康耐力斯季度净利达近四年新高，多家建筑商斩获国内外订单。</span></p>
+  <ul style="list-style:none;margin-top:24px;display:grid">
+    
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">Sime Darby Property was ordered to refund RM36.23 million plus interest over West Coast Expressway land acquisition compensation.</span><span class="cn">森那美地产被法院判令就西海岸大道土地征用案退还3623万令吉及利息。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">Ancom Nylex 4QFY2026 net profit surged 46.6% year-on-year to RM25.03 million on revenue of RM608.88 million.</span><span class="cn">安康耐力斯2026财年第四季度净利同比增46.6%至2503万令吉。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">PRG Holdings rejected an EGM requisition notice after finding applicant shareholdings fell short of the 10% statutory threshold.</span><span class="cn">PRG控股以提议股东持股未达10%法定门槛为由驳回召开特别股东大会的要求。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">Geohan Corporation bagged a RM40.9 million foundation contract for a 65-storey mixed development in Persiaran KLCC.</span><span class="cn">Geohan公司斩获吉隆坡城中城路65层综合发展项目4090万令吉打桩工程。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">Hartanah Kenyalang won a RM41.38 million construction contract for multi-storey buildings in Sarawak.</span><span class="cn">Hartanah Kenyalang获得砂拉越4138万令吉多层建筑及配套设施施工合同。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 0px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" >
+      <span class="en">MGB secured a RM44.7 million MEP works contract for a 75-unit villa development project in Saudi Arabia.</span><span class="cn">MGB公司获得沙特阿拉伯75套别墅项目价值4470万令吉的机电工程合同。</span>
+    </li>
+  </ul>
+</section>
+
+<section data-screen-label="Central Insight" data-reveal aria-label="Central insight" style="margin-top:56px;padding:30px 0 34px;border-top:3px solid var(--ink);border-bottom:1px solid var(--line)">
+  <span aria-hidden="true" style="font-family:var(--df);font-size:56px;line-height:.6;color:var(--a2);display:block;margin-bottom:10px">&para;</span>
+  <p data-cjk="title" style="font-family:var(--df);font-size:23px;line-height:1.35;letter-spacing:-.005em;background:var(--gh);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-wrap:pretty">
+    <span class="en">Malaysian equities showcase resilient sector fundamentals, driven by steady construction contract flow, expansion into Middle Eastern markets, and recovering chemical industry profitability.</span><span class="cn">马来西亚上市公司展现稳健基本面，受国内基础设施建设订单、中东市场扩张及化工行业利润回升推动。</span>
+  </p>
+</section>
+
+<section data-screen-label="Dimensions" style="margin-top:52px">
+  <p data-reveal style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:2px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">02</span><span class="en">5 Dimensions</span><span class="cn">维度分析</span></p>
+  
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">1</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Consequence</span><span class="cn">影响推演</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">WCE Land Refund Order</span><span class="cn">西海岸大道土地退款判决</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">Court ruling forces repayment of excess compensation, impacting immediate cash reserves without impairing core real estate operations.</span><span class="cn">法院判决强制退回超额赔偿款，短期影响现金流，但不损害核心地产业务。</span></p>
+      <div style="margin-top:16px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Land Refund Amount</span><span class="cn">土地退款金额</span></p>
+      <div style="margin-top:2px;display:grid;gap:8px">
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en">July 2026</span><span class="cn">2026年7月</span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">36.2M MYR</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:100%"></i></div>
+    </div></div>
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">High Court set aside RM78.6 million severance award, requiring SDP Klang to refund RM36.23 million to LLM.</span><span class="cn">高等法院撤销7860万令吉分割割裂补偿金，判令森那美地产子公司退还3623万令吉。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">2</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Historical context</span><span class="cn">历史脉络</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Ancom Nylex Earnings Peak</span><span class="cn">安康耐力斯业绩创新高</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">Full-year revenue reached RM1.93 billion as quarterly profit hit a nearly four-year high of RM25.03 million.</span><span class="cn">全年营业额达19.3亿令吉，单季净利创下近四年新高达2503万令吉。</span></p>
+      <div style="margin-top:16px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">4QFY2026 Net Profit</span><span class="cn">2026财年第4季净利润</span></p>
+      <div style="margin-top:2px;display:grid;gap:8px">
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en">3 Months Ended May 31, 2026</span><span class="cn">截至2026年5月31日止3个月</span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">25M MYR</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:100%"></i></div>
+    </div></div>
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Full-year FY2026 net profit increased 28.3% year-on-year from RM63.49 million to RM81.44 million.</span><span class="cn">2026财年全年净利润同比增长28.3%，从6349万令吉升至8144万令吉。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">3</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Contradiction</span><span class="cn">矛盾之处</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">PRG Governance Dispute</span><span class="cn">PRG控股公司治理纷争</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">PRG Board rejected shareholder attempt to remove Managing Director, citing non-compliance with the 10% statutory shareholding requirement.</span><span class="cn">PRG董事会以未满足10%法定持股门槛为由，驳回股东要求撤换董事总经理的申请。</span></p>
+      <div style="margin-top:16px;display:grid;gap:12px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">EGM Statutory Ownership Threshold</span><span class="cn">特别股东大会法定持股门槛</span></p>
+      <p style="font-family:var(--df);font-size:38px;line-height:1;color:var(--ink)"><span class="en"><span data-count>10</span> <span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">%</span></span><span class="cn"><span data-count>10</span><span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">%</span></span></p>
+      <p style="font-family:var(--mf);font-size:11.5px;color:var(--ink3);margin-top:7px"><span class="en">July 2026</span><span class="cn">2026年7月</span></p>
+      
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Requisitioning shareholders sought to remove executive director Andrew Chan and appoint three replacement board members.</span><span class="cn">提议股东要求撤消执行董事陈林辉的职务，并指定任命三名新董事。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">4</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Future signal</span><span class="cn">前瞻信号</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Domestic Order Book Momentum</span><span class="cn">国内基础设施新获订单</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">Geohan&#39;s year-to-date contract wins exceeded RM200 million following its RM40.9 million KLCC foundation contract.</span><span class="cn">新获4090万令吉吉隆坡城中城打桩合同后，Geohan今年累计新中标金额突破2亿令吉。</span></p>
+      <div style="margin-top:16px;display:grid;gap:12px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Geohan Year-to-Date Contract Wins</span><span class="cn">Geohan今年累计中标金额</span></p>
+      <p style="font-family:var(--df);font-size:38px;line-height:1;color:var(--ink)"><span class="en"><span data-count>200M</span> <span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">MYR</span></span><span class="cn"><span data-count>2亿</span><span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">令吉</span></span></p>
+      <p style="font-family:var(--mf);font-size:11.5px;color:var(--ink3);margin-top:7px"><span class="en">YTD 2026</span><span class="cn">2026年年初至今</span></p>
+      
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Hartanah Kenyalang added RM41.38 million in Sarawak building contracts to domestic construction activity.</span><span class="cn">Hartanah Kenyalang斩获砂拉越4138万令吉建筑工程，推进地方基建。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">5</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Future signal</span><span class="cn">前瞻信号</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Saudi Arabia Market Expansion</span><span class="cn">MGB开拓沙特阿拉伯市场</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">MGB&#39;s 10-month villa MEP contract with Roshn Group marks continued overseas revenue diversification into Saudi real estate.</span><span class="cn">MGB与沙特Roshn集团签订10个月别墅机电合同，持续拓展中东市场收益来源。</span></p>
+      <div style="margin-top:16px;display:grid;gap:12px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Saudi Villa Contract Value</span><span class="cn">沙特别墅合同金额</span></p>
+      <p style="font-family:var(--df);font-size:38px;line-height:1;color:var(--ink)"><span class="en"><span data-count>44.7M</span> <span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">MYR</span></span><span class="cn"><span data-count>4470万</span><span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">令吉</span></span></p>
+      <p style="font-family:var(--mf);font-size:11.5px;color:var(--ink3);margin-top:7px"><span class="en">10-Month Project</span><span class="cn">10个月项目期</span></p>
+      
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Contract covers mechanical, electrical, plumbing, and finishing works for 75 residential villa units.</span><span class="cn">合同涵盖75套住宅别墅项目的机械、电气、管道及装修工程。</span></li>
+    </ul>
+    </div>
+  </article>
+</section>
+
+
+<section data-screen-label="Timeline" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:18px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">03</span><span class="en">Timeline</span><span class="cn">时间线</span></p>
+  <ol style="list-style:none;position:relative" style-before="content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,var(--a2),var(--a1),var(--line))">
+    
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2015</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Land in Klang acquired for West Coast Expressway construction.</span><span class="cn">巴生七宗土地被征用用于西海岸大道建设。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-07-10</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">High Court set aside RM78.6 million land compensation award.</span><span class="cn">高等法院裁定撤销7860万令吉土地补偿裁决。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-07-20</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Court ordered Sime Darby Property to refund RM36.23 million.</span><span class="cn">法院判令森那美地产退还3623万令吉溢价补偿。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 4px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--gh);border:3px solid var(--a3)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-07-21</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Malaysian firms report corporate updates, earnings, and contracts.</span><span class="cn">多间马来西亚企业集中公布财报与中标项目。</span></span>
+    </li>
+  </ol>
+</section>
+
+<section data-screen-label="Key Takeaway" data-reveal aria-label="Key takeaway" style="margin-top:60px;padding:36px 26px 38px;background:var(--inv-bg);border-radius:20px;position:relative;overflow:hidden">
+  <p style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ia1);margin-bottom:14px"><span class="en">Key takeaway</span><span class="cn">核心结论</span></p>
+  <p data-cjk="title" style="font-family:var(--df);font-size:24px;line-height:1.32;letter-spacing:-.005em;background:var(--gi);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-wrap:pretty">
+    <span class="en">Malaysian listed companies balance corporate legal challenges against expanding domestic and international order books and improving chemical sector earnings.</span><span class="cn">马来西亚上市企业在妥善应对法律纠纷的同时，凭借国内外新订单与化工部门复苏维持稳健增长。</span>
+  </p>
+</section>
+
+
+<section data-screen-label="What to Watch" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:20px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">04</span><span class="en">What to Watch</span><span class="cn">后续关注</span></p>
+  <ol style="list-style:none;display:grid">
+    <li data-cjk="body" style="position:relative;padding:0 0 20px 46px;font-size:15.5px;color:var(--ink2)" style-before="content:'01';position:absolute;left:0;top:1px;font-family:var(--mf);font-weight:600;font-size:15px;color:var(--aink)" style-after="content:'';position:absolute;left:0;top:24px;width:26px;height:1px;background:var(--gr)"><span class="en">Legal appeals by Sime Darby Property regarding the High Court land judgment.</span><span class="cn">森那美地产就高等法院土地判决提出的后续上诉动向。</span></li><li data-cjk="body" style="position:relative;padding:0 0 20px 46px;font-size:15.5px;color:var(--ink2)" style-before="content:'02';position:absolute;left:0;top:1px;font-family:var(--mf);font-weight:600;font-size:15px;color:var(--aink)" style-after="content:'';position:absolute;left:0;top:24px;width:26px;height:1px;background:var(--gr)"><span class="en">Subsequent EGM notices or legal steps taken by PRG requisitionist shareholders.</span><span class="cn">PRG控股提议股东后续是否重新提交特大合规申请。</span></li><li data-cjk="body" style="position:relative;padding:0 0 0px 46px;font-size:15.5px;color:var(--ink2)" style-before="content:'03';position:absolute;left:0;top:1px;font-family:var(--mf);font-weight:600;font-size:15px;color:var(--aink)" ><span class="en">Execution progress and margin contribution of MGB&#39;s Saudi villa development project.</span><span class="cn">MGB沙特别墅机电工程的履约进度与利润贡献情况。</span></li>
+  </ol>
+</section>
+
+
+<section data-screen-label="Uncertainties" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:20px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">05</span><span class="en">Uncertainties</span><span class="cn">不确定因素</span></p>
+  <ul style="list-style:none;display:grid">
+    <li data-cjk="body" style="position:relative;padding:0 0 15px 24px;font-size:15px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:8px;width:8px;height:8px;border:2px solid var(--ink3);transform:rotate(45deg)"><span class="en">Final interest costs dependent on Sime Darby Property&#39;s repayment timeline.</span><span class="cn">森那美地产退款所需时间决定的最终利息支出金额。</span></li><li data-cjk="body" style="position:relative;padding:0 0 0px 24px;font-size:15px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:8px;width:8px;height:8px;border:2px solid var(--ink3);transform:rotate(45deg)"><span class="en">Client identity and payment terms for Hartanah Kenyalang&#39;s Sarawak contract.</span><span class="cn">Hartanah Kenyalang砂拉越项目客户身份及具体付款条款。</span></li>
+  </ul>
+</section>
+
+
+<section data-screen-label="Sources" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:6px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">06</span><span class="en">Sources</span><span class="cn">信息来源</span></p>
+  <ol style="list-style:none">
+    
+    <li style="position:relative;padding:12px 0 12px 32px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'1';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://theedgemalaysia.com/node/811560" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Sime Darby Property, Ancom Nylex, PRG, Geohan, Hartanah Kenyalang, MGB</span><span class="cn">森那美地产、安康耐力斯、PRG控股、Geohan、Hartanah Kenyalang及MGB企业重磅消息摘要</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">The Edge Malaysia &middot; 2026-07-21</small>
+    </li>
+    <li style="position:relative;padding:12px 0 12px 32px;font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'2';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://www.edgeprop.my/content/1912345/court-orders-sime-darby-property-refund-rm362m-plus-interest-west-coast-expressway-land-case" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Court orders Sime Darby Property to refund RM36.2m plus interest in West Coast Expressway land case</span><span class="cn">西海岸大道土地案：法院判令森那美地产退还3620万令吉及利息</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">The Edge Malaysia / EdgeProp &middot; 2026-07-20</small>
+    </li>
+  </ol>
+</section>
+
+</main>
+
+<footer style="margin-top:56px;padding:26px 22px 44px;border-top:1px solid var(--line);text-align:center;font-family:var(--mf);font-size:11.5px;line-height:1.9;color:var(--ink3)">
+  <b style="color:var(--ink2);font-weight:600">The Edge Malaysia</b> &middot; 2026-07-21T23:31:04+08:00<br>
+  <span class="en">Enriched analysis &mdash; sources listed above</span>
+  <span class="cn">深度增补分析 &mdash;&mdash; 信息来源见上文</span>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:940},&quot;colorway&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Flame Blue&quot;,&quot;options&quot;:[&quot;Flame Blue&quot;,&quot;Verdigris&quot;,&quot;Champagne&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;defaultLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;EN&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;中文&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;animations&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    const D = document.documentElement;
+    const get = k => {
+      try {
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+          let c = ca[i].trim();
+          if (c.indexOf(k + '=') === 0) return decodeURIComponent(c.substring(k.length + 1));
+        }
+      } catch (e) {}
+      try { return localStorage.getItem(k); } catch (e) { return null; }
+    };
+    const lang = get('meridian-language') || get('infographic-lang') || (this.props.defaultLang === '中文' ? 'cn' : 'en');
+    const theme = get('meridian-theme') || get('infographic-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    this._setLang(lang);
+    this._setTheme(theme);
+    const bar = document.getElementById('mProgress');
+    this._onScroll = () => {
+      const h = D.scrollHeight - innerHeight;
+      if (bar) bar.style.width = (h > 0 ? (scrollY / h * 100) : 0) + '%';
+    };
+    addEventListener('scroll', this._onScroll, { passive: true });
+    this._onScroll();
+    if (this.props.animations === false) return;
+    this._initReveals();
+  }
+  componentWillUnmount() { removeEventListener('scroll', this._onScroll); }
+  _setLang(l) {
+    const D = document.documentElement;
+    D.setAttribute('data-lang', l);
+    D.setAttribute('lang', l === 'cn' ? 'zh-Hans' : 'en');
+    try {
+      localStorage.setItem('meridian-language', l);
+      localStorage.setItem('infographic-lang', l);
+      document.cookie = 'meridian-language=' + l + '; path=/; max-age=31536000; SameSite=Lax';
+    } catch (e) {}
+  }
+  _setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try {
+      localStorage.setItem('meridian-theme', t);
+      localStorage.setItem('infographic-theme', t);
+      document.cookie = 'meridian-theme=' + t + '; path=/; max-age=31536000; SameSite=Lax';
+    } catch (e) {}
+    this._applyColorway();
+  }
+  _applyColorway() {
+    const cw = {
+      'Flame Blue': { light: ['#0a2d6e', '#1553cf', '#2fa6d9', '#1043a8'], dark: ['#cfe6ff', '#7fb0ff', '#3f7bf0', '#8ab4ff'] },
+      'Verdigris':  { light: ['#0c4a40', '#127a63', '#3aa88a', '#0f6350'], dark: ['#d2f2e2', '#7fd3ae', '#2c9a78', '#8fdcba'] },
+      'Champagne':  { light: ['#5f430f', '#a8781f', '#c9a04a', '#8a621a'], dark: ['#f3dfae', '#d9b56a', '#a87c2c', '#e5c885'] }
+    };
+    const set = cw[this.props.colorway] || cw['Flame Blue'];
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const a = dark ? set.dark : set.light, ia = dark ? set.light : set.dark;
+    const s = document.documentElement.style;
+    s.setProperty('--a3', a[0]); s.setProperty('--a1', a[1]); s.setProperty('--a2', a[2]); s.setProperty('--aink', a[3]);
+    s.setProperty('--ia3', ia[0]); s.setProperty('--ia1', ia[1]); s.setProperty('--ia2', ia[2]);
+  }
+  _initReveals() {
+    const ease = 'cubic-bezier(.22,1,.36,1)';
+    const els = [...document.querySelectorAll('[data-reveal]')];
+    els.forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(28px)';
+      el.style.transition = 'opacity .85s ' + ease + ', transform .85s ' + ease;
+    });
+    const bars = [...document.querySelectorAll('[data-bar]')];
+    bars.forEach(b => {
+      b.style.transformOrigin = 'left center';
+      b.style.transform = 'scaleX(0)';
+      b.style.transition = 'transform 1.1s .25s ' + ease;
+    });
+    const counts = [...document.querySelectorAll('[data-count]')];
+    const runCount = el => {
+      const txt = el.textContent.trim();
+      const target = parseFloat(txt.replace(/,/g, ''));
+      if (isNaN(target)) return;
+      const dec = (txt.split('.')[1] || '').length;
+      const grouped = txt.indexOf(',') >= 0;
+      const t0 = performance.now(), dur = 1100;
+      const fmt = v => {
+        let s = v.toFixed(dec);
+        if (grouped) s = (+s).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+        return s;
+      };
+      const tick = now => {
+        const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(target * e);
+        if (p < 1) requestAnimationFrame(tick); else el.textContent = txt;
+      };
+      requestAnimationFrame(tick);
+    };
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        const el = en.target;
+        io.unobserve(el);
+        if (el.hasAttribute('data-reveal')) {
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+          el.querySelectorAll('[data-bar]').forEach(b => { b.style.transform = 'scaleX(1)'; });
+          el.querySelectorAll('[data-count]').forEach(runCount);
+        } else if (el.hasAttribute('data-count')) {
+          runCount(el);
+        } else if (el.hasAttribute('data-bar')) {
+          el.style.transform = 'scaleX(1)';
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    els.forEach(el => io.observe(el));
+    counts.forEach(c => { if (!c.closest('[data-reveal]')) io.observe(c); });
+    bars.forEach(b => { if (!b.closest('[data-reveal]')) io.observe(b); });
+  }
+  renderVals() {
+    return {
+      toEN: () => this._setLang('en'),
+      toCN: () => this._setLang('cn'),
+      flipTheme: () => this._setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+    };
+  }
+}
+</script>
+</body>
+</html>

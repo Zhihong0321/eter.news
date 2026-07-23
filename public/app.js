@@ -426,10 +426,11 @@ function renderNews() {
 }
 
 function openArticle(article) {
-  if (!article || !article.url) return;
-  const targetUrl = `/article?url=${encodeURIComponent(article.url)}`;
-  window.location.assign(targetUrl);
+  if (!article) return;
+  const renderUrl = article.render_file ? `/rendered/${encodeURIComponent(article.render_file)}` : (article.url ? `/article?url=${encodeURIComponent(article.url)}` : null);
+  if (renderUrl) window.location.assign(renderUrl);
 }
+
 
 
 

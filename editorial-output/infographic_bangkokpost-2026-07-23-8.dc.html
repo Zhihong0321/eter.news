@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lat Phrao Pub Fire Death Toll Rises to 35</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500;600&family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5f4f1;--paper2:#ecebe6;--card:#fdfdfb;
+  --ink:#14161a;--ink2:#4c505a;--ink3:#878b94;--line:#e0dfd9;
+  --a3:#0a2d6e;--a1:#1553cf;--a2:#2fa6d9;--aink:#1043a8;
+  --ia3:#cfe6ff;--ia1:#7fb0ff;--ia2:#3f7bf0;
+  --inv-bg:#14161a;--inv-ink:#eceef2;
+  --wash:radial-gradient(120% 60% at 50% 0%,rgba(21,83,207,.08),rgba(10,45,110,.03) 45%,transparent 75%);
+  --shadow:0 1px 2px rgba(15,25,50,.04),0 10px 30px -14px rgba(15,25,50,.12);
+  --gdir:135deg;
+  --gh:linear-gradient(var(--gdir),var(--a3) 0%,var(--a1) 48%,var(--a2) 100%);
+  --gr:linear-gradient(90deg,var(--a1),var(--a2) 60%,transparent);
+  --gi:linear-gradient(var(--gdir),var(--ia3) 0%,var(--ia1) 48%,var(--ia2) 100%);
+  --df:"Gloock",georgia,serif;
+  --if:"Instrument Serif",georgia,serif;
+  --bf:"Hanken Grotesk","Helvetica Neue",arial,sans-serif;
+  --mf:"Spline Sans Mono",ui-monospace,monospace;
+}
+[data-theme="dark"]{
+  --paper:#0c0e12;--paper2:#12151b;--card:#141821;
+  --ink:#eceef2;--ink2:#b3b8c2;--ink3:#7d828c;--line:#232833;
+  --a3:#cfe6ff;--a1:#7fb0ff;--a2:#3f7bf0;--aink:#8ab4ff;
+  --ia3:#0a2d6e;--ia1:#1553cf;--ia2:#2fa6d9;
+  --inv-bg:#e9ecf2;--inv-ink:#14161a;
+  --wash:radial-gradient(120% 60% at 50% 0%,rgba(127,176,255,.08),rgba(63,123,240,.03) 45%,transparent 75%);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -14px rgba(0,0,0,.55);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--bf);font-size:17px;line-height:1.6;overflow-x:hidden;transition:background .35s,color .35s}
+a{color:var(--aink)}a:hover{color:var(--a1)}
+::selection{background:var(--a2);color:#fff}
+html:not([data-lang="cn"]) .cn{display:none!important}
+[data-lang="cn"] .en{display:none!important}
+[data-lang="cn"]{--gdir:315deg;--df:"Noto Serif SC",serif;--if:"Noto Serif SC",serif;--bf:"Noto Sans SC",sans-serif}
+[data-lang="cn"] [data-cjk="title"]{line-height:1.3!important;letter-spacing:.02em!important;font-style:normal!important}
+[data-lang="cn"] [data-cjk="body"]{line-height:1.9!important;letter-spacing:.01em!important}
+[data-lang="cn"] [data-cjk="hero"]{font-size:clamp(32px,9vw,40px)!important;line-height:1.25!important;letter-spacing:.02em!important}
+[data-lang="en"] #btnEN,html:not([data-lang="cn"]) #btnEN,[data-lang="cn"] #btnCN{background:var(--ink)!important;color:var(--paper)!important}
+@keyframes heroIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<div id="mProgress" aria-hidden="true" style="position:fixed;top:0;left:0;height:3px;width:0%;background:var(--gh);z-index:60"></div>
+
+<nav aria-label="Controls" style="position:fixed;top:12px;right:12px;z-index:50;display:flex;align-items:center;gap:8px">
+  <div style="display:flex;border:1px solid var(--line);border-radius:999px;background:var(--card);box-shadow:var(--shadow);overflow:hidden">
+    <button id="btnEN" onClick="{{ toEN }}" style="font-family:var(--mf);font-size:12px;font-weight:600;letter-spacing:.06em;padding:7px 13px;border:0;background:none;color:var(--ink3);cursor:pointer">EN</button>
+    <button id="btnCN" onClick="{{ toCN }}" style="font-family:'Noto Sans SC',var(--mf);font-size:12px;font-weight:600;letter-spacing:.06em;padding:7px 12px;border:0;background:none;color:var(--ink3);cursor:pointer;white-space:nowrap">中文</button>
+  </div>
+  <button onClick="{{ flipTheme }}" aria-label="Toggle theme" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:conic-gradient(var(--ink) 0 50%,var(--card) 50% 100%);box-shadow:var(--shadow);cursor:pointer"></button>
+</nav>
+
+<header data-screen-label="Hero" style="position:relative;padding:96px 22px 40px;background:var(--wash)">
+  <div style="max-width:460px;margin:0 auto;animation:heroIn .9s cubic-bezier(.22,1,.36,1) both">
+    <p style="font-family:var(--mf);font-size:11.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--aink);display:flex;align-items:center;gap:10px;margin-bottom:24px" style-before="content:'';width:26px;height:2px;background:var(--gr)">
+      <span class="en">Enriched Analysis &middot; Thailand</span>
+      <span class="cn">深度解析 &middot; Thailand</span>
+    </p>
+    <h1 data-cjk="hero" style="font-family:var(--df);font-size:clamp(38px,10.5vw,48px);font-weight:400;line-height:1.06;letter-spacing:-.01em;background:var(--gh);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;margin-bottom:10px;text-wrap:pretty">
+      <span class="en">Lat Phrao Pub Fire Death Toll Rises to 35</span><span class="cn">曼谷拉普劳酒吧火灾致死人���升至35人</span>
+    </h1>
+    <p data-cjk="body" style="font-family:var(--if);font-style:italic;font-size:20px;line-height:1.45;color:var(--ink2);margin:16px 0 28px;text-wrap:pretty">
+      <span class="en">A 23-year-old woman died at Siriraj Hospital on July 22, 2026, following the July 12 Rong Beer Na Ladprao pub blaze. Bangkok inspectors checked 824 venues in three days, requiring 551 to fix defects.</span><span class="cn">2026年7月22日，一名23岁伤者在西里拉医院救治无效死亡，使7月12日朗普劳酒吧大火死者增至35人。曼谷三天内排查824家场所，要求551家限期整改。</span>
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--mf);font-size:12px;color:var(--ink3);border-top:1px solid var(--line);padding-top:14px">
+      <span style="color:var(--ink2);font-weight:600">Bangkok Post</span>
+      <span class="en">22 Jul 2026</span>
+      <span class="cn">2026年7月22日</span>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px;border-top:1px solid var(--line);padding-top:20px">
+      
+        <div >
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>824</span></span><span class="cn"><span data-count>824</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">Inspected Venues</span><span class="cn">已排查场所</span></p>
+        </div>
+        <div style="border-left:1px solid var(--line);padding-left:14px">
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>67</span></span><span class="cn"><span data-count>67</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">Santika Club Death Toll</span><span class="cn">Santika夜总会遇难人数</span></p>
+        </div>
+        <div style="border-left:1px solid var(--line);padding-left:14px">
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>14,000</span></span><span class="cn"><span data-count>1.4万</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">Targeted Public Assembly Structures</span><span class="cn">目标公共聚集建筑</span></p>
+        </div>
+    </div>
+  </div>
+</header>
+
+<main style="max-width:460px;margin:0 auto;padding:0 22px 40px">
+
+<section data-screen-label="The Story" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:18px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">01</span><span class="en">The Story</span><span class="cn">新闻事实</span></p>
+  <p data-cjk="body" style="font-size:18px;line-height:1.65;text-wrap:pretty"><span class="en">A 23-year-old woman died at Siriraj Hospital on July 22, 2026, following the July 12 Rong Beer Na Ladprao pub blaze. Bangkok inspectors checked 824 venues in three days, requiring 551 to fix defects.</span><span class="cn">2026年7月22日，一名23岁伤者在西里拉医院救治无效死亡，使7月12日朗普劳酒吧大火死者增至35人。曼谷三天内排查824家场所，要求551家限期整改。</span></p>
+  <ul style="list-style:none;margin-top:24px;display:grid">
+    
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">A 23-year-old woman died on July 22, 2026, leaving 21 injured victims hospitalized, including 12 in intensive care.</span><span class="cn">2026年7月22日一名23岁女性救治无效身亡，仍有21名伤者住院，其中12人在ICU。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">Bangkok inspected 824 of 1,091 entertainment venues in three days, suspending 56 and ordering 551 to improve.</span><span class="cn">曼谷在三天内排查1091家娱乐场��中的824家，暂停56家营业并勒令551家整改。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 0px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" >
+      <span class="en">Bangkok introduced a 17-point checklist requiring engineering certifications for electrical systems and soundproofing insulation.</span><span class="cn">曼谷推出17项安全排查清单，要求隐蔽电气与隔音材料须取得工程师认证。</span>
+    </li>
+  </ul>
+</section>
+
+<section data-screen-label="Central Insight" data-reveal aria-label="Central insight" style="margin-top:56px;padding:30px 0 34px;border-top:3px solid var(--ink);border-bottom:1px solid var(--line)">
+  <span aria-hidden="true" style="font-family:var(--df);font-size:56px;line-height:.6;color:var(--a2);display:block;margin-bottom:10px">&para;</span>
+  <p data-cjk="title" style="font-family:var(--df);font-size:23px;line-height:1.35;letter-spacing:-.005em;background:var(--gh);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-wrap:pretty">
+    <span class="en">The Lat Phrao pub fire exposed systemic safety failures, prompting Bangkok to expand venue inspections to 14,000 public assembly buildings.</span><span class="cn">拉普劳酒吧火灾暴露系统性安全隐患，促使曼谷将专项排查扩大至全市1.4万处公共建筑。</span>
+  </p>
+</section>
+
+<section data-screen-label="Dimensions" style="margin-top:52px">
+  <p data-reveal style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:2px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">02</span><span class="en">3 Dimensions</span><span class="cn">维度分析</span></p>
+  
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">1</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Consequence</span><span class="cn">影响推演</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Enforcement Actions and Inspection Results</span><span class="cn">执法排查与处理结果</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">Only 217 of 824 audited Bangkok nightspots fully met safety standards during initial three-day inspections.</span><span class="cn">在三天首轮排查中，824家被检夜店中仅217家完全符合安全标准。</span></p>
+      <div style="margin-top:16px;display:grid;gap:12px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Inspected Venues</span><span class="cn">已排查场所</span></p>
+      <p style="font-family:var(--df);font-size:38px;line-height:1;color:var(--ink)"><span class="en"><span data-count>824</span> <span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">venues</span></span><span class="cn"><span data-count>824</span><span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">家</span></span></p>
+      
+      
+      <div style="margin-top:12px;display:grid;gap:8px">
+        
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en"></span><span class="cn"></span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">824 venues</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:76%"></i></div>
+    </div>
+        
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en"></span><span class="cn"></span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">1,091 venues</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:100%"></i></div>
+    </div>
+      </div>
+    </div>
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Temporary Suspensions</span><span class="cn">暂停营业场所</span></p>
+      <p style="font-family:var(--df);font-size:38px;line-height:1;color:var(--ink)"><span class="en"><span data-count>56</span> <span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">venues</span></span><span class="cn"><span data-count>56</span><span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">家</span></span></p>
+      
+      
+    </div>
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Improvement Orders</span><span class="cn">限期整改场所</span></p>
+      <p style="font-family:var(--df);font-size:38px;line-height:1;color:var(--ink)"><span class="en"><span data-count>551</span> <span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">venues</span></span><span class="cn"><span data-count>551</span><span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">家</span></span></p>
+      
+      
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Bangkok officials inspected 824 out of 1,091 supervised entertainment venues over three days.</span><span class="cn">曼谷官员在三天内对监管的1091家娱乐场所中的824家进行了检查。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Operators must provide engineer certifications for unverified internal electrical systems and soundproofing materials.</span><span class="cn">经营者须提供工程师对隐蔽电气系统与隔音材料的安全认证。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">2</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Historical context</span><span class="cn">历史脉络</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Historical Thailand Nightclub Fires</span><span class="cn">泰国历史酒吧火灾对比</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">The Lat Phrao blaze echoes past Thai venue disasters caused by flammable soundproofing and obstructed exits.</span><span class="cn">拉普劳酒吧大火重现了泰国以往因易燃隔音材料和逃生通道受阻引发的火灾惨剧。</span></p>
+      <div style="margin-top:16px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Santika Club Death Toll</span><span class="cn">Santika夜总会遇难人数</span></p>
+      <div style="margin-top:2px;display:grid;gap:8px">
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en">Santika Club Death Toll</span><span class="cn">Santika夜总会遇难人数</span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">67 deaths</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:100%"></i></div>
+    </div>
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en">Mountain B Death Toll</span><span class="cn">Mountain B酒吧遇难人数</span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">26 deaths</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:39%"></i></div>
+    </div></div>
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">The 2009 Santika Club fire in Bangkok killed 67 people due to indoor fireworks and blocked exits.</span><span class="cn">2009年曼谷Santika夜总会火灾因室内烟花与出口堵塞造成67人死亡。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">The 2022 Mountain B pub fire in Sattahip killed 26 people after acoustic foam caught fire.</span><span class="cn">2022年梭桃邑Mountain B酒吧火灾因隔音易燃泡沫起火导致26人死亡。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">3</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Future signal</span><span class="cn">前瞻信号</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Citywide Public Building Safety Audits</span><span class="cn">全市公共建筑安全排查</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">Bangkok is expanding mandatory inspections beyond nightlife venues to approximately 14,000 public assembly buildings citywide.</span><span class="cn">曼谷正将强制排查从夜店扩大至全市约1.4万处公共聚集建筑。</span></p>
+      <div style="margin-top:16px;display:grid;gap:12px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Targeted Public Assembly Structures</span><span class="cn">目标公共聚集建筑</span></p>
+      <p style="font-family:var(--df);font-size:38px;line-height:1;color:var(--ink)"><span class="en"><span data-count>14,000</span> <span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">structures</span></span><span class="cn"><span data-count>1.4万</span><span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">处</span></span></p>
+      
+      
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Expanded inspections cover public gathering structures across Bangkok, including boxing stadiums.</span><span class="cn">扩大排查覆盖曼谷全境的公共聚集建筑，包括拳击场馆。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Building regulations mandate annual safety inspections and five-year comprehensive structural reviews by independent inspectors.</span><span class="cn">建筑法规要求实施年度安全检查以及独立检查员每五年一次的全面结构审查。</span></li>
+    </ul>
+    </div>
+  </article>
+</section>
+
+
+<section data-screen-label="Timeline" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:18px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">03</span><span class="en">Timeline</span><span class="cn">时间线</span></p>
+  <ol style="list-style:none;position:relative" style-before="content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,var(--a2),var(--a1),var(--line))">
+    
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2009-01-01</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Santika Club fire in Bangkok kills 67 people.</span><span class="cn">曼谷Santika夜总会发生火灾致67人死亡。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2022-08-05</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Mountain B pub fire in Sattahip kills 26 people.</span><span class="cn">梭桃邑Mountain B酒吧火灾致26人死亡。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-07-12</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Fire breaks out at Rong Beer Na Ladprao pub in Bangkok.</span><span class="cn">曼谷朗普劳啤酒酒吧发生火灾。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-07-19</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Bangkok begins three-day safety inspection of nightlife venues.</span><span class="cn">曼谷启动为期三天的夜店安全专项排查。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 4px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--gh);border:3px solid var(--a3)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-07-22</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Death toll reaches 35; Bangkok orders 56 venue closures.</span><span class="cn">火灾死亡人数增至35人，曼谷关停56家场所。</span></span>
+    </li>
+  </ol>
+</section>
+
+<section data-screen-label="Key Takeaway" data-reveal aria-label="Key takeaway" style="margin-top:60px;padding:36px 26px 38px;background:var(--inv-bg);border-radius:20px;position:relative;overflow:hidden">
+  <p style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ia1);margin-bottom:14px"><span class="en">Key takeaway</span><span class="cn">核心结论</span></p>
+  <p data-cjk="title" style="font-family:var(--df);font-size:24px;line-height:1.32;letter-spacing:-.005em;background:var(--gi);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-wrap:pretty">
+    <span class="en">The Lat Phrao tragedy spurred Bangkok from reactive venue suspensions to mandatory structural certifications across 14,000 assembly sites.</span><span class="cn">拉普劳酒吧惨剧促使曼谷从被动关停酒吧转向对1.4万处公共建筑实施强制结构认证。</span>
+  </p>
+</section>
+
+
+<section data-screen-label="What to Watch" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:20px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">04</span><span class="en">What to Watch</span><span class="cn">后续关注</span></p>
+  <ol style="list-style:none;display:grid">
+    <li data-cjk="body" style="position:relative;padding:0 0 20px 46px;font-size:15.5px;color:var(--ink2)" style-before="content:'01';position:absolute;left:0;top:1px;font-family:var(--mf);font-weight:600;font-size:15px;color:var(--aink)" style-after="content:'';position:absolute;left:0;top:24px;width:26px;height:1px;background:var(--gr)"><span class="en">Compliance rates following BMA briefing sessions on the 17-point safety checklist.</span><span class="cn">曼谷市政府17项安全清单宣贯会后各场所的合规整改率。</span></li><li data-cjk="body" style="position:relative;padding:0 0 0px 46px;font-size:15.5px;color:var(--ink2)" style-before="content:'02';position:absolute;left:0;top:1px;font-family:var(--mf);font-weight:600;font-size:15px;color:var(--aink)" ><span class="en">Verification outcomes of engineer certifications for 551 provisionally modified venues.</span><span class="cn">551家限期整改场所的工程师安全认证核查结果。</span></li>
+  </ol>
+</section>
+
+
+<section data-screen-label="Uncertainties" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:20px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">05</span><span class="en">Uncertainties</span><span class="cn">不确定因素</span></p>
+  <ul style="list-style:none;display:grid">
+    <li data-cjk="body" style="position:relative;padding:0 0 15px 24px;font-size:15px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:8px;width:8px;height:8px;border:2px solid var(--ink3);transform:rotate(45deg)"><span class="en">Long-term enforcement consistency after the two-month inspection drive concludes.</span><span class="cn">为期两个月的专项排查结束后执法的长期持续性。</span></li><li data-cjk="body" style="position:relative;padding:0 0 0px 24px;font-size:15px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:8px;width:8px;height:8px;border:2px solid var(--ink3);transform:rotate(45deg)"><span class="en">Investigation speed for safety complaints logged on the Traffy Fondue platform.</span><span class="cn">Traffy Fondue平台所收安全投诉的核查处理速度。</span></li>
+  </ul>
+</section>
+
+
+<section data-screen-label="Sources" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:6px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">06</span><span class="en">Sources</span><span class="cn">信息来源</span></p>
+  <ol style="list-style:none">
+    
+    <li style="position:relative;padding:12px 0 12px 32px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'1';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://www.bangkokpost.com/thailand/general/3289972/lat-phrao-pub-fire-death-toll-rises-to-35-56-venues-shut" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Lat Phrao pub fire death toll rises to 35, 56 venues shut</span><span class="cn">拉普劳酒吧火灾致死人数升至35人 56家场所关停</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">Bangkok Post &middot; 2026-07-22</small>
+    </li>
+    <li style="position:relative;padding:12px 0 12px 32px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'2';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://en.wikipedia.org/wiki/Mountain_B_nightclub_fire" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Mountain B nightclub fire</span><span class="cn">Mountain B夜总会火灾</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">Wikipedia &middot; 2022-08-05</small>
+    </li>
+    <li style="position:relative;padding:12px 0 12px 32px;font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'3';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://en.wikipedia.org/wiki/Santika_Club_fire" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Santika Club fire</span><span class="cn">Santika夜总会火灾</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">Wikipedia &middot; 2009-01-01</small>
+    </li>
+  </ol>
+</section>
+
+</main>
+
+<footer style="margin-top:56px;padding:26px 22px 44px;border-top:1px solid var(--line);text-align:center;font-family:var(--mf);font-size:11.5px;line-height:1.9;color:var(--ink3)">
+  <b style="color:var(--ink2);font-weight:600">Bangkok Post</b> &middot; 2026-07-22T08:01:00.000Z<br>
+  <span class="en">Enriched analysis &mdash; sources listed above</span>
+  <span class="cn">深度增补分析 &mdash;&mdash; 信息来源见上文</span>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:940},&quot;colorway&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Flame Blue&quot;,&quot;options&quot;:[&quot;Flame Blue&quot;,&quot;Verdigris&quot;,&quot;Champagne&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;defaultLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;EN&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;中文&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;animations&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    const D = document.documentElement;
+    const get = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+    const lang = get('infographic-lang') || (this.props.defaultLang === '中文' ? 'cn' : 'en');
+    const theme = get('infographic-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    this._setLang(lang);
+    this._setTheme(theme);
+    const bar = document.getElementById('mProgress');
+    this._onScroll = () => {
+      const h = D.scrollHeight - innerHeight;
+      if (bar) bar.style.width = (h > 0 ? (scrollY / h * 100) : 0) + '%';
+    };
+    addEventListener('scroll', this._onScroll, { passive: true });
+    this._onScroll();
+    if (this.props.animations === false) return;
+    this._initReveals();
+  }
+  componentWillUnmount() { removeEventListener('scroll', this._onScroll); }
+  _setLang(l) {
+    const D = document.documentElement;
+    D.setAttribute('data-lang', l);
+    D.setAttribute('lang', l === 'cn' ? 'zh-Hans' : 'en');
+    try { localStorage.setItem('infographic-lang', l); } catch (e) {}
+  }
+  _setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('infographic-theme', t); } catch (e) {}
+    this._applyColorway();
+  }
+  _applyColorway() {
+    const cw = {
+      'Flame Blue': { light: ['#0a2d6e', '#1553cf', '#2fa6d9', '#1043a8'], dark: ['#cfe6ff', '#7fb0ff', '#3f7bf0', '#8ab4ff'] },
+      'Verdigris':  { light: ['#0c4a40', '#127a63', '#3aa88a', '#0f6350'], dark: ['#d2f2e2', '#7fd3ae', '#2c9a78', '#8fdcba'] },
+      'Champagne':  { light: ['#5f430f', '#a8781f', '#c9a04a', '#8a621a'], dark: ['#f3dfae', '#d9b56a', '#a87c2c', '#e5c885'] }
+    };
+    const set = cw[this.props.colorway] || cw['Flame Blue'];
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const a = dark ? set.dark : set.light, ia = dark ? set.light : set.dark;
+    const s = document.documentElement.style;
+    s.setProperty('--a3', a[0]); s.setProperty('--a1', a[1]); s.setProperty('--a2', a[2]); s.setProperty('--aink', a[3]);
+    s.setProperty('--ia3', ia[0]); s.setProperty('--ia1', ia[1]); s.setProperty('--ia2', ia[2]);
+  }
+  _initReveals() {
+    const ease = 'cubic-bezier(.22,1,.36,1)';
+    const els = [...document.querySelectorAll('[data-reveal]')];
+    els.forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(28px)';
+      el.style.transition = 'opacity .85s ' + ease + ', transform .85s ' + ease;
+    });
+    const bars = [...document.querySelectorAll('[data-bar]')];
+    bars.forEach(b => {
+      b.style.transformOrigin = 'left center';
+      b.style.transform = 'scaleX(0)';
+      b.style.transition = 'transform 1.1s .25s ' + ease;
+    });
+    const counts = [...document.querySelectorAll('[data-count]')];
+    const runCount = el => {
+      const txt = el.textContent.trim();
+      const target = parseFloat(txt.replace(/,/g, ''));
+      if (isNaN(target)) return;
+      const dec = (txt.split('.')[1] || '').length;
+      const grouped = txt.indexOf(',') >= 0;
+      const t0 = performance.now(), dur = 1100;
+      const fmt = v => {
+        let s = v.toFixed(dec);
+        if (grouped) s = (+s).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+        return s;
+      };
+      const tick = now => {
+        const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(target * e);
+        if (p < 1) requestAnimationFrame(tick); else el.textContent = txt;
+      };
+      requestAnimationFrame(tick);
+    };
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        const el = en.target;
+        io.unobserve(el);
+        if (el.hasAttribute('data-reveal')) {
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+          el.querySelectorAll('[data-bar]').forEach(b => { b.style.transform = 'scaleX(1)'; });
+          el.querySelectorAll('[data-count]').forEach(runCount);
+        } else if (el.hasAttribute('data-count')) {
+          runCount(el);
+        } else if (el.hasAttribute('data-bar')) {
+          el.style.transform = 'scaleX(1)';
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    els.forEach(el => io.observe(el));
+    counts.forEach(c => { if (!c.closest('[data-reveal]')) io.observe(c); });
+    bars.forEach(b => { if (!b.closest('[data-reveal]')) io.observe(b); });
+  }
+  renderVals() {
+    return {
+      toEN: () => this._setLang('en'),
+      toCN: () => this._setLang('cn'),
+      flipTheme: () => this._setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+    };
+  }
+}
+</script>
+</body>
+</html>

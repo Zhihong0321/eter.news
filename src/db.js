@@ -131,6 +131,7 @@ export async function getPublishedArticlesFromDb() {
         : new Date().toISOString();
 
       articles.push({
+        id: row.id,
         url: String(row.url).trim(),
         source: row.source || '',
         country: row.country || '',
@@ -142,6 +143,7 @@ export async function getPublishedArticlesFromDb() {
         keyFacts: Array.isArray(display.keyFacts) ? display.keyFacts : [],
         published_at: publishedAt,
         publication_status: 'rendered',
+        render_file: `infographic_${row.id}.dc.html`,
         rendered_at: row.enriched_at ? new Date(row.enriched_at).toISOString() : publishedAt
       });
     }
@@ -168,5 +170,26 @@ export async function getPublishedArticlesFromDb() {
     if (client) {
       client.release();
     }
+  }
+}
+
+export async function getInfographicContentByArticleId(articleId) {
+  if (!isDbEnabled() || !articleId) return null;
+  let client;
+  try {
+    client = await getPool().connect();
+    const { rows } = await client.query(
+      `SELECT infographic_content FROM article_enrichments WHERE article_id = $1 AND status = 'enriched' LIMIT 1;`,
+      [articleId]
+    );
+    if (!rows.length || !rows[0].infographic_content) return null;
+    return typeof rows[0].infographic_content === 'string'
+      ? JSON.parse(rows[0].infographic_content)
+      : rows[0].infographic_content;
+  } catch (err) {
+    console.error(`[db] Failed to fetch infographic content for article ${articleId}:`, err.message);
+    return null;
+  } finally {
+    if (client) client.release();
   }
 }

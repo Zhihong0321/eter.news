@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+(function() {
+  function getVal(k) {
+    try {
+      var ca = document.cookie.split(';');
+      for (var i = 0; i < ca.length; i++) {
+        var c = ca[i].trim();
+        if (c.indexOf(k + '=') === 0) return decodeURIComponent(c.substring(k.length + 1));
+      }
+    } catch (e) {}
+    try { return localStorage.getItem(k); } catch (e) { return null; }
+  }
+  try {
+    var l = getVal('meridian-language') || getVal('infographic-lang') || 'en';
+    var t = getVal('meridian-theme') || getVal('infographic-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-lang', l);
+    document.documentElement.setAttribute('lang', l === 'cn' ? 'zh-Hans' : 'en');
+    document.documentElement.setAttribute('data-theme', t);
+  } catch(e) {}
+})();
+</script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitcoin Drops 0.55% to $65,953 Amid Market Volatility</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500;600&family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5f4f1;--paper2:#ecebe6;--card:#fdfdfb;
+  --ink:#14161a;--ink2:#4c505a;--ink3:#878b94;--line:#e0dfd9;
+  --a3:#0a2d6e;--a1:#1553cf;--a2:#2fa6d9;--aink:#1043a8;
+  --ia3:#cfe6ff;--ia1:#7fb0ff;--ia2:#3f7bf0;
+  --inv-bg:#14161a;--inv-ink:#eceef2;
+  --wash:radial-gradient(120% 60% at 50% 0%,rgba(21,83,207,.08),rgba(10,45,110,.03) 45%,transparent 75%);
+  --shadow:0 1px 2px rgba(15,25,50,.04),0 10px 30px -14px rgba(15,25,50,.12);
+  --gdir:135deg;
+  --gh:linear-gradient(var(--gdir),var(--a3) 0%,var(--a1) 48%,var(--a2) 100%);
+  --gr:linear-gradient(90deg,var(--a1),var(--a2) 60%,transparent);
+  --gi:linear-gradient(var(--gdir),var(--ia3) 0%,var(--ia1) 48%,var(--ia2) 100%);
+  --df:"Gloock",georgia,serif;
+  --if:"Instrument Serif",georgia,serif;
+  --bf:"Hanken Grotesk","Helvetica Neue",arial,sans-serif;
+  --mf:"Spline Sans Mono",ui-monospace,monospace;
+}
+[data-theme="dark"]{
+  --paper:#0c0e12;--paper2:#12151b;--card:#141821;
+  --ink:#eceef2;--ink2:#b3b8c2;--ink3:#7d828c;--line:#232833;
+  --a3:#cfe6ff;--a1:#7fb0ff;--a2:#3f7bf0;--aink:#8ab4ff;
+  --ia3:#0a2d6e;--ia1:#1553cf;--ia2:#2fa6d9;
+  --inv-bg:#e9ecf2;--inv-ink:#14161a;
+  --wash:radial-gradient(120% 60% at 50% 0%,rgba(127,176,255,.08),rgba(63,123,240,.03) 45%,transparent 75%);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -14px rgba(0,0,0,.55);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--bf);font-size:17px;line-height:1.6;overflow-x:hidden;transition:background .35s,color .35s}
+a{color:var(--aink)}a:hover{color:var(--a1)}
+::selection{background:var(--a2);color:#fff}
+html:not([data-lang="cn"]) .cn{display:none!important}
+[data-lang="cn"] .en{display:none!important}
+[data-lang="cn"]{--gdir:315deg;--df:"Noto Serif SC",serif;--if:"Noto Serif SC",serif;--bf:"Noto Sans SC",sans-serif}
+[data-lang="cn"] [data-cjk="title"]{line-height:1.3!important;letter-spacing:.02em!important;font-style:normal!important}
+[data-lang="cn"] [data-cjk="body"]{line-height:1.9!important;letter-spacing:.01em!important}
+[data-lang="cn"] [data-cjk="hero"]{font-size:clamp(32px,9vw,40px)!important;line-height:1.25!important;letter-spacing:.02em!important}
+[data-lang="en"] #btnEN,html:not([data-lang="cn"]) #btnEN,[data-lang="cn"] #btnCN{background:var(--ink)!important;color:var(--paper)!important}
+@keyframes heroIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<div id="mProgress" aria-hidden="true" style="position:fixed;top:0;left:0;height:3px;width:0%;background:var(--gh);z-index:60"></div>
+
+<nav aria-label="Controls" style="position:fixed;top:12px;right:12px;z-index:50;display:flex;align-items:center;gap:8px">
+  <div style="display:flex;border:1px solid var(--line);border-radius:999px;background:var(--card);box-shadow:var(--shadow);overflow:hidden">
+    <button id="btnEN" onClick="{{ toEN }}" style="font-family:var(--mf);font-size:12px;font-weight:600;letter-spacing:.06em;padding:7px 13px;border:0;background:none;color:var(--ink3);cursor:pointer">EN</button>
+    <button id="btnCN" onClick="{{ toCN }}" style="font-family:'Noto Sans SC',var(--mf);font-size:12px;font-weight:600;letter-spacing:.06em;padding:7px 12px;border:0;background:none;color:var(--ink3);cursor:pointer;white-space:nowrap">中文</button>
+  </div>
+  <button onClick="{{ flipTheme }}" aria-label="Toggle theme" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:conic-gradient(var(--ink) 0 50%,var(--card) 50% 100%);box-shadow:var(--shadow);cursor:pointer"></button>
+</nav>
+
+<header data-screen-label="Hero" style="position:relative;padding:96px 22px 40px;background:var(--wash)">
+  <div style="max-width:460px;margin:0 auto;animation:heroIn .9s cubic-bezier(.22,1,.36,1) both">
+    <p style="font-family:var(--mf);font-size:11.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--aink);display:flex;align-items:center;gap:10px;margin-bottom:24px" style-before="content:'';width:26px;height:2px;background:var(--gr)">
+      <span class="en">Enriched Analysis &middot; Indonesia</span>
+      <span class="cn">深度解析 &middot; Indonesia</span>
+    </p>
+    <h1 data-cjk="hero" style="font-family:var(--df);font-size:clamp(38px,10.5vw,48px);font-weight:400;line-height:1.06;letter-spacing:-.01em;background:var(--gh);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;margin-bottom:10px;text-wrap:pretty">
+      <span class="en">Bitcoin Drops 0.55% to $65,953 Amid Market Volatility</span><span class="cn">市场波动加剧 比特币回落至65953美元</span>
+    </h1>
+    <p data-cjk="body" style="font-family:var(--if);font-style:italic;font-size:20px;line-height:1.45;color:var(--ink2);margin:16px 0 28px;text-wrap:pretty">
+      <span class="en">Bitcoin fell 0.55% over 24 hours to $65,953.25 on July 23, 2026. Total market capitalization stood at $1.3 trillion.</span><span class="cn">2026年7月23日，比特币24小时下跌0.55%至65953.25美元，全球总市值为1.3万亿美元。</span>
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--mf);font-size:12px;color:var(--ink3);border-top:1px solid var(--line);padding-top:14px">
+      <span style="color:var(--ink2);font-weight:600">Kompas.com</span>
+      <span class="en">22 Jul 2026</span>
+      <span class="cn">2026年7月22日</span>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px;border-top:1px solid var(--line);padding-top:20px">
+      
+        <div >
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>65,953.25</span></span><span class="cn"><span data-count>6.6万</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">Bitcoin Current Spot Price</span><span class="cn">比特币现货价格</span></p>
+        </div>
+        <div style="border-left:1px solid var(--line);padding-left:14px">
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>93</span></span><span class="cn"><span data-count>93</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">Fed Rate Pause Probability</span><span class="cn">美联储维稳利率概率</span></p>
+        </div>
+        <div style="border-left:1px solid var(--line);padding-left:14px">
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>600M</span></span><span class="cn"><span data-count>6亿</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">Mid-July Spot ETF Inflows</span><span class="cn">7月中旬现货ETF流入额</span></p>
+        </div>
+    </div>
+  </div>
+</header>
+
+<main style="max-width:460px;margin:0 auto;padding:0 22px 40px">
+
+<section data-screen-label="The Story" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:18px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">01</span><span class="en">The Story</span><span class="cn">新闻事实</span></p>
+  <p data-cjk="body" style="font-size:18px;line-height:1.65;text-wrap:pretty"><span class="en">Bitcoin fell 0.55% over 24 hours to $65,953.25 on July 23, 2026. Total market capitalization stood at $1.3 trillion.</span><span class="cn">2026年7月23日，比特币24小时下跌0.55%至65953.25美元，全球总市值为1.3万亿美元。</span></p>
+  <ul style="list-style:none;margin-top:24px;display:grid">
+    
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">Bitcoin traded at $65,953.25 (approx. 1.18 billion Indonesian Rupiah) at 06:30 WIB on July 23, 2026.</span><span class="cn">截至2026年7月23日06:30 WIB，比特币交易价为65953.25美元��约合11.8亿印尼卢比）。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">The 24-hour average decline reached 0.58%, following a temporary touch of $65,583.26 on July 22 evening.</span><span class="cn">比特币24小��平均跌幅为0.58%，此前曾于7月22日晚间触及65583.26美元低点。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">Weekly performance showed a 1.70% gain, while the 1-hour price tick gained 0.09%.</span><span class="cn">比特币近一周微升1.70%，近1小时小幅上涨0.09%。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 0px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" >
+      <span class="en">Total Bitcoin market capitalization reached $1.3 trillion (approx. 23,319 trillion Indonesian Rupiah).</span><span class="cn">比特币全球总市值达到1.3万亿美元（约合23319万亿印尼卢比）。</span>
+    </li>
+  </ul>
+</section>
+
+<section data-screen-label="Central Insight" data-reveal aria-label="Central insight" style="margin-top:56px;padding:30px 0 34px;border-top:3px solid var(--ink);border-bottom:1px solid var(--line)">
+  <span aria-hidden="true" style="font-family:var(--df);font-size:56px;line-height:.6;color:var(--a2);display:block;margin-bottom:10px">&para;</span>
+  <p data-cjk="title" style="font-family:var(--df);font-size:23px;line-height:1.35;letter-spacing:-.005em;background:var(--gh);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-wrap:pretty">
+    <span class="en">Bitcoin short-term price fluctuations reflect tension between macroeconomic monetary policy expectations and ongoing institutional ETF capital flows.</span><span class="cn">比特币短期价格波动体现了宏观货币政策预期与机构ETF资金流向之间的拉锯。</span>
+  </p>
+</section>
+
+<section data-screen-label="Dimensions" style="margin-top:52px">
+  <p data-reveal style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:2px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">02</span><span class="en">4 Dimensions</span><span class="cn">维度分析</span></p>
+  
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">1</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Historical context</span><span class="cn">历史脉络</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Recent Price Range &amp; Key Technical Levels</span><span class="cn">近期走势与关键技术关口</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">Bitcoin rebounded from a late June low of $58,000 to hold above the $65,000 threshold in July 2026.</span><span class="cn">比特币自2026年6月下旬低点58000美元反弹，7月持续维持在65000美元上方。</span></p>
+      <div style="margin-top:16px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Bitcoin Current Spot Price</span><span class="cn">比特币现货价格</span></p>
+      <div style="margin-top:2px;display:grid;gap:8px">
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en">July 23, 2026</span><span class="cn">2026年7月23日</span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">65,953.25 USD</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:100%"></i></div>
+    </div></div>
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Bitcoin touched a 21-month low near $58,000 in late June 2026 before recovering above $65,000.</span><span class="cn">比特币于2026年6月下旬跌至58000美元附近低位，随后反弹重回65000美元关口之上。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Technical analysts identify $62,500 as key support and $68,000 as major resistance.</span><span class="cn">技术分析显示62500美元为关键支撑位，68000美元为主要阻力位。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">2</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Cause</span><span class="cn">因果关系</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Macro Policy &amp; Federal Reserve Rate Expectations</span><span class="cn">宏观政策与美联储降息预期</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">Market participants await the FOMC meeting on July 28–29, 2026, anticipating unchanged benchmark interest rates.</span><span class="cn">市场关注2026年7月28日至29日美联储会议，普遍预期维持基准利率不变。</span></p>
+      <div style="margin-top:16px;display:grid;gap:12px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Fed Rate Pause Probability</span><span class="cn">美联储维稳利率概率</span></p>
+      <p style="font-family:var(--df);font-size:38px;line-height:1;color:var(--ink)"><span class="en"><span data-count>93</span> <span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">%</span></span><span class="cn"><span data-count>93</span><span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">%</span></span></p>
+      <p style="font-family:var(--mf);font-size:11.5px;color:var(--ink3);margin-top:7px"><span class="en">July 2026</span><span class="cn">2026年7月</span></p>
+      
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">The Federal Reserve benchmark interest rate target range stands at 3.50% to 3.75% heading into July.</span><span class="cn">2026年7月议息会议前，美联储联邦基金利率目标区间为3.50%至3.75%。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Interest rate swap markets price an 82% to 93% probability that the Federal Reserve holds rates steady.</span><span class="cn">利率衍生品市场显示美联储按兵不动的概率介于82%至93%之间。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">3</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Consequence</span><span class="cn">影响推演</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Institutional Adoption &amp; Spot ETF Net Flows</span><span class="cn">机构采纳与现货ETF资金流向</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">Spot Bitcoin ETFs logged over $600 million in mid-July net inflows, recovering from $4.5 billion June outflows.</span><span class="cn">现货比特币ETF在7月中旬净流入逾6亿美元，较6月45亿美元流出大幅改善。</span></p>
+      <div style="margin-top:16px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Mid-July Spot ETF Inflows</span><span class="cn">7月中旬现货ETF流入额</span></p>
+      <div style="margin-top:2px;display:grid;gap:8px">
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en">Mid-July 2026</span><span class="cn">2026年7月中旬</span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">600M USD</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:100%"></i></div>
+    </div></div>
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">United States spot Bitcoin ETFs experienced approximately $4.5 billion in net outflows during June 2026.</span><span class="cn">2026年6月美国现货比特币ETF累计净流出约45亿美元。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">A five-day positive streak in mid-July 2026 brought over $600 million into United States spot Bitcoin ETFs.</span><span class="cn">2026年7月中旬连续5日净流入为美国现货比特币ETF吸金逾6亿美元。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">4</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Future signal</span><span class="cn">前瞻信号</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">United States Market Structure Bill Impact</span><span class="cn">美国市场结构法案立法进展</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">Institutional sentiment is supported by rising market odds for the enactment of the US Clarity Act in 2026.</span><span class="cn">市场预计美国《清晰法案》2026年通过概率升至43%，对机构情绪构成支撑。</span></p>
+      <div style="margin-top:16px;display:grid;gap:12px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Clarity Act Enactment Odds</span><span class="cn">《清晰法案》立法成法概率</span></p>
+      <p style="font-family:var(--df);font-size:38px;line-height:1;color:var(--ink)"><span class="en"><span data-count>43</span> <span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">%</span></span><span class="cn"><span data-count>43</span><span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">%</span></span></p>
+      <p style="font-family:var(--mf);font-size:11.5px;color:var(--ink3);margin-top:7px"><span class="en">July 2026</span><span class="cn">2026年7月</span></p>
+      
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Prediction markets place a 43% probability on the United States Clarity Act passing into law during 2026.</span><span class="cn">预测市场显示美国《清晰法案》在2026年内签署成法的概率为43%。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Standardized federal rules are expected to provide clearer pathways for institutional crypto custody.</span><span class="cn">联邦统一监管规则预计将为机构加密资产托管提供更明确的合规路径。</span></li>
+    </ul>
+    </div>
+  </article>
+</section>
+
+
+<section data-screen-label="Timeline" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:18px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">03</span><span class="en">Timeline</span><span class="cn">时间线</span></p>
+  <ol style="list-style:none;position:relative" style-before="content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,var(--a2),var(--a1),var(--line))">
+    
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-06-30</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Bitcoin touches a low near $58,000 amid monthly ETF outflows.</span><span class="cn">比特币受当月ETF资金流出影响下探至58000美元低位。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-07-15</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">United States spot Bitcoin ETFs log five consecutive days of net inflows.</span><span class="cn">美国现货比特币ETF录得连续5个交易日资金净流入。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-07-21</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Bitcoin price climbs above the $66,000 price threshold.</span><span class="cn">比特币价格震荡上行并突破66000美元关口。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-07-22</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Bitcoin drops to $65,583.26 during evening trading hours.</span><span class="cn">比特币晚间盘中回落至65583.26美元。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-07-23</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Bitcoin trades at $65,953.25, down 0.55% over 24 hours.</span><span class="cn">比特币报65953.25美元，24小时内下跌0.55%。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 4px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--gh);border:3px solid var(--a3)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-07-28</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Federal Open Market Committee convenes for two-day monetary policy meeting.</span><span class="cn">美联储联邦公开市场委员会召开为期两天的议息会议。</span></span>
+    </li>
+  </ol>
+</section>
+
+<section data-screen-label="Key Takeaway" data-reveal aria-label="Key takeaway" style="margin-top:60px;padding:36px 26px 38px;background:var(--inv-bg);border-radius:20px;position:relative;overflow:hidden">
+  <p style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ia1);margin-bottom:14px"><span class="en">Key takeaway</span><span class="cn">核心结论</span></p>
+  <p data-cjk="title" style="font-family:var(--df);font-size:24px;line-height:1.32;letter-spacing:-.005em;background:var(--gi);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-wrap:pretty">
+    <span class="en">Bitcoin trades in a tight range as institutional ETF inflows counterbalance macroeconomic interest rate uncertainty.</span><span class="cn">机构ETF资金回流与美联储利率政策不确定性交织，推动比特币维持窄幅震荡格局。</span>
+  </p>
+</section>
+
+
+<section data-screen-label="What to Watch" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:20px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">04</span><span class="en">What to Watch</span><span class="cn">后续关注</span></p>
+  <ol style="list-style:none;display:grid">
+    <li data-cjk="body" style="position:relative;padding:0 0 20px 46px;font-size:15.5px;color:var(--ink2)" style-before="content:'01';position:absolute;left:0;top:1px;font-family:var(--mf);font-weight:600;font-size:15px;color:var(--aink)" style-after="content:'';position:absolute;left:0;top:24px;width:26px;height:1px;background:var(--gr)"><span class="en">Federal Reserve monetary policy outcome on July 29, 2026.</span><span class="cn">2026年7月29日美联储货币政策决议结果。</span></li><li data-cjk="body" style="position:relative;padding:0 0 20px 46px;font-size:15.5px;color:var(--ink2)" style-before="content:'02';position:absolute;left:0;top:1px;font-family:var(--mf);font-weight:600;font-size:15px;color:var(--aink)" style-after="content:'';position:absolute;left:0;top:24px;width:26px;height:1px;background:var(--gr)"><span class="en">Daily net inflow persistence in spot Bitcoin ETFs.</span><span class="cn">现货比特币ETF每日资金净流入的持续性。</span></li><li data-cjk="body" style="position:relative;padding:0 0 0px 46px;font-size:15.5px;color:var(--ink2)" style-before="content:'03';position:absolute;left:0;top:1px;font-family:var(--mf);font-weight:600;font-size:15px;color:var(--aink)" ><span class="en">Legislative progression of United States market structure bills.</span><span class="cn">美国加密市场结构法案的立法推进进展。</span></li>
+  </ol>
+</section>
+
+
+<section data-screen-label="Uncertainties" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:20px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">05</span><span class="en">Uncertainties</span><span class="cn">不确定因素</span></p>
+  <ul style="list-style:none;display:grid">
+    <li data-cjk="body" style="position:relative;padding:0 0 15px 24px;font-size:15px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:8px;width:8px;height:8px;border:2px solid var(--ink3);transform:rotate(45deg)"><span class="en">Unanticipated macroeconomic inflation readings impacting Fed rate path.</span><span class="cn">超预期的宏观通胀数据对美联储利率路径产生冲击。</span></li><li data-cjk="body" style="position:relative;padding:0 0 0px 24px;font-size:15px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:8px;width:8px;height:8px;border:2px solid var(--ink3);transform:rotate(45deg)"><span class="en">Exchange stablecoin liquidity shifts affecting spot trading depth.</span><span class="cn">交易所稳定币储备流动性变化对现货深度产生影响。</span></li>
+  </ul>
+</section>
+
+
+<section data-screen-label="Sources" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:6px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">06</span><span class="en">Sources</span><span class="cn">信息来源</span></p>
+  <ol style="list-style:none">
+    
+    <li style="position:relative;padding:12px 0 12px 32px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'1';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://money.kompas.com/read/2026/07/23/063800626/harga-bitcoin-hari-ini-23-juli-2026-turun-akibat-volatilitas-pasar?source=terpopuler" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Today&#39;s Bitcoin Price July 23, 2026 Drops Due to Market Volatility</span><span class="cn">今日比特币价格2026年7月23日因市场波动下跌</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">Kompas.com &middot; 2026-07-22</small>
+    </li>
+    <li style="position:relative;padding:12px 0 12px 32px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'2';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://www.federalreserve.gov" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Federal Open Market Committee Rate Decision Expectations for July 2026</span><span class="cn">2026年7月美联储议息会议决议预期</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">Macroeconomic Policy Research &middot; 2026-07-22</small>
+    </li>
+    <li style="position:relative;padding:12px 0 12px 32px;font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'3';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://farside.co.uk" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">US Spot Bitcoin ETF Capital Flow Tracking July 2026</span><span class="cn">美国现货比特币ETF 2026年7月资金流向跟踪</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">Digital Asset Fund Flows Index &middot; 2026-07-22</small>
+    </li>
+  </ol>
+</section>
+
+</main>
+
+<footer style="margin-top:56px;padding:26px 22px 44px;border-top:1px solid var(--line);text-align:center;font-family:var(--mf);font-size:11.5px;line-height:1.9;color:var(--ink3)">
+  <b style="color:var(--ink2);font-weight:600">Kompas.com</b> &middot; 2026-07-22T23:38:00.000Z<br>
+  <span class="en">Enriched analysis &mdash; sources listed above</span>
+  <span class="cn">深度增补分析 &mdash;&mdash; 信息来源见上文</span>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:940},&quot;colorway&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Flame Blue&quot;,&quot;options&quot;:[&quot;Flame Blue&quot;,&quot;Verdigris&quot;,&quot;Champagne&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;defaultLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;EN&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;中文&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;animations&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    const D = document.documentElement;
+    const get = k => {
+      try {
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+          let c = ca[i].trim();
+          if (c.indexOf(k + '=') === 0) return decodeURIComponent(c.substring(k.length + 1));
+        }
+      } catch (e) {}
+      try { return localStorage.getItem(k); } catch (e) { return null; }
+    };
+    const lang = get('meridian-language') || get('infographic-lang') || (this.props.defaultLang === '中文' ? 'cn' : 'en');
+    const theme = get('meridian-theme') || get('infographic-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    this._setLang(lang);
+    this._setTheme(theme);
+    const bar = document.getElementById('mProgress');
+    this._onScroll = () => {
+      const h = D.scrollHeight - innerHeight;
+      if (bar) bar.style.width = (h > 0 ? (scrollY / h * 100) : 0) + '%';
+    };
+    addEventListener('scroll', this._onScroll, { passive: true });
+    this._onScroll();
+    if (this.props.animations === false) return;
+    this._initReveals();
+  }
+  componentWillUnmount() { removeEventListener('scroll', this._onScroll); }
+  _setLang(l) {
+    const D = document.documentElement;
+    D.setAttribute('data-lang', l);
+    D.setAttribute('lang', l === 'cn' ? 'zh-Hans' : 'en');
+    try {
+      localStorage.setItem('meridian-language', l);
+      localStorage.setItem('infographic-lang', l);
+      document.cookie = 'meridian-language=' + l + '; path=/; max-age=31536000; SameSite=Lax';
+    } catch (e) {}
+  }
+  _setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try {
+      localStorage.setItem('meridian-theme', t);
+      localStorage.setItem('infographic-theme', t);
+      document.cookie = 'meridian-theme=' + t + '; path=/; max-age=31536000; SameSite=Lax';
+    } catch (e) {}
+    this._applyColorway();
+  }
+  _applyColorway() {
+    const cw = {
+      'Flame Blue': { light: ['#0a2d6e', '#1553cf', '#2fa6d9', '#1043a8'], dark: ['#cfe6ff', '#7fb0ff', '#3f7bf0', '#8ab4ff'] },
+      'Verdigris':  { light: ['#0c4a40', '#127a63', '#3aa88a', '#0f6350'], dark: ['#d2f2e2', '#7fd3ae', '#2c9a78', '#8fdcba'] },
+      'Champagne':  { light: ['#5f430f', '#a8781f', '#c9a04a', '#8a621a'], dark: ['#f3dfae', '#d9b56a', '#a87c2c', '#e5c885'] }
+    };
+    const set = cw[this.props.colorway] || cw['Flame Blue'];
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const a = dark ? set.dark : set.light, ia = dark ? set.light : set.dark;
+    const s = document.documentElement.style;
+    s.setProperty('--a3', a[0]); s.setProperty('--a1', a[1]); s.setProperty('--a2', a[2]); s.setProperty('--aink', a[3]);
+    s.setProperty('--ia3', ia[0]); s.setProperty('--ia1', ia[1]); s.setProperty('--ia2', ia[2]);
+  }
+  _initReveals() {
+    const ease = 'cubic-bezier(.22,1,.36,1)';
+    const els = [...document.querySelectorAll('[data-reveal]')];
+    els.forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(28px)';
+      el.style.transition = 'opacity .85s ' + ease + ', transform .85s ' + ease;
+    });
+    const bars = [...document.querySelectorAll('[data-bar]')];
+    bars.forEach(b => {
+      b.style.transformOrigin = 'left center';
+      b.style.transform = 'scaleX(0)';
+      b.style.transition = 'transform 1.1s .25s ' + ease;
+    });
+    const counts = [...document.querySelectorAll('[data-count]')];
+    const runCount = el => {
+      const txt = el.textContent.trim();
+      const target = parseFloat(txt.replace(/,/g, ''));
+      if (isNaN(target)) return;
+      const dec = (txt.split('.')[1] || '').length;
+      const grouped = txt.indexOf(',') >= 0;
+      const t0 = performance.now(), dur = 1100;
+      const fmt = v => {
+        let s = v.toFixed(dec);
+        if (grouped) s = (+s).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+        return s;
+      };
+      const tick = now => {
+        const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(target * e);
+        if (p < 1) requestAnimationFrame(tick); else el.textContent = txt;
+      };
+      requestAnimationFrame(tick);
+    };
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        const el = en.target;
+        io.unobserve(el);
+        if (el.hasAttribute('data-reveal')) {
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+          el.querySelectorAll('[data-bar]').forEach(b => { b.style.transform = 'scaleX(1)'; });
+          el.querySelectorAll('[data-count]').forEach(runCount);
+        } else if (el.hasAttribute('data-count')) {
+          runCount(el);
+        } else if (el.hasAttribute('data-bar')) {
+          el.style.transform = 'scaleX(1)';
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    els.forEach(el => io.observe(el));
+    counts.forEach(c => { if (!c.closest('[data-reveal]')) io.observe(c); });
+    bars.forEach(b => { if (!b.closest('[data-reveal]')) io.observe(b); });
+  }
+  renderVals() {
+    return {
+      toEN: () => this._setLang('en'),
+      toCN: () => this._setLang('cn'),
+      flipTheme: () => this._setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+    };
+  }
+}
+</script>
+</body>
+</html>

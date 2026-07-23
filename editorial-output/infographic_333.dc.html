@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+(function() {
+  function getVal(k) {
+    try {
+      var ca = document.cookie.split(';');
+      for (var i = 0; i < ca.length; i++) {
+        var c = ca[i].trim();
+        if (c.indexOf(k + '=') === 0) return decodeURIComponent(c.substring(k.length + 1));
+      }
+    } catch (e) {}
+    try { return localStorage.getItem(k); } catch (e) { return null; }
+  }
+  try {
+    var l = getVal('meridian-language') || getVal('infographic-lang') || 'en';
+    var t = getVal('meridian-theme') || getVal('infographic-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-lang', l);
+    document.documentElement.setAttribute('lang', l === 'cn' ? 'zh-Hans' : 'en');
+    document.documentElement.setAttribute('data-theme', t);
+  } catch(e) {}
+})();
+</script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anwar Reaffirms Aminuddin as Negeri Sembilan Chief Minister Candidate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500;600&family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5f4f1;--paper2:#ecebe6;--card:#fdfdfb;
+  --ink:#14161a;--ink2:#4c505a;--ink3:#878b94;--line:#e0dfd9;
+  --a3:#0a2d6e;--a1:#1553cf;--a2:#2fa6d9;--aink:#1043a8;
+  --ia3:#cfe6ff;--ia1:#7fb0ff;--ia2:#3f7bf0;
+  --inv-bg:#14161a;--inv-ink:#eceef2;
+  --wash:radial-gradient(120% 60% at 50% 0%,rgba(21,83,207,.08),rgba(10,45,110,.03) 45%,transparent 75%);
+  --shadow:0 1px 2px rgba(15,25,50,.04),0 10px 30px -14px rgba(15,25,50,.12);
+  --gdir:135deg;
+  --gh:linear-gradient(var(--gdir),var(--a3) 0%,var(--a1) 48%,var(--a2) 100%);
+  --gr:linear-gradient(90deg,var(--a1),var(--a2) 60%,transparent);
+  --gi:linear-gradient(var(--gdir),var(--ia3) 0%,var(--ia1) 48%,var(--ia2) 100%);
+  --df:"Gloock",georgia,serif;
+  --if:"Instrument Serif",georgia,serif;
+  --bf:"Hanken Grotesk","Helvetica Neue",arial,sans-serif;
+  --mf:"Spline Sans Mono",ui-monospace,monospace;
+}
+[data-theme="dark"]{
+  --paper:#0c0e12;--paper2:#12151b;--card:#141821;
+  --ink:#eceef2;--ink2:#b3b8c2;--ink3:#7d828c;--line:#232833;
+  --a3:#cfe6ff;--a1:#7fb0ff;--a2:#3f7bf0;--aink:#8ab4ff;
+  --ia3:#0a2d6e;--ia1:#1553cf;--ia2:#2fa6d9;
+  --inv-bg:#e9ecf2;--inv-ink:#14161a;
+  --wash:radial-gradient(120% 60% at 50% 0%,rgba(127,176,255,.08),rgba(63,123,240,.03) 45%,transparent 75%);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -14px rgba(0,0,0,.55);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--bf);font-size:17px;line-height:1.6;overflow-x:hidden;transition:background .35s,color .35s}
+a{color:var(--aink)}a:hover{color:var(--a1)}
+::selection{background:var(--a2);color:#fff}
+html:not([data-lang="cn"]) .cn{display:none!important}
+[data-lang="cn"] .en{display:none!important}
+[data-lang="cn"]{--gdir:315deg;--df:"Noto Serif SC",serif;--if:"Noto Serif SC",serif;--bf:"Noto Sans SC",sans-serif}
+[data-lang="cn"] [data-cjk="title"]{line-height:1.3!important;letter-spacing:.02em!important;font-style:normal!important}
+[data-lang="cn"] [data-cjk="body"]{line-height:1.9!important;letter-spacing:.01em!important}
+[data-lang="cn"] [data-cjk="hero"]{font-size:clamp(32px,9vw,40px)!important;line-height:1.25!important;letter-spacing:.02em!important}
+[data-lang="en"] #btnEN,html:not([data-lang="cn"]) #btnEN,[data-lang="cn"] #btnCN{background:var(--ink)!important;color:var(--paper)!important}
+@keyframes heroIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<div id="mProgress" aria-hidden="true" style="position:fixed;top:0;left:0;height:3px;width:0%;background:var(--gh);z-index:60"></div>
+
+<nav aria-label="Controls" style="position:fixed;top:12px;right:12px;z-index:50;display:flex;align-items:center;gap:8px">
+  <div style="display:flex;border:1px solid var(--line);border-radius:999px;background:var(--card);box-shadow:var(--shadow);overflow:hidden">
+    <button id="btnEN" onClick="{{ toEN }}" style="font-family:var(--mf);font-size:12px;font-weight:600;letter-spacing:.06em;padding:7px 13px;border:0;background:none;color:var(--ink3);cursor:pointer">EN</button>
+    <button id="btnCN" onClick="{{ toCN }}" style="font-family:'Noto Sans SC',var(--mf);font-size:12px;font-weight:600;letter-spacing:.06em;padding:7px 12px;border:0;background:none;color:var(--ink3);cursor:pointer;white-space:nowrap">中文</button>
+  </div>
+  <button onClick="{{ flipTheme }}" aria-label="Toggle theme" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:conic-gradient(var(--ink) 0 50%,var(--card) 50% 100%);box-shadow:var(--shadow);cursor:pointer"></button>
+</nav>
+
+<header data-screen-label="Hero" style="position:relative;padding:96px 22px 40px;background:var(--wash)">
+  <div style="max-width:460px;margin:0 auto;animation:heroIn .9s cubic-bezier(.22,1,.36,1) both">
+    <p style="font-family:var(--mf);font-size:11.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--aink);display:flex;align-items:center;gap:10px;margin-bottom:24px" style-before="content:'';width:26px;height:2px;background:var(--gr)">
+      <span class="en">Enriched Analysis &middot; Malaysia</span>
+      <span class="cn">深度解析 &middot; Malaysia</span>
+    </p>
+    <h1 data-cjk="hero" style="font-family:var(--df);font-size:clamp(38px,10.5vw,48px);font-weight:400;line-height:1.06;letter-spacing:-.01em;background:var(--gh);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;margin-bottom:10px;text-wrap:pretty">
+      <span class="en">Anwar Reaffirms Aminuddin as Negeri Sembilan Chief Minister Candidate</span><span class="cn">安华重申阿米努丁为森美���州大臣人选</span>
+    </h1>
+    <p data-cjk="body" style="font-family:var(--if);font-style:italic;font-size:20px;line-height:1.45;color:var(--ink2);margin:16px 0 28px;text-wrap:pretty">
+      <span class="en">Malaysian Prime Minister Anwar Ibrahim confirmed Aminuddin Harun as Pakatan Harapan&#39;s Chief Minister candidate for Negeri Sembilan on July 22, 2026, rejecting post-election coalition talks with Barisan Nasional.</span><span class="cn">马来西亚首相安华于2026年7月22日确认阿米努丁为希盟森美兰州大臣人选，阿米努丁明确否认选后与国���合作构筑政权的打算。</span>
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--mf);font-size:12px;color:var(--ink3);border-top:1px solid var(--line);padding-top:14px">
+      <span style="color:var(--ink2);font-weight:600">China Press</span>
+      <span class="en">23 Jul 2026</span>
+      <span class="cn">2026年7月23日</span>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px;border-top:1px solid var(--line);padding-top:20px">
+      
+        <div >
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>14</span></span><span class="cn"><span data-count>14</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">UMNO State Seats Withdrawn</span><span class="cn">巫统撤回支持的州议席数</span></p>
+        </div>
+        <div style="border-left:1px solid var(--line);padding-left:14px">
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>31</span></span><span class="cn"><span data-count>31</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">PH-BN Seats Won in 2023</span><span class="cn">2023年希盟与国阵合计赢得席位数</span></p>
+        </div>
+        <div style="border-left:1px solid var(--line);padding-left:14px">
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>50</span></span><span class="cn"><span data-count>50</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">Airbus Malaysian Suppliers</span><span class="cn">空中客车在马来西亚的本土供应商数量</span></p>
+        </div>
+    </div>
+  </div>
+</header>
+
+<main style="max-width:460px;margin:0 auto;padding:0 22px 40px">
+
+<section data-screen-label="The Story" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:18px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">01</span><span class="en">The Story</span><span class="cn">新闻事实</span></p>
+  <p data-cjk="body" style="font-size:18px;line-height:1.65;text-wrap:pretty"><span class="en">Malaysian Prime Minister Anwar Ibrahim confirmed Aminuddin Harun as Pakatan Harapan&#39;s Chief Minister candidate for Negeri Sembilan on July 22, 2026, rejecting post-election coalition talks with Barisan Nasional.</span><span class="cn">马来西亚首相安华于2026年7月22日确认阿米努丁为希盟森美兰州大臣人选，阿米努丁明确否认选后与国���合作构筑政权的打算。</span></p>
+  <ul style="list-style:none;margin-top:24px;display:grid">
+    
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">Anwar Ibrahim endorsed incumbent Aminuddin Harun as Pakatan Harapan&#39;s sole candidate for Chief Minister of Negeri Sembilan.</span><span class="cn">安华表态支持看守州务大臣阿米努丁继续作为希盟在森美兰州的唯一���臣人选。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">Anwar stated UMNO Negeri Sembilan&#39;s withdrawal of support was driven by internal factional rivalry rather than Deputy PM Ahmad Zahid&#39;s order.</span><span class="cn">安华指出森州巫统撤回支持源于党内职位争夺，并非副首相阿末扎希的授意。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">Aminuddin Harun rejected speculation about forming a post-election coalition government with Barisan Nasional.</span><span class="cn">阿米努丁否定了希盟将在州选后与国阵合作组织联合州政府的猜测。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 0px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" >
+      <span class="en">Anwar highlighted Negeri Sembilan&#39;s key role in supplying critical components for Airbus commercial aircraft manufacturing.</span><span class="cn">安华��调森美兰州在全球航空工��中的地位，为空中客车客��制造关键零部件��</span>
+    </li>
+  </ul>
+</section>
+
+<section data-screen-label="Central Insight" data-reveal aria-label="Central insight" style="margin-top:56px;padding:30px 0 34px;border-top:3px solid var(--ink);border-bottom:1px solid var(--line)">
+  <span aria-hidden="true" style="font-family:var(--df);font-size:56px;line-height:.6;color:var(--a2);display:block;margin-bottom:10px">&para;</span>
+  <p data-cjk="title" style="font-family:var(--df);font-size:23px;line-height:1.35;letter-spacing:-.005em;background:var(--gh);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-wrap:pretty">
+    <span class="en">The 2026 Negeri Sembilan state election centers on Pakatan Harapan defending its governance record and industrial stability against internal political fragmentation triggered by UMNO&#39;s withdrawal.</span><span class="cn">2026年森美兰州选的核心议题在于希盟依托过往执政业绩与产业稳定，应对巫统撤回支持所引发的政局分化。</span>
+  </p>
+</section>
+
+<section data-screen-label="Dimensions" style="margin-top:52px">
+  <p data-reveal style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:2px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">02</span><span class="en">3 Dimensions</span><span class="cn">维度分析</span></p>
+  
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">1</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Cause</span><span class="cn">因果关系</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Trigger of Assembly Dissolution</span><span class="cn">州议会解散的政治导火索</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">UMNO lawmakers withdrew confidence from Aminuddin in April 2026, leading to a minority government and eventual assembly dissolution in June.</span><span class="cn">2026年4月巫统议员对阿米努丁撤回信任致使州政权失去多数，最终促成6月州议会提前解散。</span></p>
+      <div style="margin-top:16px;display:grid;gap:12px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">UMNO State Seats Withdrawn</span><span class="cn">巫统撤回支持的州议席数</span></p>
+      <p style="font-family:var(--df);font-size:38px;line-height:1;color:var(--ink)"><span class="en"><span data-count>14</span> <span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">seats</span></span><span class="cn"><span data-count>14</span><span style="font-family:var(--bf);font-size:13.5px;font-weight:600;color:var(--aink)">席</span></span></p>
+      <p style="font-family:var(--mf);font-size:11.5px;color:var(--ink3);margin-top:7px"><span class="en">April 2026</span><span class="cn">2026年4月</span></p>
+      
+      <div style="margin-top:12px;display:grid;gap:8px">
+        
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en">April 2026</span><span class="cn">2026年4月</span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">14 seats</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:39%"></i></div>
+    </div>
+        
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en">Total Assembly Seats</span><span class="cn">州议会总席位数</span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">36 seats</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:100%"></i></div>
+    </div>
+      </div>
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">On April 27, 2026, 14 UMNO state assembly members withdrew support for Chief Minister Aminuddin Harun.</span><span class="cn">2026年4月27日，14名巫统州议员宣布对州务大臣阿米努丁失去信任并撤回支持。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Aminuddin Harun dissolved the 36-seat Negeri Sembilan State Legislative Assembly on June 5, 2026 after royal assent.</span><span class="cn">在获得森州最高统治者御准后，阿米努丁于2026年6月5日正式解散拥有36席的森州议会。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">2</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Historical context</span><span class="cn">历史脉络</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">2023 vs 2026 Electoral Alignment</span><span class="cn">2023年与2026年执政阵营演变</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">The 2023 election saw Pakatan Harapan and Barisan Nasional win 31 out of 36 seats together before their local alignment broke down in 2026.</span><span class="cn">希盟与国阵在2023年州选中曾联合赢得36席中的31席，但该合作在2026年因地方政治分歧破裂。</span></p>
+      <div style="margin-top:16px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">PH-BN Seats Won in 2023</span><span class="cn">2023年希盟与国阵合计赢得席位数</span></p>
+      <div style="margin-top:2px;display:grid;gap:8px">
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en">August 2023</span><span class="cn">2023年8月</span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">31 seats</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:100%"></i></div>
+    </div></div>
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">In August 2023, PH won 17 seats and BN won 14 seats, forming a governing alliance against Perikatan Nasional&#39;s 5 seats.</span><span class="cn">2023年8月州选，希盟夺得17席，国阵赢得14席，组建联合政府，国盟获得5席。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Aminuddin shifted from his long-held seat of Sikamat to contest Linggi, an UMNO stronghold, for the 2026 election.</span><span class="cn">在2026年州选中，阿米努丁离开长期据守的小甘密选区，转战巫统传统堡垒区宁宜选区。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">3</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Stakeholder impact</span><span class="cn">利益相关方</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Aerospace Supply Chain Integration</span><span class="cn">全球航空供应链嵌入度</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">Negeri Sembilan hosts specialized precision manufacturing hubs supplying vital components like carbon brakes to Airbus and Boeing.</span><span class="cn">森美兰州拥有精密航空制造基地，向空中客车与波音供应碳刹车盘等核心部件。</span></p>
+      
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Safran Landing Systems in Sendayan manufactures carbon brake systems for commercial aviation giants worldwide.</span><span class="cn">位于森那旺的赛峰起落架系统公司为全球民用航空巨头生产碳刹车盘系统。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Malaysia hosts approximately 50 local suppliers supporting Airbus&#39;s regional manufacturing network.</span><span class="cn">马来西亚本土共有约50家企业进入空中客车的区域制造供应链网络。</span></li>
+    </ul>
+    </div>
+  </article>
+</section>
+
+
+<section data-screen-label="Timeline" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:18px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">03</span><span class="en">Timeline</span><span class="cn">时间线</span></p>
+  <ol style="list-style:none;position:relative" style-before="content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,var(--a2),var(--a1),var(--line))">
+    
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2023-08-12</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">PH and BN win 31 seats in Negeri Sembilan election.</span><span class="cn">希盟与国阵在森美兰州选联合赢得31个议席。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-04-27</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">14 UMNO state assemblymen withdraw support for Aminuddin.</span><span class="cn">14名巫统森州议员宣布撤回对阿米努丁的支持。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-06-05</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Negeri Sembilan State Legislative Assembly is officially dissolved.</span><span class="cn">森美兰州议会正式解散。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 4px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--gh);border:3px solid var(--a3)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-07-22</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Anwar Ibrahim reconfirms Aminuddin as PH Chief Minister candidate.</span><span class="cn">安华在小甘密晚宴上重申阿米努丁为希盟大臣人选。</span></span>
+    </li>
+  </ol>
+</section>
+
+<section data-screen-label="Key Takeaway" data-reveal aria-label="Key takeaway" style="margin-top:60px;padding:36px 26px 38px;background:var(--inv-bg);border-radius:20px;position:relative;overflow:hidden">
+  <p style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ia1);margin-bottom:14px"><span class="en">Key takeaway</span><span class="cn">核心结论</span></p>
+  <p data-cjk="title" style="font-family:var(--df);font-size:24px;line-height:1.32;letter-spacing:-.005em;background:var(--gi);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-wrap:pretty">
+    <span class="en">The 2026 election tests whether Pakatan Harapan can leverage its economic track record to secure an independent mandate without Barisan Nasional&#39;s support.</span><span class="cn">2026年州选检验希盟能否凭借执政成绩在脱离国阵合作的情况下独立取得议会授权。</span>
+  </p>
+</section>
+
+
+<section data-screen-label="What to Watch" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:20px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">04</span><span class="en">What to Watch</span><span class="cn">后续关注</span></p>
+  <ol style="list-style:none;display:grid">
+    <li data-cjk="body" style="position:relative;padding:0 0 20px 46px;font-size:15.5px;color:var(--ink2)" style-before="content:'01';position:absolute;left:0;top:1px;font-family:var(--mf);font-weight:600;font-size:15px;color:var(--aink)" style-after="content:'';position:absolute;left:0;top:24px;width:26px;height:1px;background:var(--gr)"><span class="en">Voter turnout in key contest areas like the Linggi constituency.</span><span class="cn">宁宜等焦点选区的选民投票率与选情走向。</span></li><li data-cjk="body" style="position:relative;padding:0 0 0px 46px;font-size:15.5px;color:var(--ink2)" style-before="content:'02';position:absolute;left:0;top:1px;font-family:var(--mf);font-weight:600;font-size:15px;color:var(--aink)" ><span class="en">Official election outcome determining party control of the 36 assembly seats.</span><span class="cn">决定36个州议席归属的最终计票结果。</span></li>
+  </ol>
+</section>
+
+
+<section data-screen-label="Uncertainties" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:20px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">05</span><span class="en">Uncertainties</span><span class="cn">不确定因素</span></p>
+  <ul style="list-style:none;display:grid">
+    <li data-cjk="body" style="position:relative;padding:0 0 15px 24px;font-size:15px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:8px;width:8px;height:8px;border:2px solid var(--ink3);transform:rotate(45deg)"><span class="en">Post-election coalition dynamics if no party achieves a 19-seat outright majority.</span><span class="cn">若无单一阵营取得过半19席时选后联合政府的组建动向。</span></li><li data-cjk="body" style="position:relative;padding:0 0 0px 24px;font-size:15px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:8px;width:8px;height:8px;border:2px solid var(--ink3);transform:rotate(45deg)"><span class="en">Impact of national economic policy adjustments on local voter sentiment.</span><span class="cn">联邦政府调薪与助贫政策在地方选民中的转化效果。</span></li>
+  </ul>
+</section>
+
+
+<section data-screen-label="Sources" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:6px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">06</span><span class="en">Sources</span><span class="cn">信息来源</span></p>
+  <ol style="list-style:none">
+    
+    <li style="position:relative;padding:12px 0 12px 32px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'1';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://www.chinapress.com.my/20260723/%e6%a3%ae%e7%be%8e%e5%85%b0%e5%b7%9e%e9%80%89%ef%bd%9c%e5%b8%8c%e7%9b%9f%e5%a4%a7%e8%87%a3%e4%ba%ba%e9%80%89%e6%98%af%e9%98%bf%e7%b1%b3%e5%8a%aa%e4%b8%81-%e5%ae%89%e5%8d%8e%e8%b0%83%e4%be%83%e5%af%b9/" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Pakatan Harapan&#39;s Chief Minister Candidate Is Aminuddin; Anwar Teases Opponents</span><span class="cn">森美兰州选｜希盟大臣人选是阿米努丁 安华调侃对手：还没赢就在“抢位子”</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">China Press &middot; 2026-07-23</small>
+    </li>
+    <li style="position:relative;padding:12px 0 12px 32px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'2';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://www.orientaldaily.com.my" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Negeri Sembilan State Assembly Dissolved on June 5 for State Election</span><span class="cn">森州议会6月5日解散迎州选</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">Oriental Daily News &middot; 2026-06-04</small>
+    </li>
+    <li style="position:relative;padding:12px 0 12px 32px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'3';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://www.sinchew.com.my" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Aminuddin Shifts to Contest Linggi Constituency</span><span class="cn">阿米努丁转战宁宜州议席</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">Sin Chew Daily &middot; 2026-07-10</small>
+    </li>
+    <li style="position:relative;padding:12px 0 12px 32px;font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'4';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://www.mida.gov.my" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Malaysia Aerospace Ecosystem and Airbus Supply Chain Network</span><span class="cn">马来西亚航空工业生态与空中客车供应链网络</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">MIDA / Airbus &middot; 2025-11-15</small>
+    </li>
+  </ol>
+</section>
+
+</main>
+
+<footer style="margin-top:56px;padding:26px 22px 44px;border-top:1px solid var(--line);text-align:center;font-family:var(--mf);font-size:11.5px;line-height:1.9;color:var(--ink3)">
+  <b style="color:var(--ink2);font-weight:600">China Press</b> &middot; 2026-07-23T02:32:36.000Z<br>
+  <span class="en">Enriched analysis &mdash; sources listed above</span>
+  <span class="cn">深度增补分析 &mdash;&mdash; 信息来源见上文</span>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:940},&quot;colorway&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Flame Blue&quot;,&quot;options&quot;:[&quot;Flame Blue&quot;,&quot;Verdigris&quot;,&quot;Champagne&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;defaultLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;EN&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;中文&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;animations&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    const D = document.documentElement;
+    const get = k => {
+      try {
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+          let c = ca[i].trim();
+          if (c.indexOf(k + '=') === 0) return decodeURIComponent(c.substring(k.length + 1));
+        }
+      } catch (e) {}
+      try { return localStorage.getItem(k); } catch (e) { return null; }
+    };
+    const lang = get('meridian-language') || get('infographic-lang') || (this.props.defaultLang === '中文' ? 'cn' : 'en');
+    const theme = get('meridian-theme') || get('infographic-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    this._setLang(lang);
+    this._setTheme(theme);
+    const bar = document.getElementById('mProgress');
+    this._onScroll = () => {
+      const h = D.scrollHeight - innerHeight;
+      if (bar) bar.style.width = (h > 0 ? (scrollY / h * 100) : 0) + '%';
+    };
+    addEventListener('scroll', this._onScroll, { passive: true });
+    this._onScroll();
+    if (this.props.animations === false) return;
+    this._initReveals();
+  }
+  componentWillUnmount() { removeEventListener('scroll', this._onScroll); }
+  _setLang(l) {
+    const D = document.documentElement;
+    D.setAttribute('data-lang', l);
+    D.setAttribute('lang', l === 'cn' ? 'zh-Hans' : 'en');
+    try {
+      localStorage.setItem('meridian-language', l);
+      localStorage.setItem('infographic-lang', l);
+      document.cookie = 'meridian-language=' + l + '; path=/; max-age=31536000; SameSite=Lax';
+    } catch (e) {}
+  }
+  _setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try {
+      localStorage.setItem('meridian-theme', t);
+      localStorage.setItem('infographic-theme', t);
+      document.cookie = 'meridian-theme=' + t + '; path=/; max-age=31536000; SameSite=Lax';
+    } catch (e) {}
+    this._applyColorway();
+  }
+  _applyColorway() {
+    const cw = {
+      'Flame Blue': { light: ['#0a2d6e', '#1553cf', '#2fa6d9', '#1043a8'], dark: ['#cfe6ff', '#7fb0ff', '#3f7bf0', '#8ab4ff'] },
+      'Verdigris':  { light: ['#0c4a40', '#127a63', '#3aa88a', '#0f6350'], dark: ['#d2f2e2', '#7fd3ae', '#2c9a78', '#8fdcba'] },
+      'Champagne':  { light: ['#5f430f', '#a8781f', '#c9a04a', '#8a621a'], dark: ['#f3dfae', '#d9b56a', '#a87c2c', '#e5c885'] }
+    };
+    const set = cw[this.props.colorway] || cw['Flame Blue'];
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const a = dark ? set.dark : set.light, ia = dark ? set.light : set.dark;
+    const s = document.documentElement.style;
+    s.setProperty('--a3', a[0]); s.setProperty('--a1', a[1]); s.setProperty('--a2', a[2]); s.setProperty('--aink', a[3]);
+    s.setProperty('--ia3', ia[0]); s.setProperty('--ia1', ia[1]); s.setProperty('--ia2', ia[2]);
+  }
+  _initReveals() {
+    const ease = 'cubic-bezier(.22,1,.36,1)';
+    const els = [...document.querySelectorAll('[data-reveal]')];
+    els.forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(28px)';
+      el.style.transition = 'opacity .85s ' + ease + ', transform .85s ' + ease;
+    });
+    const bars = [...document.querySelectorAll('[data-bar]')];
+    bars.forEach(b => {
+      b.style.transformOrigin = 'left center';
+      b.style.transform = 'scaleX(0)';
+      b.style.transition = 'transform 1.1s .25s ' + ease;
+    });
+    const counts = [...document.querySelectorAll('[data-count]')];
+    const runCount = el => {
+      const txt = el.textContent.trim();
+      const target = parseFloat(txt.replace(/,/g, ''));
+      if (isNaN(target)) return;
+      const dec = (txt.split('.')[1] || '').length;
+      const grouped = txt.indexOf(',') >= 0;
+      const t0 = performance.now(), dur = 1100;
+      const fmt = v => {
+        let s = v.toFixed(dec);
+        if (grouped) s = (+s).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+        return s;
+      };
+      const tick = now => {
+        const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(target * e);
+        if (p < 1) requestAnimationFrame(tick); else el.textContent = txt;
+      };
+      requestAnimationFrame(tick);
+    };
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        const el = en.target;
+        io.unobserve(el);
+        if (el.hasAttribute('data-reveal')) {
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+          el.querySelectorAll('[data-bar]').forEach(b => { b.style.transform = 'scaleX(1)'; });
+          el.querySelectorAll('[data-count]').forEach(runCount);
+        } else if (el.hasAttribute('data-count')) {
+          runCount(el);
+        } else if (el.hasAttribute('data-bar')) {
+          el.style.transform = 'scaleX(1)';
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    els.forEach(el => io.observe(el));
+    counts.forEach(c => { if (!c.closest('[data-reveal]')) io.observe(c); });
+    bars.forEach(b => { if (!b.closest('[data-reveal]')) io.observe(b); });
+  }
+  renderVals() {
+    return {
+      toEN: () => this._setLang('en'),
+      toCN: () => this._setLang('cn'),
+      flipTheme: () => this._setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+    };
+  }
+}
+</script>
+</body>
+</html>

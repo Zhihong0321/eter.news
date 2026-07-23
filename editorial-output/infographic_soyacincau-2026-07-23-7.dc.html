@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+(function() {
+  function getVal(k) {
+    try {
+      var ca = document.cookie.split(';');
+      for (var i = 0; i < ca.length; i++) {
+        var c = ca[i].trim();
+        if (c.indexOf(k + '=') === 0) return decodeURIComponent(c.substring(k.length + 1));
+      }
+    } catch (e) {}
+    try { return localStorage.getItem(k); } catch (e) { return null; }
+  }
+  try {
+    var l = getVal('meridian-language') || getVal('infographic-lang') || 'en';
+    var t = getVal('meridian-theme') || getVal('infographic-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-lang', l);
+    document.documentElement.setAttribute('lang', l === 'cn' ? 'zh-Hans' : 'en');
+    document.documentElement.setAttribute('data-theme', t);
+  } catch(e) {}
+})();
+</script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIMB Malaysia Adds Apple Pay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500;600&family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5f4f1;--paper2:#ecebe6;--card:#fdfdfb;
+  --ink:#14161a;--ink2:#4c505a;--ink3:#878b94;--line:#e0dfd9;
+  --a3:#0a2d6e;--a1:#1553cf;--a2:#2fa6d9;--aink:#1043a8;
+  --ia3:#cfe6ff;--ia1:#7fb0ff;--ia2:#3f7bf0;
+  --inv-bg:#14161a;--inv-ink:#eceef2;
+  --wash:radial-gradient(120% 60% at 50% 0%,rgba(21,83,207,.08),rgba(10,45,110,.03) 45%,transparent 75%);
+  --shadow:0 1px 2px rgba(15,25,50,.04),0 10px 30px -14px rgba(15,25,50,.12);
+  --gdir:135deg;
+  --gh:linear-gradient(var(--gdir),var(--a3) 0%,var(--a1) 48%,var(--a2) 100%);
+  --gr:linear-gradient(90deg,var(--a1),var(--a2) 60%,transparent);
+  --gi:linear-gradient(var(--gdir),var(--ia3) 0%,var(--ia1) 48%,var(--ia2) 100%);
+  --df:"Gloock",georgia,serif;
+  --if:"Instrument Serif",georgia,serif;
+  --bf:"Hanken Grotesk","Helvetica Neue",arial,sans-serif;
+  --mf:"Spline Sans Mono",ui-monospace,monospace;
+}
+[data-theme="dark"]{
+  --paper:#0c0e12;--paper2:#12151b;--card:#141821;
+  --ink:#eceef2;--ink2:#b3b8c2;--ink3:#7d828c;--line:#232833;
+  --a3:#cfe6ff;--a1:#7fb0ff;--a2:#3f7bf0;--aink:#8ab4ff;
+  --ia3:#0a2d6e;--ia1:#1553cf;--ia2:#2fa6d9;
+  --inv-bg:#e9ecf2;--inv-ink:#14161a;
+  --wash:radial-gradient(120% 60% at 50% 0%,rgba(127,176,255,.08),rgba(63,123,240,.03) 45%,transparent 75%);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -14px rgba(0,0,0,.55);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--bf);font-size:17px;line-height:1.6;overflow-x:hidden;transition:background .35s,color .35s}
+a{color:var(--aink)}a:hover{color:var(--a1)}
+::selection{background:var(--a2);color:#fff}
+html:not([data-lang="cn"]) .cn{display:none!important}
+[data-lang="cn"] .en{display:none!important}
+[data-lang="cn"]{--gdir:315deg;--df:"Noto Serif SC",serif;--if:"Noto Serif SC",serif;--bf:"Noto Sans SC",sans-serif}
+[data-lang="cn"] [data-cjk="title"]{line-height:1.3!important;letter-spacing:.02em!important;font-style:normal!important}
+[data-lang="cn"] [data-cjk="body"]{line-height:1.9!important;letter-spacing:.01em!important}
+[data-lang="cn"] [data-cjk="hero"]{font-size:clamp(32px,9vw,40px)!important;line-height:1.25!important;letter-spacing:.02em!important}
+[data-lang="en"] #btnEN,html:not([data-lang="cn"]) #btnEN,[data-lang="cn"] #btnCN{background:var(--ink)!important;color:var(--paper)!important}
+@keyframes heroIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<div id="mProgress" aria-hidden="true" style="position:fixed;top:0;left:0;height:3px;width:0%;background:var(--gh);z-index:60"></div>
+
+<nav aria-label="Controls" style="position:fixed;top:12px;right:12px;z-index:50;display:flex;align-items:center;gap:8px">
+  <div style="display:flex;border:1px solid var(--line);border-radius:999px;background:var(--card);box-shadow:var(--shadow);overflow:hidden">
+    <button id="btnEN" onClick="{{ toEN }}" style="font-family:var(--mf);font-size:12px;font-weight:600;letter-spacing:.06em;padding:7px 13px;border:0;background:none;color:var(--ink3);cursor:pointer">EN</button>
+    <button id="btnCN" onClick="{{ toCN }}" style="font-family:'Noto Sans SC',var(--mf);font-size:12px;font-weight:600;letter-spacing:.06em;padding:7px 12px;border:0;background:none;color:var(--ink3);cursor:pointer;white-space:nowrap">中文</button>
+  </div>
+  <button onClick="{{ flipTheme }}" aria-label="Toggle theme" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:conic-gradient(var(--ink) 0 50%,var(--card) 50% 100%);box-shadow:var(--shadow);cursor:pointer"></button>
+</nav>
+
+<header data-screen-label="Hero" style="position:relative;padding:96px 22px 40px;background:var(--wash)">
+  <div style="max-width:460px;margin:0 auto;animation:heroIn .9s cubic-bezier(.22,1,.36,1) both">
+    <p style="font-family:var(--mf);font-size:11.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--aink);display:flex;align-items:center;gap:10px;margin-bottom:24px" style-before="content:'';width:26px;height:2px;background:var(--gr)">
+      <span class="en">Enriched Analysis &middot; Malaysia</span>
+      <span class="cn">深度解析 &middot; Malaysia</span>
+    </p>
+    <h1 data-cjk="hero" style="font-family:var(--df);font-size:clamp(38px,10.5vw,48px);font-weight:400;line-height:1.06;letter-spacing:-.01em;background:var(--gh);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;margin-bottom:10px;text-wrap:pretty">
+      <span class="en">CIMB Malaysia Adds Apple Pay</span><span class="cn">马来西亚联昌银行接入Apple Pay</span>
+    </h1>
+    <p data-cjk="body" style="font-family:var(--if);font-style:italic;font-size:20px;line-height:1.45;color:var(--ink2);margin:16px 0 28px;text-wrap:pretty">
+      <span class="en">CIMB Malaysia now supports Apple Pay for most Visa and Mastercard credit cards. Debit cards remain unsupported. A campaign offers up to RM118 cashback through 14 September 2026.</span><span class="cn">马来西亚联昌银行多数Visa和Mastercard信用卡现可使用Apple Pay。借记卡暂不支持。活动截至2026年9月14日，最高返现RM118。</span>
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--mf);font-size:12px;color:var(--ink3);border-top:1px solid var(--line);padding-top:14px">
+      <span style="color:var(--ink2);font-weight:600">SoyaCincau</span>
+      <span class="en">23 Jul 2026</span>
+      <span class="cn">2026年7月23日</span>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px;border-top:1px solid var(--line);padding-top:20px">
+      
+        <div >
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>1,442</span></span><span class="cn"><span data-count>1,442</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">Elapsed time to CIMB support</span><span class="cn">联昌银行接入间隔</span></p>
+        </div>
+        <div style="border-left:1px solid var(--line);padding-left:14px">
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>2</span></span><span class="cn"><span data-count>2</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">Excluded named credit-card products</span><span class="cn">不支持的指定信用卡产品</span></p>
+        </div>
+        <div style="border-left:1px solid var(--line);padding-left:14px">
+          <p style="font-family:var(--df);font-size:26px;line-height:1;color:var(--ink)"><span class="en"><span data-count>118</span></span><span class="cn"><span data-count>118</span></span></p>
+          <p style="font-family:var(--mf);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px"><span class="en">Maximum cashback</span><span class="cn">最高返现</span></p>
+        </div>
+    </div>
+  </div>
+</header>
+
+<main style="max-width:460px;margin:0 auto;padding:0 22px 40px">
+
+<section data-screen-label="The Story" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:18px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">01</span><span class="en">The Story</span><span class="cn">新闻事实</span></p>
+  <p data-cjk="body" style="font-size:18px;line-height:1.65;text-wrap:pretty"><span class="en">CIMB Malaysia now supports Apple Pay for most Visa and Mastercard credit cards. Debit cards remain unsupported. A campaign offers up to RM118 cashback through 14 September 2026.</span><span class="cn">马来西亚联昌银行多数Visa和Mastercard信用卡现可使用Apple Pay。借记卡暂不支持。活动截至2026年9月14日，最高返现RM118。</span></p>
+  <ul style="list-style:none;margin-top:24px;display:grid">
+    
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">Most CIMB Visa and Mastercard credit cards can be added through CIMB OCTO or Apple Wallet.</span><span class="cn">多数联昌银行Visa和Mastercard信用卡可通过CIMB OCTO或Apple Wallet添加。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 16px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" style-after="content:'';position:absolute;left:7px;top:22px;bottom:2px;width:1px;background:var(--line)">
+      <span class="en">CIMB debit cards, Platinum Business Card and Fuel Tanker Card are excluded.</span><span class="cn">联昌银行借记卡、Platinum Business Card和Fuel Tanker Card不支持。</span>
+    </li>
+    <li data-cjk="body" style="position:relative;padding:0 0 0px 26px;font-size:16px;color:var(--ink2)" style-before="content:'';position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gh)" >
+      <span class="en">Five Apple Pay purchases of at least RM50 each are required for campaign eligibility.</span><span class="cn">参加活动须完成5笔Apple Pay交易，每笔至少RM50。</span>
+    </li>
+  </ul>
+</section>
+
+<section data-screen-label="Central Insight" data-reveal aria-label="Central insight" style="margin-top:56px;padding:30px 0 34px;border-top:3px solid var(--ink);border-bottom:1px solid var(--line)">
+  <span aria-hidden="true" style="font-family:var(--df);font-size:56px;line-height:.6;color:var(--a2);display:block;margin-bottom:10px">&para;</span>
+  <p data-cjk="title" style="font-family:var(--df);font-size:23px;line-height:1.35;letter-spacing:-.005em;background:var(--gh);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-wrap:pretty">
+    <span class="en">CIMB joins Malaysia&#39;s Apple Pay market nearly four years after launch, using a credit-card-only cashback campaign to drive first use.</span><span class="cn">Apple Pay进入马来西亚近4年后，联昌银行接入该服务，并以仅限信用卡的返现活动推动首次使用。</span>
+  </p>
+</section>
+
+<section data-screen-label="Dimensions" style="margin-top:52px">
+  <p data-reveal style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:2px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">02</span><span class="en">4 Dimensions</span><span class="cn">维度分析</span></p>
+  
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">1</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Historical context</span><span class="cn">历史脉络</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Four-Year Gap</span><span class="cn">相隔近4年</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">Apple Pay launched in Malaysia on 9 August 2022. CIMB support began on 21 July 2026.</span><span class="cn">Apple Pay于2022年8月9日在马来西亚上线。联昌银行于2026年7月21日接入。</span></p>
+      
+    <ul style="list-style:none;margin-top:16px;display:grid;gap:12px">
+      
+        <li style="position:relative;padding-left:18px" style-before="content:'';position:absolute;left:0;top:6px;width:7px;height:7px;border-radius:50%;background:var(--gh)">
+          <span style="display:block;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink);margin-bottom:2px"><span class="en">9 August 2022 to 21 July 2026</span><span class="cn">2022年8月9日至2026年7月21日</span></span>
+          <span style="font-size:14.5px;color:var(--ink2)"><span class="en">1,442 days</span><span class="cn">1,442天</span></span>
+        </li>
+    </ul>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Apple Pay entered Malaysia with AmBank, Maybank and Standard Chartered card support.</span><span class="cn">Apple Pay进入马来西亚时，已获AmBank、Maybank和渣打银行卡支持。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">CIMB&#39;s official Apple Pay page lists support for most CIMB Credit Card/-i products.</span><span class="cn">联昌银行官方Apple Pay页面列明，多数CIMB信用卡/-i可使用该服务。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">2</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Stakeholder impact</span><span class="cn">利益相关方</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Credit Cards Only</span><span class="cn">仅限信用卡</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">The rollout serves most CIMB Visa and Mastercard credit-card holders, while debit-card customers cannot add their cards.</span><span class="cn">本次接入覆盖多数联昌银行Visa和Mastercard信用卡持卡人，借记卡客户暂无法添加银行卡。</span></p>
+      <div style="margin-top:16px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Excluded named credit-card products</span><span class="cn">不支持的指定信用卡产品</span></p>
+      <div style="margin-top:2px;display:grid;gap:8px">
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en">As of 21 July 2026</span><span class="cn">截至2026年7月21日</span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">2 products</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:100%"></i></div>
+    </div></div>
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Two CIMB credit-card products are excluded: PETRONAS Visa Infinite-i and PETRONAS Platinum-i.</span><span class="cn">两款联昌银行信用卡不支持：PETRONAS Visa Infinite-i和PETRONAS Platinum-i。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">CIMB says card rewards and benefits continue when eligible cards are used through Apple Pay.</span><span class="cn">联昌银行称，符合条件的银行卡通过Apple Pay支付，原有奖励和权益继续适用。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">3</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Stakeholder impact</span><span class="cn">利益相关方</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Cashback Mechanics</span><span class="cn">返现规则</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">The RM118 maximum requires qualifying separately with both Mastercard and Visa cards.</span><span class="cn">要获得RM118最高返现，客户须分别使用Mastercard和Visa信用卡完成资格要求。</span></p>
+      <div style="margin-top:16px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Maximum cashback</span><span class="cn">最高返现</span></p>
+      <div style="margin-top:2px;display:grid;gap:8px">
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en">21 July to 14 September 2026</span><span class="cn">2026年7月21日至9月14日</span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">118 RM</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:100%"></i></div>
+    </div>
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en">Campaign period</span><span class="cn">活动期</span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">68 RM</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:58%"></i></div>
+    </div></div>
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">CIMB caps cashback at RM68 for Mastercard cards and RM50 for Visa cards.</span><span class="cn">联昌银行规定，Mastercard信用卡最高返现RM68，Visa信用卡最高返现RM50。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">The campaign runs from 21 July 2026 through 14 September 2026.</span><span class="cn">活动期为2026年7月21日至2026年9月14日。</span></li>
+    </ul>
+    </div>
+  </article>
+  <article data-reveal style="background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px 22px 24px;margin-top:26px;position:relative;overflow:hidden">
+    <span aria-hidden="true" style="position:absolute;top:-18px;right:6px;font-family:var(--df);font-size:110px;line-height:1;color:var(--paper2);z-index:0;user-select:none">4</span>
+    <div style="position:relative;z-index:1">
+      <span style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--aink);border:1px solid var(--line);border-radius:999px;padding:3px 10px"><span class="en">Consequence</span><span class="cn">影响推演</span></span>
+      <h3 data-cjk="title" style="font-family:var(--df);font-size:22px;font-weight:400;line-height:1.22;letter-spacing:-.01em;margin:14px 0 10px;text-wrap:pretty"><span class="en">Merchant Acceptance Expands</span><span class="cn">商户受理扩展</span></h3>
+      <p data-cjk="body" style="font-size:16px;color:var(--ink2);text-wrap:pretty"><span class="en">CIMB cardholders can use Apple Pay at existing contactless merchants and at merchants using Tap to Pay on iPhone.</span><span class="cn">联昌银行持卡人可在现有非接触式商户，以及使用iPhone轻点支付的商户使用Apple Pay。</span></p>
+      <div style="margin-top:16px">
+    <div style="background:var(--paper2);border-radius:14px;padding:16px">
+      <p style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px"><span class="en">Initial Tap to Pay platforms</span><span class="cn">首批轻点支付平台</span></p>
+      <div style="margin-top:2px;display:grid;gap:8px">
+    <div style="display:grid;gap:3px">
+      <p style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)"><span><span class="en">22 April 2026</span><span class="cn">2026年4月22日</span></span><b style="font-family:var(--mf);font-weight:600;color:var(--ink)">5 platforms</b></p>
+      <div style="height:9px;border-radius:5px;background:var(--line);overflow:hidden"><i data-bar style="display:block;height:100%;border-radius:5px;background:var(--gh);width:100%"></i></div>
+    </div></div>
+    </div></div>
+    <ul style="list-style:none;margin-top:16px;border-top:1px dashed var(--line);padding-top:13px">
+      <li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">Apple launched Tap to Pay on iPhone in Malaysia on 22 April 2026.</span><span class="cn">苹果于2026年4月22日在马来西亚推出iPhone轻点支付。</span></li><li style="position:relative;padding:0 0 9px 18px;font-size:14.5px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:9px;width:6px;height:2px;background:var(--a2)"><span class="en">The feature lets merchants accept contactless cards and wallets without a separate payment terminal.</span><span class="cn">该功能让商户无需另配支付终端，即可受理非接触式银行卡和数字钱包。</span></li>
+    </ul>
+    </div>
+  </article>
+</section>
+
+
+<section data-screen-label="Timeline" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:18px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">03</span><span class="en">Timeline</span><span class="cn">时间线</span></p>
+  <ol style="list-style:none;position:relative" style-before="content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,var(--a2),var(--a1),var(--line))">
+    
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2022-08-09</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Apple Pay launches in Malaysia.</span><span class="cn">Apple Pay在马来西亚上线。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-04-22</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">Tap to Pay on iPhone launches in Malaysia.</span><span class="cn">iPhone轻点支付在马来西亚上线。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 26px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--a1)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-07-21</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">CIMB enables Apple Pay for eligible credit cards.</span><span class="cn">联昌银行为符合条件的信用卡启用Apple Pay。</span></span>
+    </li>
+    <li style="position:relative;padding:0 0 4px 34px" style-before="content:'';position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--gh);border:3px solid var(--a3)">
+      <span style="font-family:var(--mf);font-weight:600;font-size:13px;color:var(--aink);letter-spacing:.06em;display:block;margin-bottom:3px">2026-09-14</span>
+      <span style="font-size:15.5px;color:var(--ink2)"><span class="en">CIMB Apple Pay cashback campaign ends.</span><span class="cn">联昌银行Apple Pay返现活动结束。</span></span>
+    </li>
+  </ol>
+</section>
+
+<section data-screen-label="Key Takeaway" data-reveal aria-label="Key takeaway" style="margin-top:60px;padding:36px 26px 38px;background:var(--inv-bg);border-radius:20px;position:relative;overflow:hidden">
+  <p style="font-family:var(--mf);font-size:10.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ia1);margin-bottom:14px"><span class="en">Key takeaway</span><span class="cn">核心结论</span></p>
+  <p data-cjk="title" style="font-family:var(--df);font-size:24px;line-height:1.32;letter-spacing:-.005em;background:var(--gi);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-wrap:pretty">
+    <span class="en">CIMB&#39;s Apple Pay launch broadens credit-card access in Malaysia, but leaves CIMB debit-card users outside the service.</span><span class="cn">联昌银行接入Apple Pay扩大了马来西亚信用卡用户覆盖，但借记卡用户仍无法使用该服务。</span>
+  </p>
+</section>
+
+
+<section data-screen-label="What to Watch" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:20px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">04</span><span class="en">What to Watch</span><span class="cn">后续关注</span></p>
+  <ol style="list-style:none;display:grid">
+    <li data-cjk="body" style="position:relative;padding:0 0 20px 46px;font-size:15.5px;color:var(--ink2)" style-before="content:'01';position:absolute;left:0;top:1px;font-family:var(--mf);font-weight:600;font-size:15px;color:var(--aink)" style-after="content:'';position:absolute;left:0;top:24px;width:26px;height:1px;background:var(--gr)"><span class="en">Whether CIMB adds debit-card support.</span><span class="cn">联昌银行是否新增借记卡支持。</span></li><li data-cjk="body" style="position:relative;padding:0 0 20px 46px;font-size:15.5px;color:var(--ink2)" style-before="content:'02';position:absolute;left:0;top:1px;font-family:var(--mf);font-weight:600;font-size:15px;color:var(--aink)" style-after="content:'';position:absolute;left:0;top:24px;width:26px;height:1px;background:var(--gr)"><span class="en">Whether Apple updates its Malaysia issuer list.</span><span class="cn">苹果是否更新马来西亚发卡行名单。</span></li><li data-cjk="body" style="position:relative;padding:0 0 0px 46px;font-size:15.5px;color:var(--ink2)" style-before="content:'03';position:absolute;left:0;top:1px;font-family:var(--mf);font-weight:600;font-size:15px;color:var(--aink)" ><span class="en">Cashback uptake before 14 September 2026.</span><span class="cn">2026年9月14日前的返现参与情况。</span></li>
+  </ol>
+</section>
+
+
+<section data-screen-label="Uncertainties" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:20px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">05</span><span class="en">Uncertainties</span><span class="cn">不确定因素</span></p>
+  <ul style="list-style:none;display:grid">
+    <li data-cjk="body" style="position:relative;padding:0 0 15px 24px;font-size:15px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:8px;width:8px;height:8px;border:2px solid var(--ink3);transform:rotate(45deg)"><span class="en">No debit-card launch date was disclosed.</span><span class="cn">未披露借记卡支持上线日期。</span></li><li data-cjk="body" style="position:relative;padding:0 0 0px 24px;font-size:15px;color:var(--ink2)" style-before="content:'';position:absolute;left:2px;top:8px;width:8px;height:8px;border:2px solid var(--ink3);transform:rotate(45deg)"><span class="en">Apple&#39;s 10 July list predates CIMB&#39;s launch.</span><span class="cn">苹果7月10日名单早于联昌银行接入。</span></li>
+  </ul>
+</section>
+
+
+<section data-screen-label="Sources" data-reveal style="margin-top:52px">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:6px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">06</span><span class="en">Sources</span><span class="cn">信息来源</span></p>
+  <ol style="list-style:none">
+    
+    <li style="position:relative;padding:12px 0 12px 32px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'1';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://soyacincau.com/2026/07/21/cimb-malaysia-support-apple-pay-credit-card/" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">CIMB Malaysia now supports Apple Pay: Limited to credit cards, get up to RM118 cashback - SoyaCincau</span><span class="cn">CIMB Malaysia now supports Apple Pay: Limited to credit cards, get up to RM118 cashback - SoyaCincau</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">SoyaCincau &middot; 2026-07-23</small>
+    </li>
+    <li style="position:relative;padding:12px 0 12px 32px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'2';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://www.cimb.com.my/en/personal/day-to-day-banking/cards/credit-card/applepay.html" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Apple Pay x CIMB</span><span class="cn">Apple Pay x 联昌银行</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">CIMB Malaysia &middot; 2026-07-21</small>
+    </li>
+    <li style="position:relative;padding:12px 0 12px 32px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'3';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://www.cimb.com.my/en/personal/promotions/latest-promotions/applepay-campaign.html" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Apple Pay Cashback Campaign</span><span class="cn">Apple Pay返现活动</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">CIMB Malaysia &middot; 2026-07-21</small>
+    </li>
+    <li style="position:relative;padding:12px 0 12px 32px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'4';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://www.apple.com/my/newsroom/2022/08/apple-pay-launches-in-malaysia/" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Apple Pay launches in Malaysia</span><span class="cn">Apple Pay在马来西亚上线</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">Apple &middot; 2022-08-09</small>
+    </li>
+    <li style="position:relative;padding:12px 0 12px 32px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'5';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://www.apple.com/my/newsroom/2026/04/apple-brings-tap-to-pay-on-iphone-to-malaysia/" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Apple brings Tap to Pay on iPhone to Malaysia</span><span class="cn">苹果将iPhone轻点支付引入马来西亚</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">Apple &middot; 2026-04-22</small>
+    </li>
+    <li style="position:relative;padding:12px 0 12px 32px;font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'6';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
+      <a href="https://support.apple.com/en-mt/102897" target="_blank" rel="noopener noreferrer" style="color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--a2)"><span class="en">Apple Pay participating banks and card issuers in Asia-Pacific</span><span class="cn">亚太地区支持Apple Pay的银行和发卡机构</span></a>
+      <small style="display:block;font-family:var(--mf);font-size:11px;color:var(--ink3);margin-top:3px">Apple Support &middot; 2026-07-10</small>
+    </li>
+  </ol>
+</section>
+
+</main>
+
+<footer style="margin-top:56px;padding:26px 22px 44px;border-top:1px solid var(--line);text-align:center;font-family:var(--mf);font-size:11.5px;line-height:1.9;color:var(--ink3)">
+  <b style="color:var(--ink2);font-weight:600">SoyaCincau</b> &middot; 2026-07-23T03:04:08.716Z<br>
+  <span class="en">Enriched analysis &mdash; sources listed above</span>
+  <span class="cn">深度增补分析 &mdash;&mdash; 信息来源见上文</span>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:940},&quot;colorway&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Flame Blue&quot;,&quot;options&quot;:[&quot;Flame Blue&quot;,&quot;Verdigris&quot;,&quot;Champagne&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;defaultLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;EN&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;中文&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;animations&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    const D = document.documentElement;
+    const get = k => {
+      try {
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+          let c = ca[i].trim();
+          if (c.indexOf(k + '=') === 0) return decodeURIComponent(c.substring(k.length + 1));
+        }
+      } catch (e) {}
+      try { return localStorage.getItem(k); } catch (e) { return null; }
+    };
+    const lang = get('meridian-language') || get('infographic-lang') || (this.props.defaultLang === '中文' ? 'cn' : 'en');
+    const theme = get('meridian-theme') || get('infographic-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    this._setLang(lang);
+    this._setTheme(theme);
+    const bar = document.getElementById('mProgress');
+    this._onScroll = () => {
+      const h = D.scrollHeight - innerHeight;
+      if (bar) bar.style.width = (h > 0 ? (scrollY / h * 100) : 0) + '%';
+    };
+    addEventListener('scroll', this._onScroll, { passive: true });
+    this._onScroll();
+    if (this.props.animations === false) return;
+    this._initReveals();
+  }
+  componentWillUnmount() { removeEventListener('scroll', this._onScroll); }
+  _setLang(l) {
+    const D = document.documentElement;
+    D.setAttribute('data-lang', l);
+    D.setAttribute('lang', l === 'cn' ? 'zh-Hans' : 'en');
+    try {
+      localStorage.setItem('meridian-language', l);
+      localStorage.setItem('infographic-lang', l);
+      document.cookie = 'meridian-language=' + l + '; path=/; max-age=31536000; SameSite=Lax';
+    } catch (e) {}
+  }
+  _setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try {
+      localStorage.setItem('meridian-theme', t);
+      localStorage.setItem('infographic-theme', t);
+      document.cookie = 'meridian-theme=' + t + '; path=/; max-age=31536000; SameSite=Lax';
+    } catch (e) {}
+    this._applyColorway();
+  }
+  _applyColorway() {
+    const cw = {
+      'Flame Blue': { light: ['#0a2d6e', '#1553cf', '#2fa6d9', '#1043a8'], dark: ['#cfe6ff', '#7fb0ff', '#3f7bf0', '#8ab4ff'] },
+      'Verdigris':  { light: ['#0c4a40', '#127a63', '#3aa88a', '#0f6350'], dark: ['#d2f2e2', '#7fd3ae', '#2c9a78', '#8fdcba'] },
+      'Champagne':  { light: ['#5f430f', '#a8781f', '#c9a04a', '#8a621a'], dark: ['#f3dfae', '#d9b56a', '#a87c2c', '#e5c885'] }
+    };
+    const set = cw[this.props.colorway] || cw['Flame Blue'];
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const a = dark ? set.dark : set.light, ia = dark ? set.light : set.dark;
+    const s = document.documentElement.style;
+    s.setProperty('--a3', a[0]); s.setProperty('--a1', a[1]); s.setProperty('--a2', a[2]); s.setProperty('--aink', a[3]);
+    s.setProperty('--ia3', ia[0]); s.setProperty('--ia1', ia[1]); s.setProperty('--ia2', ia[2]);
+  }
+  _initReveals() {
+    const ease = 'cubic-bezier(.22,1,.36,1)';
+    const els = [...document.querySelectorAll('[data-reveal]')];
+    els.forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(28px)';
+      el.style.transition = 'opacity .85s ' + ease + ', transform .85s ' + ease;
+    });
+    const bars = [...document.querySelectorAll('[data-bar]')];
+    bars.forEach(b => {
+      b.style.transformOrigin = 'left center';
+      b.style.transform = 'scaleX(0)';
+      b.style.transition = 'transform 1.1s .25s ' + ease;
+    });
+    const counts = [...document.querySelectorAll('[data-count]')];
+    const runCount = el => {
+      const txt = el.textContent.trim();
+      const target = parseFloat(txt.replace(/,/g, ''));
+      if (isNaN(target)) return;
+      const dec = (txt.split('.')[1] || '').length;
+      const grouped = txt.indexOf(',') >= 0;
+      const t0 = performance.now(), dur = 1100;
+      const fmt = v => {
+        let s = v.toFixed(dec);
+        if (grouped) s = (+s).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+        return s;
+      };
+      const tick = now => {
+        const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(target * e);
+        if (p < 1) requestAnimationFrame(tick); else el.textContent = txt;
+      };
+      requestAnimationFrame(tick);
+    };
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        const el = en.target;
+        io.unobserve(el);
+        if (el.hasAttribute('data-reveal')) {
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+          el.querySelectorAll('[data-bar]').forEach(b => { b.style.transform = 'scaleX(1)'; });
+          el.querySelectorAll('[data-count]').forEach(runCount);
+        } else if (el.hasAttribute('data-count')) {
+          runCount(el);
+        } else if (el.hasAttribute('data-bar')) {
+          el.style.transform = 'scaleX(1)';
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    els.forEach(el => io.observe(el));
+    counts.forEach(c => { if (!c.closest('[data-reveal]')) io.observe(c); });
+    bars.forEach(b => { if (!b.closest('[data-reveal]')) io.observe(b); });
+  }
+  renderVals() {
+    return {
+      toEN: () => this._setLang('en'),
+      toCN: () => this._setLang('cn'),
+      flipTheme: () => this._setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+    };
+  }
+}
+</script>
+</body>
+</html>

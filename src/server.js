@@ -3,7 +3,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
-import { getPublishedArticlesFromDb, isDbEnabled, checkDbHealth } from './db.js';
+import { getPublishedArticlesFromDb, getInfographicContentByArticleId, isDbEnabled, checkDbHealth } from './db.js';
+import { renderInfographicDocument } from '../templates/infographic/render.js';
 
 try {
   dns.setDefaultResultOrder('ipv4first');
@@ -13,7 +14,9 @@ try {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.resolve(__dirname, '../public');
+const EDITORIAL_OUTPUT_DIR = path.resolve(__dirname, '../editorial-output');
 const PORT = Number(process.env.PORT) || 8080;
+
 const PUBLISHED_CACHE_MS = 5000;
 
 const CONTENT_TYPES = {
@@ -79,6 +82,63 @@ async function serveStatic(req, res, pathname) {
   }
 }
 
+async function serveRendered(req, res, filename) {
+  const name = decodeURIComponent(filename);
+
+  if (name === 'support.js' || name === '/support.js') {
+    const supportPath = path.resolve(__dirname, '../templates/infographic/support.js');
+    try {
+      const data = await fs.readFile(supportPath);
+      res.writeHead(200, {
+        'content-type': 'text/javascript; charset=utf-8',
+        'cache-control': 'public, max-age=86400'
+      });
+      res.end(data);
+      return;
+    } catch {}
+  }
+
+  const filePath = path.join(EDITORIAL_OUTPUT_DIR, name);
+  if (filePath.startsWith(`${EDITORIAL_OUTPUT_DIR}${path.sep}`)) {
+    try {
+      const data = await fs.readFile(filePath);
+      const ext = path.extname(name);
+      res.writeHead(200, {
+        'content-type': CONTENT_TYPES[ext] || 'text/html; charset=utf-8',
+        'cache-control': 'public, max-age=3600'
+      });
+      res.end(data);
+      return;
+    } catch {}
+  }
+
+  const idMatch = name.match(/^infographic_(\d+)\.dc\.html$/);
+  if (idMatch) {
+    const articleId = parseInt(idMatch[1], 10);
+    const content = await getInfographicContentByArticleId(articleId);
+    if (content) {
+      try {
+        const html = renderInfographicDocument(content, {
+          defaultLang: 'en',
+          colorway: 'masela',
+          animations: true
+        });
+        res.writeHead(200, {
+          'content-type': 'text/html; charset=utf-8',
+          'cache-control': 'public, max-age=3600'
+        });
+        res.end(html);
+        return;
+      } catch (renderErr) {
+        console.error('[server] Dynamic infographic rendering error:', renderErr);
+      }
+    }
+  }
+
+  res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
+  res.end('Rendered infographic file not found');
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const { pathname } = url;
@@ -99,6 +159,15 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, articles);
     }
 
+    if (pathname.startsWith('/rendered/')) {
+      const filename = pathname.replace(/^\/rendered\//, '');
+      return await serveRendered(req, res, filename);
+    }
+
+    if (pathname === '/support.js') {
+      return await serveRendered(req, res, 'support.js');
+    }
+
     if (pathname.startsWith('/api/')) {
       return sendJson(res, 404, { ok: false, error: 'Not found' });
     }
@@ -108,6 +177,7 @@ const server = http.createServer(async (req, res) => {
     sendJson(res, 500, { ok: false, error: error.message });
   }
 });
+
 
 const invokedPath = process.argv[1] ? path.resolve(process.argv[1]) : '';
 if (!invokedPath || invokedPath.toLowerCase().endsWith('server.js')) {
