@@ -1,4 +1,10 @@
+import dns from 'node:dns';
 import pg from 'pg';
+
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch {}
+
 
 let pool = null;
 

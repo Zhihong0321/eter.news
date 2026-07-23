@@ -1,8 +1,14 @@
+import dns from 'node:dns';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { getPublishedArticlesFromDb, isDbEnabled, checkDbHealth } from './db.js';
+
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch {}
+
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
