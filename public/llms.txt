@@ -1,0 +1,8 @@
+# Eter News (by Eternalgy)
+
+> Eter News (https://eter.my) is an independent bilingual news portal presenting completed news renders arranged by region in English and Chinese.
+
+## Key Links
+- Main Portal: https://eter.my/
+- Rendered Editions: https://eter.my/read
+- Published by: Eternalgy Sdn Bhd (https://eternalgy.me)

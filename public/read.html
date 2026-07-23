@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f5f4f1" />
+  <title>Eter News — Rendered Editions</title>
+  <meta name="description" content="Completed article renders, arranged newest-first by publication date." />
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Noto+Sans+SC:wght@400;500;700&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/read.css" />
+  <script src="/read.js" defer></script>
+</head>
+<body>
+  <nav class="page-controls" aria-label="Page controls">
+    <a class="icon-button" href="/" title="Front page" aria-label="Front page">&#8592;</a>
+    <div class="language-toggle" aria-label="Language">
+      <button id="language-en" type="button" aria-pressed="true">EN</button>
+      <button id="language-cn" type="button" aria-pressed="false">中文</button>
+    </div>
+    <button class="icon-button" id="theme-toggle" type="button" title="Toggle color theme" aria-label="Toggle color theme">&#9680;</button>
+  </nav>
+
+  <header class="masthead">
+    <div class="masthead-inner">
+      <p class="eyebrow"><span data-copy="desk">Rendered Editions</span></p>
+      <h1>Eter News</h1>
+      <div class="edition-line">
+        <span data-copy="edition">Completed renders, newest first</span>
+        <span class="edition-count" id="edition-count"></span>
+      </div>
+      <label class="search-field" for="news-search">
+        <span aria-hidden="true">⌕</span>
+        <input id="news-search" type="search" autocomplete="off" placeholder="Search headlines, sources" />
+      </label>
+      <p class="load-status" id="load-status" role="status" aria-live="polite"></p>
+    </div>
+  </header>
+
+  <main id="reader-root" class="reader-root"></main>
+
+  <div id="render-overlay" class="render-overlay" hidden>
+    <div class="render-frame-wrap">
+      <div class="render-toolbar">
+        <span class="render-title" id="render-title"></span>
+        <span class="render-toolbar-spacer"></span>
+        <a class="render-action" id="render-open" target="_blank" rel="noopener" data-copy="openTab">Open in new tab ↗</a>
+        <a class="render-action" id="render-source" target="_blank" rel="noopener" data-copy="sourceLink">Original source ↗</a>
+        <button class="render-action render-close" id="render-close" type="button" aria-label="Close">✕</button>
+      </div>
+      <iframe id="render-frame" class="render-frame" title="Rendered article" referrerpolicy="no-referrer"></iframe>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <span data-copy="footer">Collected locally, arranged by date</span>
+  </footer>
+</body>
+</html>

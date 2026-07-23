@@ -1,0 +1,202 @@
+.reader-root {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 4rem;
+}
+
+.day-group {
+  margin-top: 2.5rem;
+}
+
+.day-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 0.25rem;
+}
+
+.day-heading h2 {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin: 0;
+  color: var(--ink);
+}
+
+.day-heading .day-count {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+}
+
+.render-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.render-card {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 1rem;
+  align-items: start;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  padding: 1.1rem 0.25rem;
+  cursor: pointer;
+  color: inherit;
+  transition: background 0.15s ease;
+}
+
+.render-card:hover,
+.render-card:focus-visible {
+  background: var(--accent-soft);
+  outline: none;
+}
+
+.render-time {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--accent);
+  padding-top: 0.15rem;
+}
+
+.render-body h3 {
+  font-family: var(--editorial);
+  font-weight: 400;
+  font-size: 1.4rem;
+  line-height: 1.2;
+  margin: 0 0 0.4rem;
+  color: var(--ink);
+}
+
+.render-summary {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0 0 0.55rem;
+}
+
+.render-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+}
+
+.render-meta .render-source {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.render-meta .render-region::before {
+  content: "· ";
+}
+
+.empty-state {
+  margin-top: 3rem;
+  text-align: center;
+  color: var(--ink-faint);
+  font-family: var(--editorial);
+  font-size: 1.2rem;
+}
+
+/* Full-screen rendered-infographic overlay */
+.render-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(16, 17, 20, 0.72);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: clamp(0px, 2vw, 28px);
+}
+
+.render-frame-wrap {
+  display: flex;
+  flex-direction: column;
+  width: min(1100px, 100%);
+  background: var(--paper-raised);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.render-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.render-title {
+  font-family: var(--body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 45%;
+}
+
+.render-toolbar-spacer { flex: 1; }
+
+.render-action {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.03em;
+  color: var(--accent);
+  text-decoration: none;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.render-action:hover { border-color: var(--accent); }
+
+.render-close {
+  color: var(--signal);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.render-frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #fff;
+}
+
+@media (max-width: 620px) {
+  .render-card { grid-template-columns: 64px 1fr; gap: 0.7rem; }
+  .render-body h3 { font-size: 1.2rem; }
+  .render-title { display: none; }
+}
+
+.page-footer {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+}
