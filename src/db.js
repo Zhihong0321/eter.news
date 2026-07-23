@@ -61,11 +61,15 @@ export async function checkDbHealth() {
     };
   } catch (err) {
     console.error('[db] Health check failed:', err.message);
+    let errorMsg = err.message;
+    if (err.message.includes('ENETUNREACH') || err.message.includes('2406:')) {
+      errorMsg = 'IPv6 Network Unreachable. db.*.supabase.co direct host is IPv6-only. Railway requires Supabase Pooler connection string. Go to Supabase -> Settings -> Database -> Connection String -> Select Pooler and copy that URL to DATABASE_URL.';
+    }
     return {
       enabled: true,
       connected: false,
       host: getCleanConnectionString().split('@')[1]?.split('/')[0] || 'unknown',
-      error: err.message
+      error: errorMsg
     };
   } finally {
     if (client) client.release();
