@@ -6,7 +6,7 @@ import { getPublishedArticlesFromDb, isDbEnabled } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.resolve(__dirname, '../public');
-const PORT = Number(process.env.PORT) || 5177;
+const PORT = Number(process.env.PORT) || 8080;
 const PUBLISHED_CACHE_MS = 5000;
 
 const CONTENT_TYPES = {
