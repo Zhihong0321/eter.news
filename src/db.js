@@ -12,7 +12,7 @@ export function getPool() {
     const ssl = connectionString.includes('localhost') || connectionString.includes('127.0.0.1')
       ? false
       : { rejectUnauthorized: false };
-    pool = new pg.Pool({ connectionString, ssl });
+    pool = new pg.Pool({ connectionString, ssl, connectionTimeoutMillis: 10000 });
   }
   return pool;
 }
@@ -22,8 +22,9 @@ export async function getPublishedArticlesFromDb() {
     return { generated_at: new Date().toISOString(), count: 0, articles: [], skipped: { total: 0 } };
   }
 
-  const client = await getPool().connect();
+  let client;
   try {
+    client = await getPool().connect();
     const queryStr = `
       SELECT 
         a.id,
@@ -91,7 +92,18 @@ export async function getPublishedArticlesFromDb() {
       articles,
       skipped: { total: 0 }
     };
+  } catch (err) {
+    console.error('[db] Failed to fetch published articles:', err.message);
+    return {
+      generated_at: new Date().toISOString(),
+      count: 0,
+      articles: [],
+      skipped: { total: 0 },
+      error: err.message
+    };
   } finally {
-    client.release();
+    if (client) {
+      client.release();
+    }
   }
 }
