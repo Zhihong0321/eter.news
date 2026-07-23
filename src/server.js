@@ -101,8 +101,9 @@ const server = http.createServer(async (req, res) => {
 
 const invokedPath = process.argv[1] ? path.resolve(process.argv[1]) : '';
 if (!invokedPath || invokedPath.toLowerCase().endsWith('server.js')) {
-  server.listen(PORT, () => {
-    console.log(`[eter.news] Public news portal running on port ${PORT}`);
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`[eter.news] Public news portal running on 0.0.0.0:${PORT}`);
   });
 }
+
 
