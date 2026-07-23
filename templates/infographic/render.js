@@ -372,6 +372,7 @@ export function renderInfographicDocument(entry, options = {}) {
 })();
 </script>
 <script src="./support.js"></script>
+<script src="/tracker.js" defer></script>
 </head>
 <body>
 <x-dc>

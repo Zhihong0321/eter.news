@@ -95,9 +95,9 @@
           <div class="card-sub">Anonymized unique IPs</div>
         </div>
         <div class="card">
-          <div class="card-label">Top Traffic Source</div>
-          <div class="card-val" id="val-top-source" style="font-size:22px;margin-top:6px">-</div>
-          <div class="card-sub" id="val-top-source-sub">Primary acquisition</div>
+          <div class="card-label">Avg Read Depth</div>
+          <div class="card-val" id="val-scroll">-</div>
+          <div class="card-sub" id="val-read-time">Avg duration: -</div>
         </div>
       </div>
 
@@ -120,13 +120,18 @@
 
         <div>
           <div class="card" style="margin-bottom:24px">
-            <div class="section-title">Traffic Acquisition Sources</div>
+            <div class="section-title">Traffic Acquisition & AI Search</div>
             <div id="traffic-sources-list">Loading sources...</div>
           </div>
 
-          <div class="card">
+          <div class="card" style="margin-bottom:24px">
             <div class="section-title">Audience Language Preference</div>
             <div id="language-split-list">Loading language distribution...</div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">Reader vs AI Crawler Traffic</div>
+            <div id="bot-human-list">Loading crawler data...</div>
           </div>
         </div>
       </div>
@@ -148,12 +153,10 @@
         document.getElementById('val-total').innerText = (summary.total_pageviews || 0).toLocaleString();
         document.getElementById('val-today').innerText = (summary.views_today || 0).toLocaleString();
         document.getElementById('val-uniques').innerText = (summary.unique_visitors || 0).toLocaleString();
+        document.getElementById('val-scroll').innerText = `${summary.avg_scroll_depth || 0}%`;
+        document.getElementById('val-read-time').innerText = `Avg read duration: ${summary.avg_read_time_sec || 0}s`;
 
         const sources = data.traffic_sources || [];
-        if (sources.length) {
-          document.getElementById('val-top-source').innerText = sources[0].source;
-          document.getElementById('val-top-source-sub').innerText = `${sources[0].count.toLocaleString()} visits (${Math.round((sources[0].count / (summary.total_pageviews || 1)) * 100)}%)`;
-        }
 
         // Render Top Articles
         const topArticles = data.top_articles || [];
@@ -206,6 +209,23 @@
             </div>
           `;
         }).join('');
+
+        // Render Bot vs Human Breakdown
+        const botList = document.getElementById('bot-human-list');
+        const bh = data.bot_vs_human || { human: 0, bot: 0 };
+        const totalBh = Math.max(1, (bh.human || 0) + (bh.bot || 0));
+        const humanPct = Math.round(((bh.human || 0) / totalBh) * 100);
+        const botPct = Math.round(((bh.bot || 0) / totalBh) * 100);
+        botList.innerHTML = `
+          <div class="progress-bar-wrap">
+            <div class="progress-info"><span>Human Readers</span><span>${(bh.human || 0).toLocaleString()} (${humanPct}%)</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:${humanPct}%"></div></div>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-info"><span>AI Crawlers & Bots</span><span>${(bh.bot || 0).toLocaleString()} (${botPct}%)</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:${botPct}%;background:var(--ink3)"></div></div>
+          </div>
+        `;
 
         document.getElementById('last-updated').innerText = 'Updated ' + new Date().toLocaleTimeString();
       } catch (e) {

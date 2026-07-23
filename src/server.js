@@ -248,6 +248,8 @@ const server = http.createServer(async (req, res) => {
           const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
           const ipHash = crypto.createHash('sha256').update(ip + (process.env.SALT || 'eter-news')).digest('hex').slice(0, 32);
           const userAgent = req.headers['user-agent'] || '';
+          const isBot = /gptbot|perplexitybot|claudebot|google-extended|bytespider|bingbot|crawler|spider/i.test(userAgent);
+          const country = (req.headers['cf-ipcountry'] || req.headers['x-country'] || req.headers['x-appengine-country'] || '').toString().trim().toUpperCase();
           
           await recordPageviewInDb({
             path: data.path || '/',
@@ -260,7 +262,12 @@ const server = http.createServer(async (req, res) => {
             utm_source: data.utm_source,
             utm_medium: data.utm_medium,
             utm_campaign: data.utm_campaign,
-            ip_hash: ipHash
+            ip_hash: ipHash,
+            scroll_depth: data.scroll_depth || 0,
+            read_time_sec: data.read_time_sec || 0,
+            is_bot: isBot,
+            country: country,
+            share_platform: data.share_platform || ''
           });
           return sendJson(res, 200, { ok: true });
         } catch (err) {

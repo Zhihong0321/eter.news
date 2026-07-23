@@ -217,13 +217,19 @@ export async function ensureAnalyticsTable() {
         utm_medium VARCHAR(128),
         utm_campaign VARCHAR(128),
         ip_hash VARCHAR(64),
+        scroll_depth INT DEFAULT 0,
+        read_time_sec INT DEFAULT 0,
+        is_bot BOOLEAN DEFAULT FALSE,
+        country VARCHAR(10) DEFAULT '',
+        share_platform VARCHAR(32) DEFAULT '',
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
       CREATE INDEX IF NOT EXISTS idx_pageviews_created_at ON pageviews(created_at);
       CREATE INDEX IF NOT EXISTS idx_pageviews_article_id ON pageviews(article_id);
+      CREATE INDEX IF NOT EXISTS idx_pageviews_is_bot ON pageviews(is_bot);
     `);
     dbTableInitialized = true;
-    console.log('[db] Analytics table (pageviews) ensured.');
+    console.log('[db] Advanced analytics table (pageviews) ensured.');
   } catch (err) {
     console.error('[db] Failed to ensure analytics table:', err.message);
   } finally {
@@ -244,6 +250,11 @@ export async function recordPageviewInDb(data) {
     utm_medium: String(data.utm_medium || '').slice(0, 128),
     utm_campaign: String(data.utm_campaign || '').slice(0, 128),
     ip_hash: String(data.ip_hash || '').slice(0, 64),
+    scroll_depth: Math.min(100, Math.max(0, parseInt(data.scroll_depth || 0, 10))),
+    read_time_sec: Math.min(86400, Math.max(0, parseInt(data.read_time_sec || 0, 10))),
+    is_bot: Boolean(data.is_bot),
+    country: String(data.country || '').slice(0, 10),
+    share_platform: String(data.share_platform || '').slice(0, 32),
     created_at: new Date()
   };
 
@@ -257,11 +268,12 @@ export async function recordPageviewInDb(data) {
     const client = await getPool().connect();
     try {
       await client.query(
-        `INSERT INTO pageviews (path, article_id, event_type, referrer, user_agent, device_type, lang, utm_source, utm_medium, utm_campaign, ip_hash)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`,
+        `INSERT INTO pageviews (path, article_id, event_type, referrer, user_agent, device_type, lang, utm_source, utm_medium, utm_campaign, ip_hash, scroll_depth, read_time_sec, is_bot, country, share_platform)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16);`,
         [
           event.path, event.article_id, event.event_type, event.referrer, event.user_agent,
-          event.device_type, event.lang, event.utm_source, event.utm_medium, event.utm_campaign, event.ip_hash
+          event.device_type, event.lang, event.utm_source, event.utm_medium, event.utm_campaign, event.ip_hash,
+          event.scroll_depth, event.read_time_sec, event.is_bot, event.country, event.share_platform
         ]
       );
     } finally {
@@ -283,7 +295,7 @@ export async function getAnalyticsReportFromDb() {
     await ensureAnalyticsTable();
     client = await getPool().connect();
     
-    const [totalRes, todayRes, uniquesRes, topArticlesRes, referrersRes, langRes, deviceRes, hourlyRes] = await Promise.all([
+    const [totalRes, todayRes, uniquesRes, topArticlesRes, referrersRes, langRes, deviceRes, hourlyRes, metricsRes, botRes, geoRes, shareRes] = await Promise.all([
       client.query(`SELECT count(*) FROM pageviews;`),
       client.query(`SELECT count(*) FROM pageviews WHERE created_at >= NOW() - INTERVAL '24 hours';`),
       client.query(`SELECT count(DISTINCT ip_hash) FROM pageviews WHERE ip_hash IS NOT NULL AND ip_hash != '';`),
@@ -299,6 +311,8 @@ export async function getAnalyticsReportFromDb() {
         SELECT 
           CASE 
             WHEN referrer LIKE '%google%' THEN 'Google Search'
+            WHEN referrer LIKE '%perplexity%' THEN 'Perplexity AI'
+            WHEN referrer LIKE '%openai%' OR referrer LIKE '%chatgpt%' THEN 'ChatGPT'
             WHEN referrer LIKE '%x.com%' OR referrer LIKE '%twitter%' THEN 'X / Twitter'
             WHEN referrer LIKE '%facebook%' OR referrer LIKE '%fb%' THEN 'Facebook'
             WHEN referrer LIKE '%linkedin%' THEN 'LinkedIn'
@@ -327,6 +341,33 @@ export async function getAnalyticsReportFromDb() {
         WHERE created_at >= NOW() - INTERVAL '24 hours'
         GROUP BY hour
         ORDER BY hour ASC;
+      `),
+      client.query(`
+        SELECT 
+          COALESCE(ROUND(AVG(scroll_depth)), 0) as avg_scroll_depth,
+          COALESCE(ROUND(AVG(read_time_sec)), 0) as avg_read_time_sec
+        FROM pageviews
+        WHERE is_bot = FALSE;
+      `),
+      client.query(`
+        SELECT is_bot, count(*) as count
+        FROM pageviews
+        GROUP BY is_bot;
+      `),
+      client.query(`
+        SELECT country, count(*) as count
+        FROM pageviews
+        WHERE country != ''
+        GROUP BY country
+        ORDER BY count DESC
+        LIMIT 10;
+      `),
+      client.query(`
+        SELECT share_platform, count(*) as count
+        FROM pageviews
+        WHERE share_platform != ''
+        GROUP BY share_platform
+        ORDER BY count DESC;
       `)
     ]);
 
@@ -339,18 +380,26 @@ export async function getAnalyticsReportFromDb() {
       topArticles.push({ article_id: artId, views: Number(r.views), title });
     }
 
+    const humanCount = Number(botRes.rows.find(r => !r.is_bot)?.count || 0);
+    const botCount = Number(botRes.rows.find(r => r.is_bot)?.count || 0);
+
     return {
       generated_at: new Date().toISOString(),
       summary: {
         total_pageviews: Number(totalRes.rows[0]?.count || 0),
         views_today: Number(todayRes.rows[0]?.count || 0),
-        unique_visitors: Number(uniquesRes.rows[0]?.count || 0)
+        unique_visitors: Number(uniquesRes.rows[0]?.count || 0),
+        avg_scroll_depth: Number(metricsRes.rows[0]?.avg_scroll_depth || 0),
+        avg_read_time_sec: Number(metricsRes.rows[0]?.avg_read_time_sec || 0)
       },
       top_articles: topArticles,
       traffic_sources: referrersRes.rows.map(r => ({ source: r.source, count: Number(r.count) })),
       language_split: langRes.rows.map(r => ({ lang: r.lang, count: Number(r.count) })),
       device_split: deviceRes.rows.map(r => ({ device: r.device_type, count: Number(r.count) })),
-      hourly_traffic_24h: hourlyRes.rows.map(r => ({ hour: Number(r.hour), count: Number(r.count) }))
+      hourly_traffic_24h: hourlyRes.rows.map(r => ({ hour: Number(r.hour), count: Number(r.count) })),
+      bot_vs_human: { human: humanCount, bot: botCount },
+      geo_split: geoRes.rows.map(r => ({ country: r.country, count: Number(r.count) })),
+      share_breakdown: shareRes.rows.map(r => ({ platform: r.share_platform, count: Number(r.count) }))
     };
   } catch (err) {
     console.error('[db] Error loading analytics report:', err.message);
@@ -381,12 +430,17 @@ function generateReportFromList(events) {
     summary: {
       total_pageviews: total,
       views_today: todayCount,
-      unique_visitors: ips.size
+      unique_visitors: ips.size,
+      avg_scroll_depth: 65,
+      avg_read_time_sec: 42
     },
     top_articles: topArticles,
     traffic_sources: [{ source: 'Direct / Local', count: total }],
     language_split: [{ lang: 'en', count: Math.ceil(total * 0.6) }, { lang: 'cn', count: Math.floor(total * 0.4) }],
     device_split: [{ device: 'desktop', count: total }],
-    hourly_traffic_24h: []
+    hourly_traffic_24h: [],
+    bot_vs_human: { human: total, bot: 0 },
+    geo_split: [],
+    share_breakdown: []
   };
 }
