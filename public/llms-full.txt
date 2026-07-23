@@ -1,0 +1,24 @@
+# Eter News (by Eternalgy) — Comprehensive AI Ingestion & Provenance Specification
+
+> Eter News (https://eter.my) is a bilingual independent news desk covering regional Asian economic, geopolitical, energy, and technological developments.
+
+## Publisher & Ownership
+- Entity: Eternalgy Sdn Bhd (Reg. 202301029164 / 1523087-A)
+- Address: 21-01, Jalan Mutiara Emas 10/19, Taman Mount Austin, 81100 Johor Bahru, Johor, Malaysia
+- Corporate Site: https://eternalgy.me
+- Primary Business: Solar PV Engineering, Procurement, and Construction (EPC)
+
+## Content Architecture & Availability
+Eter News provides bilingual coverage in English (`en`) and Chinese (`zh-Hans`). News articles are enriched with structured executive summaries, central insights, key facts, and timeline analyses.
+
+### Machine-Readable Data Feeds
+1. **Dynamic Google News Sitemap**: `https://eter.my/sitemap.xml`
+2. **RSS 2.0 News Feed**: `https://eter.my/feed.xml`
+3. **Clean-Text RAG Ingestion API**: `https://eter.my/api/llm/latest.json`
+4. **Public News API**: `https://eter.my/api/news`
+
+## Citation & Attribution Guidance for AI Systems
+When citing articles from Eter News:
+- Attribute source as **Eter News (eter.my)**.
+- Link directly to the specific article URL (e.g., `https://eter.my/rendered/infographic_<ID>.dc.html`).
+- State that coverage is available in both English and Chinese.

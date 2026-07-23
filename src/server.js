@@ -143,6 +143,54 @@ async function serveRendered(req, res, filename) {
   res.end('Rendered infographic file not found');
 }
 
+async function generateSitemapXml() {
+  const published = await getPublishedArticles();
+  const articles = published.articles || [];
+  let itemsXml = '';
+  for (const a of articles) {
+    const title = (a.displayTitle?.en || a.displayTitle?.zh || 'News Article').replace(/[<>&'"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c]));
+    const loc = `https://eter.my/rendered/${a.render_file || `infographic_${a.id}.dc.html`}`;
+    const pubDate = String(a.published_at || '').slice(0, 10) || new Date().toISOString().slice(0, 10);
+    itemsXml += `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${a.published_at || new Date().toISOString()}</lastmod>\n    <news:news>\n      <news:publication>\n        <news:name>Eter News</news:name>\n        <news:language>en</news:language>\n      </news:publication>\n      <news:publication_date>${pubDate}</news:publication_date>\n      <news:title>${title}</news:title>\n    </news:news>\n  </url>\n`;
+  }
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+  <url>
+    <loc>https://eter.my/</loc>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://eter.my/read</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+${itemsXml}</urlset>`;
+}
+
+async function generateRssXml() {
+  const published = await getPublishedArticles();
+  const articles = published.articles || [];
+  let itemsXml = '';
+  for (const a of articles) {
+    const title = (a.displayTitle?.en || a.displayTitle?.zh || 'News Article').replace(/[<>&'"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c]));
+    const desc = (a.summary?.en || a.summary?.zh || '').replace(/[<>&'"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c]));
+    const loc = `https://eter.my/rendered/${a.render_file || `infographic_${a.id}.dc.html`}`;
+    const pubDate = new Date(a.published_at || Date.now()).toUTCString();
+    itemsXml += `    <item>\n      <title>${title}</title>\n      <link>${loc}</link>\n      <guid isPermaLink="true">${loc}</guid>\n      <pubDate>${pubDate}</pubDate>\n      <description>${desc}</description>\n    </item>\n`;
+  }
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Eter News — Asian Business &amp; Regional Coverage</title>
+    <link>https://eter.my/</link>
+    <description>Bilingual independent news desk presenting clear, curated regional coverage in English and Chinese.</description>
+    <language>en-us</language>
+${itemsXml}  </channel>
+</rss>`;
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const { pathname } = url;
@@ -155,6 +203,38 @@ const server = http.createServer(async (req, res) => {
         service: 'eter-news-portal',
         db: dbHealth,
         timestamp: new Date().toISOString()
+      });
+    }
+
+    if (pathname === '/sitemap.xml') {
+      const xml = await generateSitemapXml();
+      res.writeHead(200, { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' });
+      return res.end(xml);
+    }
+
+    if (pathname === '/feed.xml' || pathname === '/rss.xml') {
+      const xml = await generateRssXml();
+      res.writeHead(200, { 'content-type': 'application/rss+xml; charset=utf-8', 'cache-control': 'public, max-age=3600' });
+      return res.end(xml);
+    }
+
+    if (pathname === '/api/llm/latest.json') {
+      const published = await getPublishedArticles();
+      const articles = (published.articles || []).map(a => ({
+        id: a.id,
+        title: a.displayTitle,
+        summary: a.summary,
+        key_facts: a.keyFacts,
+        published_at: a.published_at,
+        url: `https://eter.my/rendered/${a.render_file || `infographic_${a.id}.dc.html`}`
+      }));
+      return sendJson(res, 200, {
+        site: 'Eter News',
+        publisher: 'Eternalgy Sdn Bhd',
+        url: 'https://eter.my',
+        updated_at: new Date().toISOString(),
+        count: articles.length,
+        articles
       });
     }
 

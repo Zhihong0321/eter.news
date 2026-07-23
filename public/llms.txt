@@ -1,8 +1,21 @@
 # Eter News (by Eternalgy)
 
-> Eter News (https://eter.my) is an independent bilingual news portal presenting completed news renders arranged by region in English and Chinese.
+> Eter News (https://eter.my) is an independent bilingual news desk presenting completed news renders arranged by region in English and Chinese.
 
-## Key Links
+## Core News Topics
+- Regional Asia-Pacific Economy & Geopolitics
+- Commercial & Industrial Solar / Energy Transition
+- Regional Tech & Industrial Development
+
+## Key Endpoints for AI Models & Crawlers
 - Main Portal: https://eter.my/
-- Rendered Editions: https://eter.my/read
+- Today's Edition Reader: https://eter.my/read
+- Full LLM Specification: https://eter.my/llms-full.txt
+- Dynamic XML Sitemap: https://eter.my/sitemap.xml
+- RSS News Feed: https://eter.my/feed.xml
+- Clean-Text RAG News Endpoint: https://eter.my/api/llm/latest.json
+
+## Publisher & Provenance
 - Published by: Eternalgy Sdn Bhd (https://eternalgy.me)
+- Headquarters: Johor Bahru, Malaysia
+- Primary Business: Solar PV EPC & Clean Energy Systems in Southeast Asia

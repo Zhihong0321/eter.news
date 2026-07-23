@@ -2,4 +2,19 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
+# Authorized AI Search & LLM Crawlers
+User-agent: GPTBot
+User-agent: PerplexityBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+User-agent: Bingbot
+User-agent: Bytespider
+Allow: /
+Allow: /rendered/
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /feed.xml
+Allow: /api/news
+Allow: /api/llm/latest.json
+
 Sitemap: https://eter.my/sitemap.xml

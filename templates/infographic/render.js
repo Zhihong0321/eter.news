@@ -261,7 +261,7 @@ function listSection({ number, titleEn, titleZh, items, ordered = true, renderIt
   const tag = ordered ? 'ol' : 'ul';
   return `
 <section data-screen-label="${esc(titleEn)}" data-reveal style="margin-top:52px">
-  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:20px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">${number}</span><span class="en">${esc(titleEn)}</span><span class="cn">${esc(titleZh)}</span></p>
+  <h2 style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin:0 0 20px 0" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">${number}</span><span class="en">${esc(titleEn)}</span><span class="cn">${esc(titleZh)}</span></h2>
   <${tag} style="list-style:none;display:grid">
     ${items.map(renderItem).join('')}
   </${tag}>
@@ -282,7 +282,7 @@ function sourcesSection(sources) {
   if (!sources?.length) return '';
   return `
 <section data-screen-label="Sources" data-reveal style="margin-top:52px">
-  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin-bottom:6px" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">06</span><span class="en">Sources</span><span class="cn">信息来源</span></p>
+  <h2 style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:12px;margin:0 0 6px 0" style-after="content:'';flex:1;height:1px;background:var(--line)"><span style="color:var(--aink)">06</span><span class="en">Sources</span><span class="cn">信息来源</span></h2>
   <ol style="list-style:none">
     ${sources.map((source, i) => `
     <li style="position:relative;padding:12px 0 12px 32px;${i < sources.length - 1 ? 'border-bottom:1px solid var(--line);' : ''}font-size:13.5px;line-height:1.45;color:var(--ink2)" style-before="content:'${i + 1}';position:absolute;left:0;top:13px;font-family:var(--mf);font-weight:600;font-size:12px;color:var(--aink)">
@@ -377,7 +377,28 @@ export function renderInfographicDocument(entry, options = {}) {
 <x-dc>
 <helmet>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${esc(pair(core.displayTitle).en)}</title>
+<title>${esc(pair(core.displayTitle).en)} — Eter News</title>
+<meta name="description" content="${esc(pair(core.summary).en)}">
+${options.canonicalUrl ? `<link rel="canonical" href="${esc(options.canonicalUrl)}">` : ''}
+<meta property="og:title" content="${esc(pair(core.displayTitle).en)}">
+<meta property="og:description" content="${esc(pair(core.summary).en)}">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": ${JSON.stringify(pair(core.displayTitle).en)},
+  "description": ${JSON.stringify(pair(core.summary).en)},
+  "inLanguage": ["en", "zh-Hans"],
+  "datePublished": ${JSON.stringify(publishedAt || new Date().toISOString())},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Eter News",
+    "url": "https://eter.my/",
+    "logo": "https://eter.my/assets/eternalgy-dark.png"
+  }
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500;600&family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
