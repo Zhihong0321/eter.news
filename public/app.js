@@ -14,6 +14,7 @@ const tagModalSearch = document.getElementById('tag-modal-search');
 const tagSelectAll = document.getElementById('tag-select-all');
 const tagClearAll = document.getElementById('tag-clear-all');
 const tagModalList = document.getElementById('tag-modal-list');
+const tagModalCount = document.getElementById('tag-modal-count');
 const tagModalDone = document.getElementById('tag-modal-done');
 
 
