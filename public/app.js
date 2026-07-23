@@ -53,28 +53,44 @@ function getCookie(name) {
 
 const copy = {
   en: {
-    desk: 'by Eternalgy',
+    desk: 'Independent desk by Eternalgy',
+    latestNav: 'Latest',
+    editionsNav: 'Editions',
+    aboutNav: 'Eternalgy',
+    themeLabel: 'Theme',
+    heroDeck: 'Clearer context for a changing Asia.',
+    heroSubline: 'Curated regional reporting, thoughtfully arranged in two languages.',
+    editionLabel: 'Today’s edition',
     edition: 'Latest completed renders',
-    footer: 'Collected locally and arranged by region',
+    browseArchive: 'Browse archive',
+    footer: 'Collected with care. Arranged for clarity.',
+    publishedBy: 'Published by',
+    companyLine: 'A solar EPC company. Solar, engineered to last.',
     search: 'Search headlines, sources, regions',
+    searchLabel: 'Search the edition',
     countryFilter: 'Country',
     tagFilter: 'Topic',
     allCountries: 'All countries',
-    allTags: 'All tags',
+    allTags: 'All topics',
     loading: 'Loading the latest collected edition...',
     loadError: 'The collected news feed could not be loaded.',
     empty: 'No completed article renders are available yet.',
     noMatch: 'No stories match these filters.',
-    topStory: 'Top story',
+    topStory: 'Cover story',
+    latestBrief: 'Latest briefing',
     news: 'News',
     stories: 'stories',
+    openStory: 'Read story',
     sourceLink: 'View original source ↗',
     unknownDate: 'Publication time unavailable',
-    selectTags: 'Select Tags',
-    searchTags: 'Search tags...',
+    filterEdition: 'Filter this edition',
+    switchTheme: 'Switch color theme',
+    close: 'Close',
+    selectTags: 'Choose topics',
+    searchTags: 'Search topics…',
     selectAll: 'Select all',
     clearAll: 'Clear all',
-    done: 'Done',
+    done: 'Show stories',
     tagsSelected: '{n} tags selected',
     allTagsSelected: 'All tags selected',
     regions: {
@@ -87,28 +103,44 @@ const copy = {
     }
   },
   cn: {
-    desk: '由 Eternalgy 出品',
-    edition: '最新完成渲染的报道',
-    footer: '本地采集，按地区编排',
+    desk: 'Eternalgy 独立编辑部',
+    latestNav: '最新',
+    editionsNav: '往期',
+    aboutNav: 'Eternalgy',
+    themeLabel: '主题',
+    heroDeck: '洞察瞬息万变的亚洲。',
+    heroSubline: '精心梳理区域报道，以双语呈现清晰脉络。',
+    editionLabel: '今日版面',
+    edition: '最新完成的深度呈现',
+    browseArchive: '浏览往期',
+    footer: '用心采集，为清晰而编排。',
+    publishedBy: '出版',
+    companyLine: '太阳能 EPC 公司。经得起时间考验的太阳能工程。',
     search: '搜索标题、来源或地区',
+    searchLabel: '搜索今日版面',
     countryFilter: '国家',
-    tagFilter: '标签',
+    tagFilter: '主题',
     allCountries: '所有国家',
-    allTags: '所有标签',
+    allTags: '所有主题',
     loading: '正在载入最新采集版面...',
     loadError: '无法载入已采集的新闻。',
     empty: '目前没有已完成渲染的报道。',
     noMatch: '没有符合筛选条件的新闻。',
-    topStory: '头条',
+    topStory: '封面报道',
+    latestBrief: '最新简报',
     news: '新闻',
     stories: '篇报道',
+    openStory: '阅读报道',
     sourceLink: '查看原始来源 ↗',
     unknownDate: '发布时间不详',
-    selectTags: '选择标签',
-    searchTags: '搜索标签...',
+    filterEdition: '筛选今日版面',
+    switchTheme: '切换明暗主题',
+    close: '关闭',
+    selectTags: '选择主题',
+    searchTags: '搜索主题…',
     selectAll: '全选',
     clearAll: '清空',
-    done: '完成',
+    done: '显示报道',
     tagsSelected: '已选择 {n} 个标签',
     allTagsSelected: '已选择所有标签',
     regions: {
@@ -354,12 +386,12 @@ function createStory(article, isTopStory = false) {
   const button = makeElement('button', 'story-button');
   button.type = 'button';
   button.dataset.articleId = article.id;
-  button.setAttribute('aria-label', pickText(article.displayTitle));
+  button.setAttribute('aria-label', `${currentCopy().openStory}: ${pickText(article.displayTitle)}`);
 
   const tags = makeElement('div', 'story-tags');
   if (isTopStory) tags.append(createTag(currentCopy().topStory, true));
   const topicTags = articleTags(article);
-  topicTags.slice(0, 4).forEach((tag) => tags.append(createTag(tagLabel(tag))));
+  topicTags.slice(0, isTopStory ? 4 : 2).forEach((tag) => tags.append(createTag(tagLabel(tag))));
   if (tags.children.length === 0) {
     tags.append(createTag(currentCopy().news));
   }
@@ -368,6 +400,12 @@ function createStory(article, isTopStory = false) {
   button.append(makeElement(isTopStory ? 'h2' : 'h3', '', pickText(article.displayTitle)));
   if (isTopStory) button.append(makeElement('p', 'story-summary', articleSummary(article)));
   button.append(createMeta(article));
+
+  const cta = makeElement('span', 'story-cta');
+  cta.append(makeElement('span', '', currentCopy().openStory));
+  cta.append(makeElement('span', '', '↗'));
+  button.append(cta);
+
   wrapper.append(button);
   return wrapper;
 }
@@ -412,10 +450,26 @@ function renderNews() {
   }
 
   editionCount.textContent = `${articles.length} ${currentCopy().stories}`;
-  newsRoot.append(createStory(articles[0], true));
+
+  const featuredLayout = makeElement('section', 'featured-layout');
+  featuredLayout.setAttribute('aria-label', currentCopy().topStory);
+  featuredLayout.append(createStory(articles[0], true));
+
+  const briefingArticles = articles.slice(1, 4);
+  if (briefingArticles.length) {
+    const briefing = makeElement('aside', 'latest-brief');
+    briefing.append(makeElement('h2', 'brief-heading', currentCopy().latestBrief));
+    const briefingList = makeElement('div', 'brief-list');
+    briefingArticles.forEach((article) => briefingList.append(createStory(article)));
+    briefing.append(briefingList);
+    featuredLayout.append(briefing);
+  } else {
+    featuredLayout.classList.add('is-solo');
+  }
+  newsRoot.append(featuredLayout);
 
   const grouped = new Map(regionOrder.map((region) => [region, []]));
-  articles.slice(1).forEach((article) => grouped.get(regionFor(article.country)).push(article));
+  articles.slice(4).forEach((article) => grouped.get(regionFor(article.country)).push(article));
 
   let sectionIndex = 0;
   regionOrder.forEach((region) => {
@@ -440,23 +494,35 @@ function applyLanguage(language) {
   document.cookie = `meridian-language=${language}; path=/; max-age=31536000; SameSite=Lax`;
   root.dataset.lang = language;
   root.lang = language === 'cn' ? 'zh-CN' : 'en';
+  document.title = language === 'cn'
+    ? 'Eter News — 洞察瞬息万变的亚洲'
+    : 'Eter News — Clearer context for a changing Asia';
 
   document.getElementById('language-en').setAttribute('aria-pressed', String(language === 'en'));
   document.getElementById('language-cn').setAttribute('aria-pressed', String(language === 'cn'));
   document.querySelectorAll('[data-copy]').forEach((element) => {
-    element.textContent = currentCopy()[element.dataset.copy];
+    const value = currentCopy()[element.dataset.copy];
+    if (value) element.textContent = value;
   });
   searchInput.placeholder = currentCopy().search;
+  if (tagModalSearch) tagModalSearch.placeholder = currentCopy().searchTags;
+  if (tagModalClose) tagModalClose.setAttribute('aria-label', currentCopy().close);
+  const themeToggle = document.getElementById('theme-toggle');
+  themeToggle.title = currentCopy().switchTheme;
+  themeToggle.setAttribute('aria-label', currentCopy().switchTheme);
   document.getElementById('edition-date').textContent = new Intl.DateTimeFormat(locale(), { dateStyle: 'full' }).format(new Date());
   renderFilterOptions();
   renderNews();
 }
 
 function applyTheme(theme) {
-  if (theme === 'dark') root.dataset.theme = 'dark';
+  const isDark = theme === 'dark';
+  if (isDark) root.dataset.theme = 'dark';
   else delete root.dataset.theme;
-  localStorage.setItem('meridian-theme', theme);
-  document.cookie = `meridian-theme=${theme}; path=/; max-age=31536000; SameSite=Lax`;
+  localStorage.setItem('meridian-theme', isDark ? 'dark' : 'light');
+  document.cookie = `meridian-theme=${isDark ? 'dark' : 'light'}; path=/; max-age=31536000; SameSite=Lax`;
+  document.getElementById('theme-toggle').setAttribute('aria-pressed', String(isDark));
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', isDark ? '#0e100d' : '#f3f0e8');
 }
 
 function updateProgress() {
@@ -593,6 +659,14 @@ if (tagModalList) {
     renderNews();
   });
 }
+
+document.addEventListener('keydown', (event) => {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLocaleLowerCase() === 'k') {
+    event.preventDefault();
+    searchInput.focus();
+    searchInput.select();
+  }
+});
 
 document.getElementById('language-en').addEventListener('click', () => applyLanguage('en'));
 document.getElementById('language-cn').addEventListener('click', () => applyLanguage('cn'));

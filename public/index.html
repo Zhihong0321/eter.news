@@ -3,16 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f5f4f1" />
-  <title>Eter News — by Eternalgy</title>
-  <meta name="description" content="Eter News, by Eternalgy — an independent news desk that presents curated regional news in English and Chinese." />
+  <meta name="theme-color" content="#f3f0e8" />
+  <title>Eter News — Clearer context for a changing Asia</title>
+  <meta name="description" content="Eter News is a bilingual independent news desk presenting clear, curated regional coverage in English and Chinese." />
   <link rel="canonical" href="https://eter.my/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Eter News" />
-  <meta property="og:title" content="Eter News — by Eternalgy" />
-  <meta property="og:description" content="Independent news desk by Eternalgy — completed article renders, arranged by region." />
+  <meta property="og:title" content="Eter News — Clearer context" />
+  <meta property="og:description" content="A calm, bilingual view of the stories shaping Asia and the world." />
   <meta property="og:url" content="https://eter.my/" />
-  <meta name="twitter:card" content="summary" />
+  <meta property="og:image" content="https://eter.my/og.png" />
+  <meta property="og:image:width" content="1733" />
+  <meta property="og:image:height" content="909" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Eter News — Clearer context" />
+  <meta name="twitter:description" content="A calm, bilingual view of the stories shaping Asia and the world." />
+  <meta name="twitter:image" content="https://eter.my/og.png" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -44,7 +50,7 @@
         "@id": "https://eter.my/#eternews",
         "name": "Eter News",
         "url": "https://eter.my/",
-        "description": "Independent news desk by Eternalgy — completed article renders, arranged by region.",
+        "description": "A bilingual independent news desk presenting clear, curated regional coverage.",
         "inLanguage": ["en", "zh"],
         "parentOrganization": { "@id": "https://eter.my/#eternalgy" },
         "publisher": { "@id": "https://eter.my/#eternalgy" }
@@ -60,88 +66,155 @@
     ]
   }
   </script>
+  <script>
+    (() => {
+      try {
+        const theme = localStorage.getItem('meridian-theme');
+        if (theme === 'dark' || (!theme && matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+        const language = localStorage.getItem('meridian-language');
+        if (language === 'cn') {
+          document.documentElement.dataset.lang = 'cn';
+          document.documentElement.lang = 'zh-CN';
+        }
+      } catch {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@700;900&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;700;900&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
   <script src="/app.js" defer></script>
 </head>
 <body>
   <div class="reading-progress" id="reading-progress" aria-hidden="true"></div>
 
-  <nav class="page-controls" aria-label="Page controls">
-    <div class="language-toggle" aria-label="Language">
-      <button id="language-en" type="button" aria-pressed="true">EN</button>
-      <button id="language-cn" type="button" aria-pressed="false">中文</button>
-    </div>
-    <button class="icon-button" id="theme-toggle" type="button" title="Toggle color theme" aria-label="Toggle color theme">&#9680;</button>
-    <a class="icon-button" href="/read" title="Read rendered editions by date" aria-label="Read rendered editions by date">&#128197;</a>
-  </nav>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="mini-wordmark" href="/" aria-label="Eter News home">
+        <span>Eter</span><span>News</span>
+      </a>
 
-  <header class="masthead">
-    <div class="masthead-inner">
-      <p class="eyebrow eyebrow--logo">
-        <a href="https://eternalgy.me" target="_blank" rel="noopener" aria-label="Published by Eternalgy — Eternal Energy">
-          <img class="eternalgy-logo eternalgy-logo--dark" src="/assets/eternalgy-dark.png" alt="" width="151" height="20" decoding="async" />
-          <img class="eternalgy-logo eternalgy-logo--white" src="/assets/eternalgy-white.png" alt="" width="151" height="20" decoding="async" />
-        </a>
-      </p>
-      <h1>Eter News</h1>
-      <div class="edition-line">
-        <time id="edition-date"></time>
-        <span data-copy="edition">Latest completed renders</span>
-        <span class="edition-count" id="edition-count"></span>
-      </div>
-      <label class="search-field" for="news-search">
-        <span aria-hidden="true">⌕</span>
-        <input id="news-search" type="search" autocomplete="off" placeholder="Search headlines, sources, regions" />
-      </label>
-      <div class="filter-bar" aria-label="News filters">
-        <div class="country-filter-block">
-          <span class="filter-label" id="country-filter-label" data-copy="countryFilter">Country</span>
-          <div class="country-toggles" id="country-filter" role="group" aria-labelledby="country-filter-label"></div>
+      <nav class="primary-nav" aria-label="Primary navigation">
+        <a href="#latest" aria-current="page" data-copy="latestNav">Latest</a>
+        <a href="/read" data-copy="editionsNav">Editions</a>
+        <a href="https://eternalgy.me" target="_blank" rel="noopener" data-copy="aboutNav">Eternalgy</a>
+      </nav>
+
+      <div class="page-controls" aria-label="Page controls">
+        <div class="language-toggle" aria-label="Language">
+          <button id="language-en" type="button" aria-pressed="true">EN</button>
+          <button id="language-cn" type="button" aria-pressed="false">中文</button>
         </div>
-        <div class="tag-filter-block">
-          <span class="filter-label" data-copy="tagFilter">Topic</span>
-          <button type="button" class="tag-trigger-button" id="tag-trigger" aria-haspopup="dialog" aria-expanded="false">
-            <span id="tag-trigger-text" data-copy="allTags">All tags</span>
-            <span class="dropdown-icon" aria-hidden="true">▾</span>
-          </button>
-        </div>
+        <button class="theme-button" id="theme-toggle" type="button" title="Switch color theme" aria-label="Switch color theme">
+          <span class="theme-icon theme-icon--sun" aria-hidden="true">☼</span>
+          <span class="theme-icon theme-icon--moon" aria-hidden="true">☾</span>
+          <span class="theme-button-label" data-copy="themeLabel">Theme</span>
+        </button>
       </div>
-      <p class="load-status" id="load-status" role="status" aria-live="polite"></p>
     </div>
   </header>
 
-  <main class="news-page" id="news-root" aria-live="polite">
-    <section class="loading-state" aria-label="Loading news">
-      <div class="loading-line wide"></div>
-      <div class="loading-line"></div>
-      <div class="loading-line short"></div>
+  <main>
+    <section class="masthead" id="latest" aria-labelledby="page-title">
+      <div class="masthead-inner">
+        <div class="masthead-topline">
+          <p class="publisher-mark">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span data-copy="desk">Independent desk by Eternalgy</span>
+          </p>
+          <p class="edition-date"><time id="edition-date"></time></p>
+        </div>
+
+        <div class="title-lockup">
+          <h1 id="page-title"><span>Eter</span><span>News</span></h1>
+          <div class="masthead-deck">
+            <p data-copy="heroDeck">Clearer context for a changing Asia.</p>
+            <span data-copy="heroSubline">Curated regional reporting, thoughtfully arranged in two languages.</span>
+          </div>
+        </div>
+
+        <div class="edition-strip">
+          <div>
+            <span class="strip-label" data-copy="editionLabel">Today’s edition</span>
+            <strong data-copy="edition">Latest completed renders</strong>
+          </div>
+          <span class="edition-count" id="edition-count"></span>
+          <a class="edition-link" href="/read">
+            <span data-copy="browseArchive">Browse archive</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+
+        <div class="discovery-panel" aria-label="Search and filter news">
+          <label class="search-field" for="news-search">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <span class="sr-only" data-copy="searchLabel">Search the edition</span>
+            <input id="news-search" type="search" autocomplete="off" placeholder="Search headlines, sources, regions" />
+            <kbd>⌘ K</kbd>
+          </label>
+
+          <div class="filter-bar" aria-label="News filters">
+            <div class="country-filter-block">
+              <span class="filter-label" id="country-filter-label" data-copy="countryFilter">Country</span>
+              <div class="country-toggles" id="country-filter" role="group" aria-labelledby="country-filter-label"></div>
+            </div>
+            <div class="tag-filter-block">
+              <span class="filter-label" data-copy="tagFilter">Topic</span>
+              <button type="button" class="tag-trigger-button" id="tag-trigger" aria-haspopup="dialog" aria-expanded="false">
+                <span id="tag-trigger-text" data-copy="allTags">All topics</span>
+                <span class="dropdown-icon" aria-hidden="true">＋</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="load-status" id="load-status" role="status" aria-live="polite"></p>
+      </div>
     </section>
+
+    <div class="news-page" id="news-root" aria-live="polite">
+      <section class="loading-state" aria-label="Loading news">
+        <span class="loading-kicker"></span>
+        <div class="loading-line wide"></div>
+        <div class="loading-line"></div>
+        <div class="loading-line short"></div>
+      </section>
+    </div>
   </main>
 
   <footer class="site-footer">
-    <a class="footer-logo" href="https://eternalgy.me" target="_blank" rel="noopener" aria-label="Eternalgy — Eternal Energy">
-      <img class="eternalgy-logo eternalgy-logo--dark" src="/assets/eternalgy-dark.png" alt="" width="182" height="24" loading="lazy" decoding="async" />
-      <img class="eternalgy-logo eternalgy-logo--white" src="/assets/eternalgy-white.png" alt="" width="182" height="24" loading="lazy" decoding="async" />
-    </a>
-    <p class="footer-note"><strong>Eter News</strong> · <span data-copy="footer">Collected locally and arranged by region</span></p>
-    <p class="footer-company">Published by <strong>Eternalgy Sdn&nbsp;Bhd</strong> — a solar EPC company. Solar, engineered to last.</p>
-    <p class="footer-contact">21-01, Jalan Mutiara Emas 10/19, Taman Mount Austin, 81100 Johor Bahru, Johor · <a href="tel:+601121000099">+60&nbsp;11-2100&nbsp;0099</a> · <a href="mailto:enquiry@eternalgy.me">enquiry@eternalgy.me</a></p>
-    <p class="footer-legal">© 2026 Eternalgy Sdn Bhd · Reg. 202301029164 (1523087-A) · CIDB G3 · SEDA RPVSP &amp; RPVI · MyHijau certified</p>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a class="footer-wordmark" href="/">Eter News</a>
+        <p data-copy="footer">Collected with care. Arranged for clarity.</p>
+      </div>
+      <div class="footer-meta">
+        <p><span data-copy="publishedBy">Published by</span> <strong>Eternalgy Sdn&nbsp;Bhd</strong></p>
+        <p data-copy="companyLine">A solar EPC company. Solar, engineered to last.</p>
+      </div>
+      <div class="footer-contact">
+        <a href="mailto:enquiry@eternalgy.me">enquiry@eternalgy.me</a>
+        <a href="tel:+601121000099">+60 11-2100 0099</a>
+        <a href="https://eternalgy.me" target="_blank" rel="noopener">eternalgy.me ↗</a>
+      </div>
+    </div>
+    <div class="footer-legal">© 2026 Eternalgy Sdn Bhd · Reg. 202301029164 (1523087-A) · CIDB G3 · SEDA RPVSP &amp; RPVI · MyHijau certified</div>
   </footer>
 
   <div class="tag-modal-backdrop" id="tag-modal-backdrop" hidden>
     <div class="tag-modal" role="dialog" aria-modal="true" aria-labelledby="tag-modal-title">
       <div class="tag-modal-header">
-        <h3 id="tag-modal-title" data-copy="selectTags">Select Tags</h3>
-        <button type="button" class="modal-close-button" id="tag-modal-close" aria-label="Close">&times;</button>
+        <div>
+          <span class="modal-kicker" data-copy="filterEdition">Filter this edition</span>
+          <h2 id="tag-modal-title" data-copy="selectTags">Choose topics</h2>
+        </div>
+        <button type="button" class="modal-close-button" id="tag-modal-close" aria-label="Close">×</button>
       </div>
-      <div class="tag-modal-search">
+      <label class="tag-modal-search" for="tag-modal-search">
         <span aria-hidden="true">⌕</span>
-        <input type="search" id="tag-modal-search" placeholder="Search tags..." autocomplete="off" />
-      </div>
+        <input type="search" id="tag-modal-search" placeholder="Search topics…" autocomplete="off" />
+      </label>
       <div class="tag-modal-actions">
         <button type="button" class="text-button" id="tag-select-all" data-copy="selectAll">Select all</button>
         <button type="button" class="text-button" id="tag-clear-all" data-copy="clearAll">Clear all</button>
@@ -149,12 +222,9 @@
       <div class="tag-modal-body" id="tag-modal-list"></div>
       <div class="tag-modal-footer">
         <span class="selected-count-badge" id="tag-modal-count"></span>
-        <button type="button" class="primary-button" id="tag-modal-done" data-copy="done">Done</button>
+        <button type="button" class="primary-button" id="tag-modal-done" data-copy="done">Show stories</button>
       </div>
     </div>
   </div>
-
 </body>
 </html>
-
-
