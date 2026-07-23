@@ -1095,8 +1095,14 @@ a {
   cursor: pointer;
 }
 
-.tag-chip:hover,
-.tag-chip[aria-pressed="true"] {
+.tag-chip:hover {
+  border-color: var(--rule-strong);
+  color: var(--ink);
+  background: var(--accent-soft);
+}
+
+.tag-chip[aria-pressed="true"],
+.tag-chip[aria-pressed="true"]:hover {
   border-color: var(--ink);
   color: var(--surface-strong);
   background: var(--ink);
