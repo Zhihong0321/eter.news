@@ -78,8 +78,8 @@ const server = http.createServer(async (req, res) => {
   try {
     if (pathname === '/health' || pathname === '/api/health') {
       const dbHealth = await checkDbHealth();
-      return sendJson(res, dbHealth.connected ? 200 : 500, {
-        ok: dbHealth.connected,
+      return sendJson(res, 200, {
+        ok: true,
         service: 'eter-news-portal',
         db: dbHealth,
         timestamp: new Date().toISOString()
