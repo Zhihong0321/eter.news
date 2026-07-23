@@ -58,7 +58,7 @@ const copy = {
     footer: 'Collected locally and arranged by region',
     search: 'Search headlines, sources, regions',
     countryFilter: 'Country',
-    tagFilter: 'Tag',
+    tagFilter: 'Topic',
     allCountries: 'All countries',
     allTags: 'All tags',
     loading: 'Loading the latest collected edition...',
