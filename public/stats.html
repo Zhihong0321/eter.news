@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Traffic Analytics & Report — Eter News</title>
+  <meta name="description" content="Live traffic, readership analytics, and audience insights for Eter News." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --paper: #f5f4f1; --paper2: #ecebe6; --card: #fdfdfb;
+      --ink: #14161a; --ink2: #4c505a; --ink3: #878b94; --line: #e0dfd9;
+      --a1: #1553cf; --a2: #2fa6d9; --aink: #1043a8;
+      --shadow: 0 1px 2px rgba(15,25,50,.04), 0 10px 30px -14px rgba(15,25,50,.12);
+      --font-display: "Gloock", georgia, serif;
+      --font-body: "Hanken Grotesk", sans-serif;
+      --font-mono: "Spline Sans Mono", monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #0c0e12; --paper2: #12151b; --card: #141821;
+        --ink: #eceef2; --ink2: #b3b8c2; --ink3: #7d828c; --line: #232833;
+        --a1: #7fb0ff; --a2: #3f7bf0; --aink: #8ab4ff;
+        --shadow: 0 2px 8px rgba(0,0,0,.4);
+      }
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; padding: 24px 16px 60px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    header { margin-bottom: 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 20px; }
+    .brand { font-family: var(--font-display); font-size: 28px; color: var(--ink); text-decoration: none; display: inline-flex; gap: 4px; }
+    .brand span:last-child { color: var(--a1); }
+    .page-title { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--ink3); margin-top: 4px; }
+    .pulse-badge { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; color: var(--aink); background: var(--paper2); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); }
+    .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); } 70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); }
+    .card-label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink3); margin-bottom: 8px; }
+    .card-val { font-family: var(--font-display); font-size: 32px; color: var(--ink); line-height: 1.1; }
+    .card-sub { font-size: 12px; color: var(--ink2); margin-top: 6px; }
+
+    .section-title { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--ink3); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .section-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px; }
+    
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink3); padding: 10px 12px; border-bottom: 1px solid var(--line); }
+    td { padding: 12px; border-bottom: 1px solid var(--line); font-size: 13.5px; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    .art-title { font-weight: 600; color: var(--ink); text-decoration: none; display: block; line-height: 1.35; }
+    .art-title:hover { color: var(--a1); }
+    .art-meta { font-family: var(--font-mono); font-size: 11px; color: var(--ink3); margin-top: 2px; }
+
+    .progress-bar-wrap { margin-bottom: 14px; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; font-weight: 500; }
+    .progress-track { height: 8px; background: var(--paper2); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--a1), var(--a2)); border-radius: 999px; transition: width 0.4s ease; }
+
+    footer { text-align: center; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); font-family: var(--font-mono); font-size: 11px; color: var(--ink3); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <a href="/" class="brand"><span>Eter</span><span>News</span></a>
+        <div class="page-title">Traffic Analytics & Readership Report</div>
+      </div>
+      <div class="pulse-badge">
+        <span class="pulse-dot"></span>
+        <span id="last-updated">Live Monitoring</span>
+      </div>
+    </header>
+
+    <main>
+      <div class="grid-4">
+        <div class="card">
+          <div class="card-label">Total Pageviews</div>
+          <div class="card-val" id="val-total">-</div>
+          <div class="card-sub">All-time portal volume</div>
+        </div>
+        <div class="card">
+          <div class="card-label">24-Hour Traffic</div>
+          <div class="card-val" id="val-today">-</div>
+          <div class="card-sub">Pageviews in last 24h</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Unique Readers</div>
+          <div class="card-val" id="val-uniques">-</div>
+          <div class="card-sub">Anonymized unique IPs</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Top Traffic Source</div>
+          <div class="card-val" id="val-top-source" style="font-size:22px;margin-top:6px">-</div>
+          <div class="card-sub" id="val-top-source-sub">Primary acquisition</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">Top 10 Most Read News Articles</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:40px">#</th>
+                <th>Article Headline</th>
+                <th style="text-align:right">Views</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-top-articles">
+              <tr><td colspan="3" style="text-align:center;color:var(--ink3)">Loading top stories...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <div class="card" style="margin-bottom:24px">
+            <div class="section-title">Traffic Acquisition Sources</div>
+            <div id="traffic-sources-list">Loading sources...</div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">Audience Language Preference</div>
+            <div id="language-split-list">Loading language distribution...</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      Published by <strong>Eternalgy Sdn Bhd</strong> · Confidential Analytics Report for Eter News Portal (eter.my)
+    </footer>
+  </div>
+
+  <script>
+    async function loadReport() {
+      try {
+        const res = await fetch('/api/analytics/report');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        const summary = data.summary || {};
+        document.getElementById('val-total').innerText = (summary.total_pageviews || 0).toLocaleString();
+        document.getElementById('val-today').innerText = (summary.views_today || 0).toLocaleString();
+        document.getElementById('val-uniques').innerText = (summary.unique_visitors || 0).toLocaleString();
+
+        const sources = data.traffic_sources || [];
+        if (sources.length) {
+          document.getElementById('val-top-source').innerText = sources[0].source;
+          document.getElementById('val-top-source-sub').innerText = `${sources[0].count.toLocaleString()} visits (${Math.round((sources[0].count / (summary.total_pageviews || 1)) * 100)}%)`;
+        }
+
+        // Render Top Articles
+        const topArticles = data.top_articles || [];
+        const tbl = document.getElementById('tbl-top-articles');
+        if (topArticles.length) {
+          tbl.innerHTML = topArticles.map((a, i) => `
+            <tr>
+              <td style="font-family:var(--font-mono);color:var(--aink);font-weight:600">${i + 1}</td>
+              <td>
+                <a class="art-title" href="/rendered/infographic_${a.article_id}.dc.html" target="_blank">${a.title}</a>
+                <div class="art-meta">Article #${a.article_id}</div>
+              </td>
+              <td style="text-align:right;font-family:var(--font-mono);font-weight:600">${a.views.toLocaleString()}</td>
+            </tr>
+          `).join('');
+        } else {
+          tbl.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--ink3)">No article views recorded yet.</td></tr>`;
+        }
+
+        // Render Traffic Sources Progress Bars
+        const srcList = document.getElementById('traffic-sources-list');
+        const maxSrc = Math.max(...sources.map(s => s.count), 1);
+        srcList.innerHTML = sources.map(s => {
+          const pct = Math.round((s.count / maxSrc) * 100);
+          return `
+            <div class="progress-bar-wrap">
+              <div class="progress-info">
+                <span>${s.source}</span>
+                <span>${s.count.toLocaleString()}</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+            </div>
+          `;
+        }).join('') || '<div style="color:var(--ink3)">No traffic sources recorded yet.</div>';
+
+        // Render Language Split Progress Bars
+        const langList = document.getElementById('language-split-list');
+        const langs = data.language_split || [];
+        const maxLang = Math.max(...langs.map(l => l.count), 1);
+        langList.innerHTML = langs.map(l => {
+          const pct = Math.round((l.count / maxLang) * 100);
+          const label = l.lang === 'cn' || l.lang === 'zh' ? 'Chinese (中文)' : 'English (EN)';
+          return `
+            <div class="progress-bar-wrap">
+              <div class="progress-info">
+                <span>${label}</span>
+                <span>${l.count.toLocaleString()}</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+            </div>
+          `;
+        }).join('');
+
+        document.getElementById('last-updated').innerText = 'Updated ' + new Date().toLocaleTimeString();
+      } catch (e) {
+        console.error('Failed to load analytics report:', e);
+      }
+    }
+
+    loadReport();
+    setInterval(loadReport, 30000);
+  </script>
+</body>
+</html>

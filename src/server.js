@@ -3,7 +3,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
-import { getPublishedArticlesFromDb, getInfographicContentByArticleId, isDbEnabled, checkDbHealth } from './db.js';
+import crypto from 'node:crypto';
+import { getPublishedArticlesFromDb, getInfographicContentByArticleId, isDbEnabled, checkDbHealth, recordPageviewInDb, getAnalyticsReportFromDb } from './db.js';
 import { renderInfographicDocument } from '../templates/infographic/render.js';
 
 try {
@@ -236,6 +237,46 @@ const server = http.createServer(async (req, res) => {
         count: articles.length,
         articles
       });
+    }
+
+    if (pathname === '/api/analytics/event' && req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => { body += chunk; if (body.length > 1e6) req.destroy(); });
+      req.on('end', async () => {
+        try {
+          const data = JSON.parse(body || '{}');
+          const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+          const ipHash = crypto.createHash('sha256').update(ip + (process.env.SALT || 'eter-news')).digest('hex').slice(0, 32);
+          const userAgent = req.headers['user-agent'] || '';
+          
+          await recordPageviewInDb({
+            path: data.path || '/',
+            article_id: data.article_id,
+            event_type: data.event_type || 'pageview',
+            referrer: data.referrer || req.headers['referer'] || '',
+            user_agent: userAgent,
+            device_type: data.device_type || (/mobile/i.test(userAgent) ? 'mobile' : /tablet/i.test(userAgent) ? 'tablet' : 'desktop'),
+            lang: data.lang || 'en',
+            utm_source: data.utm_source,
+            utm_medium: data.utm_medium,
+            utm_campaign: data.utm_campaign,
+            ip_hash: ipHash
+          });
+          return sendJson(res, 200, { ok: true });
+        } catch (err) {
+          return sendJson(res, 400, { ok: false, error: err.message });
+        }
+      });
+      return;
+    }
+
+    if (pathname === '/api/analytics/report' && req.method === 'GET') {
+      const report = await getAnalyticsReportFromDb();
+      return sendJson(res, 200, report);
+    }
+
+    if (pathname === '/stats' || pathname === '/stats/' || pathname === '/analytics' || pathname === '/analytics/') {
+      return await serveStatic(req, res, '/stats.html');
     }
 
     if (pathname === '/api/news' && req.method === 'GET') {
