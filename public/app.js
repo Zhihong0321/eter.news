@@ -16,10 +16,6 @@ const tagClearAll = document.getElementById('tag-clear-all');
 const tagModalList = document.getElementById('tag-modal-list');
 const tagModalDone = document.getElementById('tag-modal-done');
 
-const articleModalBackdrop = document.getElementById('article-modal-backdrop');
-const articleModalClose = document.getElementById('article-modal-close');
-const articleModalMeta = document.getElementById('article-modal-meta');
-const articleModalBody = document.getElementById('article-modal-body');
 
 
 function setCookie(name, value, days = 365) {
@@ -537,23 +533,12 @@ if (tagModalBackdrop) {
     if (event.target === tagModalBackdrop) closeTagModal();
   });
 }
-if (articleModalClose) {
-  articleModalClose.addEventListener('click', closeArticleModal);
-}
-if (articleModalBackdrop) {
-  articleModalBackdrop.addEventListener('click', (event) => {
-    if (event.target === articleModalBackdrop) closeArticleModal();
-  });
-}
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') {
-    if (articleModalBackdrop && !articleModalBackdrop.hasAttribute('hidden')) {
-      closeArticleModal();
-    } else if (tagModalBackdrop && !tagModalBackdrop.hasAttribute('hidden')) {
-      closeTagModal();
-    }
+  if (event.key === 'Escape' && tagModalBackdrop && !tagModalBackdrop.hasAttribute('hidden')) {
+    closeTagModal();
   }
 });
+
 
 
 if (tagModalSearch) {
