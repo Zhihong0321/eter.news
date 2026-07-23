@@ -14,8 +14,13 @@ const tagModalSearch = document.getElementById('tag-modal-search');
 const tagSelectAll = document.getElementById('tag-select-all');
 const tagClearAll = document.getElementById('tag-clear-all');
 const tagModalList = document.getElementById('tag-modal-list');
-const tagModalCount = document.getElementById('tag-modal-count');
 const tagModalDone = document.getElementById('tag-modal-done');
+
+const articleModalBackdrop = document.getElementById('article-modal-backdrop');
+const articleModalClose = document.getElementById('article-modal-close');
+const articleModalMeta = document.getElementById('article-modal-meta');
+const articleModalBody = document.getElementById('article-modal-body');
+
 
 function setCookie(name, value, days = 365) {
   const date = new Date();
@@ -424,12 +429,93 @@ function renderNews() {
   });
 }
 
-// The rendered infographic IS the article page — a self-contained bilingual
-// document. Go straight to it; no modal, no wrapper chrome.
 function openArticle(article) {
-  const renderUrl = article.render_file ? `/rendered/${encodeURIComponent(article.render_file)}` : article.url;
-  if (renderUrl) window.location.assign(renderUrl);
+  if (!article) return;
+
+  if (articleModalMeta) {
+    articleModalMeta.replaceChildren();
+    const tagsDiv = makeElement('div', 'story-tags');
+    const topicTags = articleTags(article);
+    topicTags.forEach((tag) => tagsDiv.append(createTag(tagLabel(tag))));
+    if (tagsDiv.children.length === 0) tagsDiv.append(createTag(currentCopy().news));
+    articleModalMeta.append(tagsDiv);
+  }
+
+  if (articleModalBody) {
+    articleModalBody.replaceChildren();
+
+    const titleEn = article.displayTitle?.en || '';
+    const titleZh = article.displayTitle?.zh || '';
+
+    const titleGroup = makeElement('div', 'modal-title-group');
+    if (state.language === 'cn') {
+      if (titleZh) titleGroup.append(makeElement('h2', 'modal-title-primary', titleZh));
+      if (titleEn) titleGroup.append(makeElement('h3', 'modal-title-secondary', titleEn));
+    } else {
+      if (titleEn) titleGroup.append(makeElement('h2', 'modal-title-primary', titleEn));
+      if (titleZh) titleGroup.append(makeElement('h3', 'modal-title-secondary', titleZh));
+    }
+    articleModalBody.append(titleGroup);
+
+    const meta = makeElement('div', 'story-meta modal-story-meta');
+    [article.source, countryName(article.country), formatMinutesAgo(article.published_at, currentCopy().unknownDate)]
+      .filter(Boolean)
+      .forEach((val) => meta.append(makeElement('span', '', val)));
+    articleModalBody.append(meta);
+
+    const summaryEn = article.summary?.en || '';
+    const summaryZh = article.summary?.zh || '';
+
+    const summarySec = makeElement('div', 'modal-section');
+    summarySec.append(makeElement('h4', 'modal-section-title', state.language === 'cn' ? '核心摘要' : 'Executive Summary'));
+
+    if (state.language === 'cn') {
+      if (summaryZh) summarySec.append(makeElement('p', 'modal-summary-text', summaryZh));
+      if (summaryEn) summarySec.append(makeElement('p', 'modal-summary-subtext', summaryEn));
+    } else {
+      if (summaryEn) summarySec.append(makeElement('p', 'modal-summary-text', summaryEn));
+      if (summaryZh) summarySec.append(makeElement('p', 'modal-summary-subtext', summaryZh));
+    }
+    articleModalBody.append(summarySec);
+
+    if (Array.isArray(article.keyFacts) && article.keyFacts.length > 0) {
+      const factsSec = makeElement('div', 'modal-section');
+      factsSec.append(makeElement('h4', 'modal-section-title', state.language === 'cn' ? '关键要点' : 'Key Takeaways'));
+      const ul = makeElement('ul', 'modal-facts-list');
+      article.keyFacts.forEach((fact) => {
+        const li = makeElement('li', 'modal-fact-item');
+        const mainText = pickText(fact);
+        const subText = state.language === 'cn' ? (fact.en || '') : (fact.zh || '');
+        li.append(makeElement('div', 'modal-fact-main', mainText));
+        if (subText && subText !== mainText) {
+          li.append(makeElement('div', 'modal-fact-sub', subText));
+        }
+        ul.append(li);
+      });
+      factsSec.append(ul);
+      articleModalBody.append(factsSec);
+    }
+
+    if (article.url) {
+      const linkSec = makeElement('div', 'modal-link-section');
+      const a = makeElement('a', 'source-link-button', currentCopy().sourceLink);
+      a.href = article.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      linkSec.append(a);
+      articleModalBody.append(linkSec);
+    }
+  }
+
+  if (articleModalBackdrop) articleModalBackdrop.removeAttribute('hidden');
+  document.body.style.overflow = 'hidden';
 }
+
+function closeArticleModal() {
+  if (articleModalBackdrop) articleModalBackdrop.setAttribute('hidden', '');
+  document.body.style.overflow = '';
+}
+
 
 function applyLanguage(language) {
   state.language = language;
@@ -531,11 +617,24 @@ if (tagModalBackdrop) {
     if (event.target === tagModalBackdrop) closeTagModal();
   });
 }
+if (articleModalClose) {
+  articleModalClose.addEventListener('click', closeArticleModal);
+}
+if (articleModalBackdrop) {
+  articleModalBackdrop.addEventListener('click', (event) => {
+    if (event.target === articleModalBackdrop) closeArticleModal();
+  });
+}
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && tagModalBackdrop && !tagModalBackdrop.hasAttribute('hidden')) {
-    closeTagModal();
+  if (event.key === 'Escape') {
+    if (articleModalBackdrop && !articleModalBackdrop.hasAttribute('hidden')) {
+      closeArticleModal();
+    } else if (tagModalBackdrop && !tagModalBackdrop.hasAttribute('hidden')) {
+      closeTagModal();
+    }
   }
 });
+
 
 if (tagModalSearch) {
   tagModalSearch.addEventListener('input', () => {
