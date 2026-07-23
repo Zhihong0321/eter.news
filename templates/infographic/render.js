@@ -293,6 +293,41 @@ function sourcesSection(sources) {
 </section>`;
 }
 
+function socialShareSection(displayTitle, sourceUrl) {
+  const pTitle = pair(displayTitle);
+  const enTitle = pTitle.en;
+  const url = sourceUrl || '';
+  return `
+<section data-screen-label="Share" data-reveal style="margin-top:48px;padding:24px 20px;background:var(--paper2);border:1px solid var(--line);border-radius:18px;text-align:center">
+  <p style="font-family:var(--mf);font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--aink);margin-bottom:14px">
+    <span class="en">Share this analysis</span>
+    <span class="cn">分享此深度分析</span>
+  </p>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px">
+    <button onclick="shareLink()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font-family:var(--mf);font-size:12px;font-weight:600;cursor:pointer;box-shadow:var(--shadow);transition:transform .15s" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='none'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      <span id="copyLinkTxt"><span class="en">Copy Link</span><span class="cn">复制链接</span></span>
+    </button>
+    <a href="https://x.com/intent/tweet?text=${encodeURIComponent(enTitle)}&url=${encodeURIComponent(url)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font-family:var(--mf);font-size:12px;font-weight:600;text-decoration:none;box-shadow:var(--shadow);transition:transform .15s" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='none'">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      <span>X</span>
+    </a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font-family:var(--mf);font-size:12px;font-weight:600;text-decoration:none;box-shadow:var(--shadow);transition:transform .15s" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='none'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      <span>Facebook</span>
+    </a>
+    <a href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font-family:var(--mf);font-size:12px;font-weight:600;text-decoration:none;box-shadow:var(--shadow);transition:transform .15s" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='none'">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.25V10.9H6.46M7.86 6.74a1.62 1.62 0 1 0 0 3.24 1.62 1.62 0 0 0 0-3.24z"/></svg>
+      <span>LinkedIn</span>
+    </a>
+    <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(enTitle + ' ' + url)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font-family:var(--mf);font-size:12px;font-weight:600;text-decoration:none;box-shadow:var(--shadow);transition:transform .15s" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='none'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.572-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.461c-1.815 0-3.593-.486-5.147-1.405l-.369-.219-3.824.997 1.018-3.727-.241-.383C2.5 15.54 1.5 13.567 1.5 11.5 1.5 5.986 5.986 1.5 11.5 1.5s10 4.486 10 10-4.486 10-10 10"/></svg>
+      <span>WhatsApp</span>
+    </a>
+  </div>
+</section>`;
+}
+
 export function renderInfographicDocument(entry, options = {}) {
   const content = entry.infographicContent;
   if (!content) throw new Error('renderInfographicDocument requires an enriched article (infographicContent missing)');
@@ -392,6 +427,11 @@ html:not([data-lang="cn"]) .cn{display:none!important}
 <div id="mProgress" aria-hidden="true" style="position:fixed;top:0;left:0;height:3px;width:0%;background:var(--gh);z-index:60"></div>
 
 <nav aria-label="Controls" style="position:fixed;top:12px;right:12px;z-index:50;display:flex;align-items:center;gap:8px">
+  <button id="btnNavShare" onClick="{{ sharePage }}" aria-label="Share page" style="display:flex;align-items:center;gap:5px;font-family:var(--mf);font-size:12px;font-weight:600;padding:7px 13px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink2);box-shadow:var(--shadow);cursor:pointer">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+    <span class="en">Share</span>
+    <span class="cn">分享</span>
+  </button>
   <div style="display:flex;border:1px solid var(--line);border-radius:999px;background:var(--card);box-shadow:var(--shadow);overflow:hidden">
     <button id="btnEN" onClick="{{ toEN }}" style="font-family:var(--mf);font-size:12px;font-weight:600;letter-spacing:.06em;padding:7px 13px;border:0;background:none;color:var(--ink3);cursor:pointer">EN</button>
     <button id="btnCN" onClick="{{ toCN }}" style="font-family:'Noto Sans SC',var(--mf);font-size:12px;font-weight:600;letter-spacing:.06em;padding:7px 12px;border:0;background:none;color:var(--ink3);cursor:pointer;white-space:nowrap">中文</button>
@@ -472,6 +512,8 @@ ${listSection({
 })}
 
 ${sourcesSection(sources)}
+
+${socialShareSection(core.displayTitle, core.sourceUrl || raw.url)}
 
 </main>
 
@@ -606,8 +648,25 @@ class Component extends DCLogic {
     return {
       toEN: () => this._setLang('en'),
       toCN: () => this._setLang('cn'),
-      flipTheme: () => this._setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+      flipTheme: () => this._setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'),
+      sharePage: () => { if (typeof shareLink === 'function') shareLink(); }
     };
+  }
+}
+function shareLink() {
+  var url = window.location.href;
+  var title = document.title || 'News Analysis';
+  if (navigator.share) {
+    navigator.share({ title: title, url: url }).catch(function() {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function() {
+      var txts = document.querySelectorAll('#copyLinkTxt');
+      txts.forEach(function(el) {
+        var orig = el.innerHTML;
+        el.innerHTML = '<span style="color:var(--a1)">✓ Copied! / 已复制</span>';
+        setTimeout(function() { el.innerHTML = orig; }, 2000);
+      });
+    }).catch(function() {});
   }
 }
 </script>
