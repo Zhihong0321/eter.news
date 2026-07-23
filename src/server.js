@@ -118,7 +118,10 @@ async function serveRendered(req, res, filename) {
     const content = await getInfographicContentByArticleId(articleId);
     if (content) {
       try {
-        const html = renderInfographicDocument(content, {
+        const entry = content.infographicContent
+          ? content
+          : { infographicContent: content, coreNews: content.coreNews || {} };
+        const html = renderInfographicDocument(entry, {
           defaultLang: 'en',
           colorway: 'masela',
           animations: true
