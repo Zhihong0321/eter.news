@@ -56,7 +56,9 @@ async function getPublishedArticles() {
 async function serveStatic(req, res, pathname) {
   const relative = pathname === '/' ? '/index.html'
     : pathname === '/read' || pathname === '/read/' ? '/read.html'
+    : pathname === '/article' || pathname === '/article/' ? '/article.html'
     : pathname;
+
   const filePath = path.resolve(PUBLIC_DIR, `.${relative}`);
   if (filePath !== PUBLIC_DIR && !filePath.startsWith(`${PUBLIC_DIR}${path.sep}`)) {
     res.writeHead(403);
