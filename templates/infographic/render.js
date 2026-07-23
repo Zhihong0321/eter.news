@@ -387,8 +387,8 @@ ${options.canonicalUrl ? `<link rel="canonical" href="${esc(options.canonicalUrl
 {
   "@context": "https://schema.org",
   "@type": "NewsArticle",
-  "headline": ${JSON.stringify(pair(core.displayTitle).en)},
-  "description": ${JSON.stringify(pair(core.summary).en)},
+  "headline": ${JSON.stringify(esc(pair(core.displayTitle).en))},
+  "description": ${JSON.stringify(esc(pair(core.summary).en))},
   "inLanguage": ["en", "zh-Hans"],
   "datePublished": ${JSON.stringify(publishedAt || new Date().toISOString())},
   "publisher": {
