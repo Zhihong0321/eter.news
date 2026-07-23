@@ -7,6 +7,7 @@ RUN npm install --omit=dev
 
 COPY public ./public
 COPY src ./src
+COPY templates ./templates
 
 EXPOSE 8080
 ENV PORT=8080
