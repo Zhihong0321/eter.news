@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f5f4f1" />
+  <title>Article — Eter News</title>
+  <meta name="description" content="Read full bilingual executive summary and key analysis on Eter News." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@700;900&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/article.css" />
+  <script src="/article.js" defer></script>
+</head>
+<body>
+  <div class="reading-progress" id="reading-progress" aria-hidden="true"></div>
+
+  <nav class="page-controls" aria-label="Page controls">
+    <a class="icon-button back-button" href="/" title="Back to front page" aria-label="Back to front page">
+      &#8592; <span data-copy="back">Back</span>
+    </a>
+    <div class="language-toggle" aria-label="Language">
+      <button id="language-en" type="button" aria-pressed="true">EN</button>
+      <button id="language-cn" type="button" aria-pressed="false">中文</button>
+    </div>
+    <button class="icon-button" id="theme-toggle" type="button" title="Toggle color theme" aria-label="Toggle color theme">&#9680;</button>
+  </nav>
+
+  <main class="article-page" id="article-root">
+    <div class="loading-state">
+      <div class="loading-line wide"></div>
+      <div class="loading-line"></div>
+      <div class="loading-line short"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <a class="footer-logo" href="https://eternalgy.me" target="_blank" rel="noopener" aria-label="Eternalgy — Eternal Energy">
+      <img class="eternalgy-logo eternalgy-logo--dark" src="/assets/eternalgy-dark.png" alt="" width="182" height="24" loading="lazy" decoding="async" />
+      <img class="eternalgy-logo eternalgy-logo--white" src="/assets/eternalgy-white.png" alt="" width="182" height="24" loading="lazy" decoding="async" />
+    </a>
+    <p class="footer-note"><strong>Eter News</strong> · Collected locally and arranged by region</p>
+    <p class="footer-company">Published by <strong>Eternalgy Sdn&nbsp;Bhd</strong> — a solar EPC company. Solar, engineered to last.</p>
+  </footer>
+</body>
+</html>
