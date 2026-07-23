@@ -6,9 +6,28 @@ export function isDbEnabled() {
   return Boolean(process.env.DATABASE_URL || process.env.SUPABASE_DB_URL);
 }
 
+function getCleanConnectionString() {
+  let connectionString = (process.env.DATABASE_URL || process.env.SUPABASE_DB_URL || '').trim();
+  // Fix unescaped @ symbol in password if user pasted raw password like postgres:@Eternalgy2026@...
+  if (connectionString.includes('@') && connectionString.indexOf('@') !== connectionString.lastIndexOf('@')) {
+    const lastAt = connectionString.lastIndexOf('@');
+    const firstColon = connectionString.indexOf(':', connectionString.indexOf('://') + 3);
+    if (firstColon > 0 && firstColon < lastAt) {
+      const user = connectionString.slice(0, firstColon + 1);
+      const rawPass = connectionString.slice(firstColon + 1, lastAt);
+      const hostPath = connectionString.slice(lastAt);
+      const encodedPass = rawPass.replace(/@/g, '%40');
+      connectionString = `${user}${encodedPass}${hostPath}`;
+    }
+  }
+  return connectionString;
+}
+
 export function getPool() {
   if (!pool && isDbEnabled()) {
-    const connectionString = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL;
+    const connectionString = getCleanConnectionString();
+    const host = connectionString.split('@')[1] || 'unknown';
+    console.log('[db] Initializing pg pool for database host:', host);
     const ssl = connectionString.includes('localhost') || connectionString.includes('127.0.0.1')
       ? false
       : { rejectUnauthorized: false };
@@ -17,9 +36,40 @@ export function getPool() {
   return pool;
 }
 
+export async function checkDbHealth() {
+  if (!isDbEnabled()) {
+    return { enabled: false, connected: false, error: 'DATABASE_URL is not set in environment' };
+  }
+  let client;
+  try {
+    const connStr = getCleanConnectionString();
+    const host = connStr.split('@')[1]?.split('/')[0] || 'unknown';
+    client = await getPool().connect();
+    const res = await client.query('SELECT count(*) FROM article_enrichments WHERE status = \'enriched\';');
+    return {
+      enabled: true,
+      connected: true,
+      host,
+      enrichedArticlesInDb: Number(res.rows[0]?.count || 0),
+      error: null
+    };
+  } catch (err) {
+    console.error('[db] Health check failed:', err.message);
+    return {
+      enabled: true,
+      connected: false,
+      host: getCleanConnectionString().split('@')[1]?.split('/')[0] || 'unknown',
+      error: err.message
+    };
+  } finally {
+    if (client) client.release();
+  }
+}
+
 export async function getPublishedArticlesFromDb() {
   if (!isDbEnabled()) {
-    return { generated_at: new Date().toISOString(), count: 0, articles: [], skipped: { total: 0 } };
+    console.warn('[db] isDbEnabled is FALSE. DATABASE_URL is missing in environment variables.');
+    return { generated_at: new Date().toISOString(), count: 0, articles: [], skipped: { total: 0 }, dbStatus: 'disabled' };
   }
 
   let client;
@@ -86,20 +136,23 @@ export async function getPublishedArticlesFromDb() {
       });
     }
 
+    console.log(`[db] Successfully loaded ${articles.length} published articles from DB.`);
     return {
       generated_at: new Date().toISOString(),
       count: articles.length,
       articles,
-      skipped: { total: 0 }
+      skipped: { total: 0 },
+      dbStatus: 'connected'
     };
   } catch (err) {
-    console.error('[db] Failed to fetch published articles:', err.message);
+    console.error('[db] Failed to fetch published articles:', err.stack || err.message);
     return {
       generated_at: new Date().toISOString(),
       count: 0,
       articles: [],
       skipped: { total: 0 },
-      error: err.message
+      error: err.message,
+      dbStatus: 'error'
     };
   } finally {
     if (client) {

@@ -2,7 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
-import { getPublishedArticlesFromDb, isDbEnabled } from './db.js';
+import { getPublishedArticlesFromDb, isDbEnabled, checkDbHealth } from './db.js';
+
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.resolve(__dirname, '../public');
@@ -76,10 +77,11 @@ const server = http.createServer(async (req, res) => {
 
   try {
     if (pathname === '/health' || pathname === '/api/health') {
-      return sendJson(res, 200, {
-        ok: true,
+      const dbHealth = await checkDbHealth();
+      return sendJson(res, dbHealth.connected ? 200 : 500, {
+        ok: dbHealth.connected,
         service: 'eter-news-portal',
-        dbEnabled: isDbEnabled(),
+        db: dbHealth,
         timestamp: new Date().toISOString()
       });
     }
