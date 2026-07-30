@@ -4,7 +4,18 @@ import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
-import { getPublishedArticlesFromDb, getInfographicContentByArticleId, isDbEnabled, checkDbHealth, recordPageviewInDb, getAnalyticsReportFromDb } from './db.js';
+import {
+  getPublishedArticlesFromDb,
+  getInfographicContentByArticleId,
+  isDbEnabled,
+  checkDbHealth,
+  recordPageviewInDb,
+  getAnalyticsReportFromDb,
+  getExistingArticleUrls,
+  persistArticles,
+  recordStageStatus,
+  getPipelineStageCounts
+} from './db.js';
 import { renderInfographicDocument } from '../templates/infographic/render.js';
 
 try {
@@ -17,6 +28,38 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.resolve(__dirname, '../public');
 const EDITORIAL_OUTPUT_DIR = path.resolve(__dirname, '../editorial-output');
 const PORT = Number(process.env.PORT) || 8080;
+
+// Machine-to-machine key for /api/hub/* — lets a fetcher running off Railway
+// write through this portal service instead of holding a direct Postgres
+// connection, so Postgres reads/writes stay on Railway's free private
+// network and only small JSON payloads cross the public internet.
+const HUB_API_KEY = process.env.HUB_API_KEY || '';
+if (!HUB_API_KEY) {
+  console.warn('\n  WARNING: HUB_API_KEY is not set. The /api/hub/* endpoints are LOCKED — no key will be accepted.\n  Set HUB_API_KEY in your environment to let a remote fetcher write through this hub.\n');
+}
+
+function isHubAuthenticated(req) {
+  if (!HUB_API_KEY) return false;
+  const expected = crypto.createHash('sha256').update(HUB_API_KEY).digest();
+  const actual = crypto.createHash('sha256').update(String(req.headers['x-hub-key'] || '')).digest();
+  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+}
+
+async function readJsonBody(req) {
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of req) {
+    size += chunk.length;
+    if (size > 1_000_000) throw new Error('Request body too large');
+    chunks.push(chunk);
+  }
+  if (!chunks.length) return {};
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  } catch {
+    throw new Error('Invalid JSON body');
+  }
+}
 
 const PUBLISHED_CACHE_MS = 5000;
 
@@ -197,6 +240,51 @@ const server = http.createServer(async (req, res) => {
   const { pathname } = url;
 
   try {
+    // Hub API: write-through for a fetcher running off Railway. Mirrors
+    // news-fetcher-v2's src/db/store.js function signatures 1:1 so its
+    // src/db/hub-client.js works against this service unmodified.
+    if (pathname.startsWith('/api/hub/') && !isHubAuthenticated(req)) {
+      return sendJson(res, 401, { ok: false, error: 'Hub authentication required' });
+    }
+
+    if (pathname === '/api/hub/existing-urls' && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      const urls = Array.isArray(body.urls) ? body.urls : [];
+      const existing = await getExistingArticleUrls(urls);
+      return sendJson(res, 200, { ok: true, existing: [...existing] });
+    }
+
+    if (pathname === '/api/hub/persist-articles' && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      const articles = Array.isArray(body.articles) ? body.articles : [];
+      const idsByUrl = await persistArticles(articles);
+      return sendJson(res, 200, { ok: true, ids: [...idsByUrl.entries()] });
+    }
+
+    if (pathname === '/api/hub/stage-status' && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      await recordStageStatus(body.articleId, body.stage, body.status, body.error ?? null);
+      return sendJson(res, 200, { ok: true });
+    }
+
+    if (pathname === '/api/hub/debug/status' && req.method === 'GET') {
+      const dbHealth = await checkDbHealth();
+      const counts = await getPipelineStageCounts();
+      return sendJson(res, 200, {
+        ok: true,
+        db: {
+          ...dbHealth,
+          private: dbHealth.host ? /\.railway\.internal/i.test(dbHealth.host) : null
+        },
+        pipeline: { counts },
+        process: {
+          pid: process.pid,
+          uptimeSeconds: Math.round(process.uptime()),
+          nodeVersion: process.version
+        }
+      });
+    }
+
     if (pathname === '/health' || pathname === '/api/health') {
       const dbHealth = await checkDbHealth();
       return sendJson(res, 200, {
