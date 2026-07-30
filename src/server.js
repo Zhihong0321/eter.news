@@ -16,6 +16,21 @@ import {
   recordStageStatus,
   getPipelineStageCounts
 } from './db.js';
+import {
+  ROUTABLE_TASKS,
+  API_STYLES,
+  listProviders,
+  getProviderSecret,
+  createProvider,
+  updateProvider,
+  deleteProvider,
+  addModel,
+  deleteModel,
+  listRoutes,
+  setTaskChain,
+  buildRequest,
+  extractText
+} from './llm-config.js';
 import { renderInfographicDocument } from '../templates/infographic/render.js';
 
 try {
@@ -265,6 +280,152 @@ const server = http.createServer(async (req, res) => {
       const body = await readJsonBody(req);
       await recordStageStatus(body.articleId, body.stage, body.status, body.error ?? null);
       return sendJson(res, 200, { ok: true });
+    }
+
+    // LLM control plane, proxied 1:1 from news-fetcher-v2's factory dashboard
+    // (/api/factory/llm/* forwards its whole request here verbatim when
+    // HUB_URL is set) so the local factory needs no DATABASE_URL of its own
+    // even for provider/model/route admin. api_key is never returned in
+    // plaintext except internally, right before the /test route's own
+    // outbound call — the secret never crosses back to the local machine.
+    if (pathname === '/api/hub/llm' && req.method === 'GET') {
+      if (!isDbEnabled()) {
+        return sendJson(res, 200, {
+          ok: true, enabled: false, tasks: ROUTABLE_TASKS, apiStyles: API_STYLES,
+          providers: [], routes: {},
+          error: 'LLM settings require a database (set DATABASE_URL)'
+        });
+      }
+      try {
+        const [providers, routes] = await Promise.all([listProviders(), listRoutes()]);
+        return sendJson(res, 200, { ok: true, enabled: true, tasks: ROUTABLE_TASKS, apiStyles: API_STYLES, providers, routes });
+      } catch (error) {
+        return sendJson(res, 500, { ok: false, error: error.message });
+      }
+    }
+
+    if (pathname.startsWith('/api/hub/llm') && !isDbEnabled()) {
+      return sendJson(res, 400, { ok: false, error: 'LLM settings require a database (set DATABASE_URL)' });
+    }
+
+    if (pathname === '/api/hub/llm/providers' && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      try {
+        const id = await createProvider({
+          name: body.name,
+          apiStyle: body.apiStyle || 'anthropic',
+          baseUrl: body.baseUrl,
+          apiKey: body.apiKey,
+          enabled: body.enabled !== false,
+          notes: body.notes ?? null
+        });
+        for (const model of Array.isArray(body.models) ? body.models : []) {
+          const entry = typeof model === 'string' ? { model } : model;
+          if (entry?.model) await addModel(id, entry);
+        }
+        return sendJson(res, 201, { ok: true, id });
+      } catch (error) {
+        return sendJson(res, 400, { ok: false, error: error.message });
+      }
+    }
+
+    const hubLlmProviderMatch = pathname.match(/^\/api\/hub\/llm\/providers\/(\d+)$/);
+    if (hubLlmProviderMatch && (req.method === 'PATCH' || req.method === 'DELETE')) {
+      const providerId = Number(hubLlmProviderMatch[1]);
+      try {
+        if (req.method === 'DELETE') {
+          const removed = await deleteProvider(providerId);
+          return sendJson(res, removed ? 200 : 404, { ok: removed, error: removed ? undefined : 'Provider not found' });
+        }
+        const body = await readJsonBody(req);
+        const updated = await updateProvider(providerId, body);
+        return sendJson(res, updated ? 200 : 404, { ok: updated, error: updated ? undefined : 'Provider not found or no fields to update' });
+      } catch (error) {
+        return sendJson(res, 400, { ok: false, error: error.message });
+      }
+    }
+
+    const hubLlmModelsMatch = pathname.match(/^\/api\/hub\/llm\/providers\/(\d+)\/models$/);
+    if (hubLlmModelsMatch && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      try {
+        const id = await addModel(Number(hubLlmModelsMatch[1]), {
+          model: body.model,
+          label: body.label ?? null,
+          enabled: body.enabled !== false
+        });
+        return sendJson(res, 201, { ok: true, id });
+      } catch (error) {
+        return sendJson(res, 400, { ok: false, error: error.message });
+      }
+    }
+
+    const hubLlmModelMatch = pathname.match(/^\/api\/hub\/llm\/models\/(\d+)$/);
+    if (hubLlmModelMatch && req.method === 'DELETE') {
+      try {
+        const removed = await deleteModel(Number(hubLlmModelMatch[1]));
+        return sendJson(res, removed ? 200 : 404, { ok: removed, error: removed ? undefined : 'Model not found' });
+      } catch (error) {
+        return sendJson(res, 400, { ok: false, error: error.message });
+      }
+    }
+
+    const hubLlmRouteMatch = pathname.match(/^\/api\/hub\/llm\/routes\/([a-z]+)$/);
+    if (hubLlmRouteMatch && req.method === 'PUT') {
+      const task = hubLlmRouteMatch[1];
+      const body = await readJsonBody(req);
+      try {
+        const count = await setTaskChain(task, Array.isArray(body.entries) ? body.entries : []);
+        return sendJson(res, 200, { ok: true, task, count });
+      } catch (error) {
+        return sendJson(res, 400, { ok: false, error: error.message });
+      }
+    }
+
+    // Live credential check, run from the Hub so the plaintext key never has
+    // to travel back to whatever machine is administering the factory.
+    if (pathname === '/api/hub/llm/test' && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      const providerId = Number(body.providerId);
+      const model = String(body.model || '').trim();
+      if (!Number.isInteger(providerId) || !model) {
+        return sendJson(res, 400, { ok: false, error: 'providerId and model are required' });
+      }
+      const provider = await getProviderSecret(providerId);
+      if (!provider) return sendJson(res, 404, { ok: false, error: 'Provider not found' });
+
+      const request = buildRequest({ ...provider, token: provider.apiKey, model }, 'Reply with exactly: OK', { maxTokens: 2048 });
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 30000);
+      const startedAt = Date.now();
+      try {
+        const response = await fetch(request.url, {
+          method: 'POST',
+          headers: request.headers,
+          body: JSON.stringify(request.body),
+          signal: controller.signal
+        });
+        const latencyMs = Date.now() - startedAt;
+        if (!response.ok) {
+          const raw = await response.text().catch(() => '');
+          let message = raw.slice(0, 200);
+          try { message = JSON.parse(raw).error?.message || message; } catch { /* keep raw */ }
+          return sendJson(res, 200, { ok: false, status: response.status, latencyMs, error: message });
+        }
+        const payload = await response.json();
+        const text = extractText(payload, provider.apiStyle).trim();
+        return sendJson(res, 200, {
+          ok: Boolean(text),
+          status: response.status,
+          latencyMs,
+          reply: text.slice(0, 120),
+          error: text ? undefined : 'Endpoint answered but returned empty text (model may have spent the token budget on reasoning)'
+        });
+      } catch (error) {
+        return sendJson(res, 200, { ok: false, latencyMs: Date.now() - startedAt, error: error.message });
+      } finally {
+        clearTimeout(timer);
+      }
     }
 
     if (pathname === '/api/hub/debug/status' && req.method === 'GET') {

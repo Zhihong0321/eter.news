@@ -42,6 +42,10 @@ export function getPool() {
   return pool;
 }
 
+export function query(text, params) {
+  return getPool().query(text, params);
+}
+
 export async function checkDbHealth() {
   if (!isDbEnabled()) {
     return { enabled: false, connected: false, error: 'DATABASE_URL is not set in environment' };
