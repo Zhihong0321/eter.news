@@ -10,27 +10,10 @@ import {
   isDbEnabled,
   checkDbHealth,
   recordPageviewInDb,
-  getAnalyticsReportFromDb,
-  getExistingArticleUrls,
-  persistArticles,
-  recordStageStatus,
-  getPipelineStageCounts
+  getAnalyticsReportFromDb
 } from './db.js';
-import {
-  ROUTABLE_TASKS,
-  API_STYLES,
-  listProviders,
-  getProviderSecret,
-  createProvider,
-  updateProvider,
-  deleteProvider,
-  addModel,
-  deleteModel,
-  listRoutes,
-  setTaskChain,
-  buildRequest,
-  extractText
-} from './llm-config.js';
+import { handleAdminApi } from './engine/admin.js';
+import { startScheduler } from './engine/scheduler.js';
 import { renderInfographicDocument } from '../templates/infographic/render.js';
 
 try {
@@ -44,20 +27,10 @@ const PUBLIC_DIR = path.resolve(__dirname, '../public');
 const EDITORIAL_OUTPUT_DIR = path.resolve(__dirname, '../editorial-output');
 const PORT = Number(process.env.PORT) || 8080;
 
-// Machine-to-machine key for /api/hub/* — lets a fetcher running off Railway
-// write through this portal service instead of holding a direct Postgres
-// connection, so Postgres reads/writes stay on Railway's free private
-// network and only small JSON payloads cross the public internet.
-const HUB_API_KEY = process.env.HUB_API_KEY || '';
-if (!HUB_API_KEY) {
-  console.warn('\n  WARNING: HUB_API_KEY is not set. The /api/hub/* endpoints are LOCKED — no key will be accepted.\n  Set HUB_API_KEY in your environment to let a remote fetcher write through this hub.\n');
-}
-
-function isHubAuthenticated(req) {
-  if (!HUB_API_KEY) return false;
-  const expected = crypto.createHash('sha256').update(HUB_API_KEY).digest();
-  const actual = crypto.createHash('sha256').update(String(req.headers['x-hub-key'] || '')).digest();
-  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+// Admin key for /admin and /api/admin/* (news-gather monitoring dashboard).
+// Unset = the dashboard stays locked.
+if (!process.env.HUB_API_KEY) {
+  console.warn('\n  WARNING: HUB_API_KEY is not set. The /admin dashboard is LOCKED — no key will be accepted.\n');
 }
 
 async function readJsonBody(req) {
@@ -115,7 +88,7 @@ async function getPublishedArticles() {
   return value;
 }
 
-async function serveStatic(req, res, pathname) {
+async function serveStatic(req, res, pathname, { noStore = false } = {}) {
   const relative = pathname === '/' ? '/index.html'
     : pathname === '/read' || pathname === '/read/' ? '/read.html'
     : pathname === '/article' || pathname === '/article/' ? '/article.html'
@@ -133,7 +106,7 @@ async function serveStatic(req, res, pathname) {
     const ext = path.extname(filePath);
     res.writeHead(200, {
       'content-type': CONTENT_TYPES[ext] || 'application/octet-stream',
-      'cache-control': 'public, max-age=60'
+      'cache-control': noStore ? 'no-store' : 'public, max-age=60'
     });
     res.end(data);
   } catch {
@@ -255,195 +228,14 @@ const server = http.createServer(async (req, res) => {
   const { pathname } = url;
 
   try {
-    // Hub API: write-through for a fetcher running off Railway. Mirrors
-    // news-fetcher-v2's src/db/store.js function signatures 1:1 so its
-    // src/db/hub-client.js works against this service unmodified.
-    if (pathname.startsWith('/api/hub/') && !isHubAuthenticated(req)) {
-      return sendJson(res, 401, { ok: false, error: 'Hub authentication required' });
+    if (await handleAdminApi(req, res, pathname, url, { sendJson, readJsonBody })) return;
+
+    if (pathname === '/admin' || pathname === '/admin/') {
+      return await serveStatic(req, res, '/admin.html', { noStore: true });
     }
 
-    if (pathname === '/api/hub/existing-urls' && req.method === 'POST') {
-      const body = await readJsonBody(req);
-      const urls = Array.isArray(body.urls) ? body.urls : [];
-      const existing = await getExistingArticleUrls(urls);
-      return sendJson(res, 200, { ok: true, existing: [...existing] });
-    }
-
-    if (pathname === '/api/hub/persist-articles' && req.method === 'POST') {
-      const body = await readJsonBody(req);
-      const articles = Array.isArray(body.articles) ? body.articles : [];
-      const idsByUrl = await persistArticles(articles);
-      return sendJson(res, 200, { ok: true, ids: [...idsByUrl.entries()] });
-    }
-
-    if (pathname === '/api/hub/stage-status' && req.method === 'POST') {
-      const body = await readJsonBody(req);
-      await recordStageStatus(body.articleId, body.stage, body.status, body.error ?? null);
-      return sendJson(res, 200, { ok: true });
-    }
-
-    // LLM control plane, proxied 1:1 from news-fetcher-v2's factory dashboard
-    // (/api/factory/llm/* forwards its whole request here verbatim when
-    // HUB_URL is set) so the local factory needs no DATABASE_URL of its own
-    // even for provider/model/route admin. api_key is never returned in
-    // plaintext except internally, right before the /test route's own
-    // outbound call — the secret never crosses back to the local machine.
-    if (pathname === '/api/hub/llm' && req.method === 'GET') {
-      if (!isDbEnabled()) {
-        return sendJson(res, 200, {
-          ok: true, enabled: false, tasks: ROUTABLE_TASKS, apiStyles: API_STYLES,
-          providers: [], routes: {},
-          error: 'LLM settings require a database (set DATABASE_URL)'
-        });
-      }
-      try {
-        const [providers, routes] = await Promise.all([listProviders(), listRoutes()]);
-        return sendJson(res, 200, { ok: true, enabled: true, tasks: ROUTABLE_TASKS, apiStyles: API_STYLES, providers, routes });
-      } catch (error) {
-        return sendJson(res, 500, { ok: false, error: error.message });
-      }
-    }
-
-    if (pathname.startsWith('/api/hub/llm') && !isDbEnabled()) {
-      return sendJson(res, 400, { ok: false, error: 'LLM settings require a database (set DATABASE_URL)' });
-    }
-
-    if (pathname === '/api/hub/llm/providers' && req.method === 'POST') {
-      const body = await readJsonBody(req);
-      try {
-        const id = await createProvider({
-          name: body.name,
-          apiStyle: body.apiStyle || 'anthropic',
-          baseUrl: body.baseUrl,
-          apiKey: body.apiKey,
-          enabled: body.enabled !== false,
-          notes: body.notes ?? null
-        });
-        for (const model of Array.isArray(body.models) ? body.models : []) {
-          const entry = typeof model === 'string' ? { model } : model;
-          if (entry?.model) await addModel(id, entry);
-        }
-        return sendJson(res, 201, { ok: true, id });
-      } catch (error) {
-        return sendJson(res, 400, { ok: false, error: error.message });
-      }
-    }
-
-    const hubLlmProviderMatch = pathname.match(/^\/api\/hub\/llm\/providers\/(\d+)$/);
-    if (hubLlmProviderMatch && (req.method === 'PATCH' || req.method === 'DELETE')) {
-      const providerId = Number(hubLlmProviderMatch[1]);
-      try {
-        if (req.method === 'DELETE') {
-          const removed = await deleteProvider(providerId);
-          return sendJson(res, removed ? 200 : 404, { ok: removed, error: removed ? undefined : 'Provider not found' });
-        }
-        const body = await readJsonBody(req);
-        const updated = await updateProvider(providerId, body);
-        return sendJson(res, updated ? 200 : 404, { ok: updated, error: updated ? undefined : 'Provider not found or no fields to update' });
-      } catch (error) {
-        return sendJson(res, 400, { ok: false, error: error.message });
-      }
-    }
-
-    const hubLlmModelsMatch = pathname.match(/^\/api\/hub\/llm\/providers\/(\d+)\/models$/);
-    if (hubLlmModelsMatch && req.method === 'POST') {
-      const body = await readJsonBody(req);
-      try {
-        const id = await addModel(Number(hubLlmModelsMatch[1]), {
-          model: body.model,
-          label: body.label ?? null,
-          enabled: body.enabled !== false
-        });
-        return sendJson(res, 201, { ok: true, id });
-      } catch (error) {
-        return sendJson(res, 400, { ok: false, error: error.message });
-      }
-    }
-
-    const hubLlmModelMatch = pathname.match(/^\/api\/hub\/llm\/models\/(\d+)$/);
-    if (hubLlmModelMatch && req.method === 'DELETE') {
-      try {
-        const removed = await deleteModel(Number(hubLlmModelMatch[1]));
-        return sendJson(res, removed ? 200 : 404, { ok: removed, error: removed ? undefined : 'Model not found' });
-      } catch (error) {
-        return sendJson(res, 400, { ok: false, error: error.message });
-      }
-    }
-
-    const hubLlmRouteMatch = pathname.match(/^\/api\/hub\/llm\/routes\/([a-z]+)$/);
-    if (hubLlmRouteMatch && req.method === 'PUT') {
-      const task = hubLlmRouteMatch[1];
-      const body = await readJsonBody(req);
-      try {
-        const count = await setTaskChain(task, Array.isArray(body.entries) ? body.entries : []);
-        return sendJson(res, 200, { ok: true, task, count });
-      } catch (error) {
-        return sendJson(res, 400, { ok: false, error: error.message });
-      }
-    }
-
-    // Live credential check, run from the Hub so the plaintext key never has
-    // to travel back to whatever machine is administering the factory.
-    if (pathname === '/api/hub/llm/test' && req.method === 'POST') {
-      const body = await readJsonBody(req);
-      const providerId = Number(body.providerId);
-      const model = String(body.model || '').trim();
-      if (!Number.isInteger(providerId) || !model) {
-        return sendJson(res, 400, { ok: false, error: 'providerId and model are required' });
-      }
-      const provider = await getProviderSecret(providerId);
-      if (!provider) return sendJson(res, 404, { ok: false, error: 'Provider not found' });
-
-      const request = buildRequest({ ...provider, token: provider.apiKey, model }, 'Reply with exactly: OK', { maxTokens: 2048 });
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 30000);
-      const startedAt = Date.now();
-      try {
-        const response = await fetch(request.url, {
-          method: 'POST',
-          headers: request.headers,
-          body: JSON.stringify(request.body),
-          signal: controller.signal
-        });
-        const latencyMs = Date.now() - startedAt;
-        if (!response.ok) {
-          const raw = await response.text().catch(() => '');
-          let message = raw.slice(0, 200);
-          try { message = JSON.parse(raw).error?.message || message; } catch { /* keep raw */ }
-          return sendJson(res, 200, { ok: false, status: response.status, latencyMs, error: message });
-        }
-        const payload = await response.json();
-        const text = extractText(payload, provider.apiStyle).trim();
-        return sendJson(res, 200, {
-          ok: Boolean(text),
-          status: response.status,
-          latencyMs,
-          reply: text.slice(0, 120),
-          error: text ? undefined : 'Endpoint answered but returned empty text (model may have spent the token budget on reasoning)'
-        });
-      } catch (error) {
-        return sendJson(res, 200, { ok: false, latencyMs: Date.now() - startedAt, error: error.message });
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-
-    if (pathname === '/api/hub/debug/status' && req.method === 'GET') {
-      const dbHealth = await checkDbHealth();
-      const counts = await getPipelineStageCounts();
-      return sendJson(res, 200, {
-        ok: true,
-        db: {
-          ...dbHealth,
-          private: dbHealth.host ? /\.railway\.internal/i.test(dbHealth.host) : null
-        },
-        pipeline: { counts },
-        process: {
-          pid: process.pid,
-          uptimeSeconds: Math.round(process.uptime()),
-          nodeVersion: process.version
-        }
-      });
+    if (pathname === '/admin/keys' || pathname === '/admin/keys/') {
+      return await serveStatic(req, res, '/admin-keys.html', { noStore: true });
     }
 
     if (pathname === '/health' || pathname === '/api/health') {
@@ -564,6 +356,7 @@ const invokedPath = process.argv[1] ? path.resolve(process.argv[1]) : '';
 if (!invokedPath || invokedPath.toLowerCase().endsWith('server.js')) {
   server.listen(PORT, '0.0.0.0', () => {
     console.log(`[eter.news] Public news portal running on 0.0.0.0:${PORT}`);
+    startScheduler();
   });
 }
 

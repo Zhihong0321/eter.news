@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>API Keys — Eter News</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="brand-mark">Eter</span>
+      <span class="brand-sub">API Keys</span>
+    </div>
+    <div class="status-line"><span id="enc" class="muted"></span></div>
+    <div class="actions">
+      <a class="btn" href="/admin">← Gather Monitor</a>
+    </div>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <main>
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Credentials</h2>
+        <button id="btn-import" class="btn small" title="Copy keys set as server environment variables into the database">Import from environment</button>
+      </div>
+      <p class="muted">Keys are stored in PostgreSQL, encrypted with AES-256-GCM, and take effect immediately — no redeploy. A stored key overrides the matching environment variable. Full values are never shown again after saving.</p>
+      <div id="cards" class="key-cards"></div>
+    </section>
+  </main>
+  <script src="/admin-keys.js" type="module"></script>
+</body>
+</html>

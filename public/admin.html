@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Gather Monitor — Eter News</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin.css" />
+</head>
+<body>
+  <div id="login" class="login" hidden>
+    <form id="login-form" class="login-card">
+      <p class="eyebrow">Eter News</p>
+      <h1>Gather Monitor</h1>
+      <label for="key">Admin key</label>
+      <input id="key" type="password" autocomplete="current-password" required />
+      <button class="btn primary" type="submit">Sign in</button>
+      <p id="login-error" class="error" role="alert"></p>
+    </form>
+  </div>
+
+  <div id="app" hidden>
+    <header class="top">
+      <div class="brand">
+        <span class="brand-mark">Eter</span>
+        <span class="brand-sub">Gather Monitor</span>
+      </div>
+      <div class="status-line">
+        <span id="engine-pill" class="pill">…</span>
+        <span id="next-run" class="muted"></span>
+      </div>
+      <div class="actions">
+        <button id="btn-run" class="btn primary">Run now</button>
+        <button id="btn-stop" class="btn" hidden>Stop</button>
+        <button id="btn-pause" class="btn">Pause schedule</button>
+        <a class="btn" href="/admin/keys">API keys</a>
+        <button id="btn-logout" class="btn ghost">Sign out</button>
+      </div>
+    </header>
+
+    <div id="banner" class="banner" hidden></div>
+
+    <main>
+      <section class="kpis" aria-label="Last 24 hours">
+        <div class="kpi"><span class="kpi-label">Published · 24h</span><b id="k-published">–</b></div>
+        <div class="kpi"><span class="kpi-label">Rejected</span><b id="k-rejected">–</b></div>
+        <div class="kpi"><span class="kpi-label">Failed</span><b id="k-failed">–</b></div>
+        <div class="kpi"><span class="kpi-label">Tavily calls</span><b id="k-tavily">–</b></div>
+        <div class="kpi"><span class="kpi-label">LLM calls</span><b id="k-llm">–</b></div>
+        <div class="kpi"><span class="kpi-label">Tokens</span><b id="k-tokens">–</b></div>
+        <div class="kpi"><span class="kpi-label">Articles live</span><b id="k-live">–</b></div>
+      </section>
+
+      <section class="panel" id="run-panel">
+        <div class="panel-head">
+          <h2 id="run-title">Run</h2>
+          <span id="run-meta" class="muted"></span>
+        </div>
+        <div id="funnel" class="funnel"></div>
+        <div class="split">
+          <div>
+            <h3>Articles in this run</h3>
+            <div class="table-wrap"><table id="items-table"><thead><tr><th>Status</th><th>Stage</th><th>Title</th><th class="num">Tokens</th></tr></thead><tbody></tbody></table></div>
+          </div>
+          <div>
+            <h3>Event log</h3>
+            <ol id="log" class="log"></ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>Run history</h2></div>
+        <div class="table-wrap">
+          <table id="runs-table">
+            <thead><tr><th>#</th><th>Status</th><th>Trigger</th><th>Started</th><th>Took</th><th class="num">Topics</th><th class="num">Found</th><th class="num">New</th><th class="num">Published</th><th class="num">Rejected</th><th class="num">Failed</th><th class="num">Tokens</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <nav class="tabs" role="tablist">
+          <button class="tab active" data-tab="topics" role="tab">Topics</button>
+          <button class="tab" data-tab="settings" role="tab">Settings</button>
+          <button class="tab" data-tab="failures" role="tab">Failures</button>
+          <button class="tab" data-tab="articles" role="tab">Latest articles</button>
+          <button class="tab" data-tab="health" role="tab">Connections</button>
+        </nav>
+        <div id="tab-topics" class="tab-body"></div>
+        <div id="tab-settings" class="tab-body" hidden></div>
+        <div id="tab-failures" class="tab-body" hidden></div>
+        <div id="tab-articles" class="tab-body" hidden></div>
+        <div id="tab-health" class="tab-body" hidden></div>
+      </section>
+    </main>
+  </div>
+  <script src="/admin.js" type="module"></script>
+</body>
+</html>

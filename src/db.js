@@ -80,16 +80,8 @@ export async function checkDbHealth() {
   }
 }
 
-export async function getPublishedArticlesFromDb() {
-  if (!isDbEnabled()) {
-    console.warn('[db] isDbEnabled is FALSE. DATABASE_URL is missing in environment variables.');
-    return { generated_at: new Date().toISOString(), count: 0, articles: [], skipped: { total: 0 }, dbStatus: 'disabled' };
-  }
-
-  let client;
-  try {
-    client = await getPool().connect();
-    const queryStr = `
+// Exported so tests can run the portal's exact read query against the engine's writes.
+export const PUBLISHED_ARTICLES_SQL = `
       SELECT 
         a.id,
         a.url,
@@ -110,7 +102,17 @@ export async function getPublishedArticlesFromDb() {
       ORDER BY COALESCE(a.published_at, a.fetched_at, e.enriched_at) DESC
       LIMIT 300;
     `;
-    const { rows } = await client.query(queryStr);
+
+export async function getPublishedArticlesFromDb() {
+  if (!isDbEnabled()) {
+    console.warn('[db] isDbEnabled is FALSE. DATABASE_URL is missing in environment variables.');
+    return { generated_at: new Date().toISOString(), count: 0, articles: [], skipped: { total: 0 }, dbStatus: 'disabled' };
+  }
+
+  let client;
+  try {
+    client = await getPool().connect();
+    const { rows } = await client.query(PUBLISHED_ARTICLES_SQL);
 
     const articles = [];
     for (const row of rows) {
@@ -410,188 +412,6 @@ export async function getAnalyticsReportFromDb() {
     return generateReportFromList(inMemoryPageviews);
   } finally {
     if (client) client.release();
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Hub write-path — ported from news-fetcher-v2's src/db/store.js and
-// src/db/pipeline-status.js verbatim (same SQL, same tables) so this portal
-// service can accept writes from a remote fetcher over HTTP instead of that
-// fetcher holding a direct Postgres connection. See src/server.js's
-// /api/hub/* routes.
-// ---------------------------------------------------------------------------
-
-const RETRY_BACKOFF_CAP_MINUTES = 360;
-
-const RECORD_DONE_SQL = `
-insert into article_pipeline_status (article_id, stage, status, attempts, last_error, next_retry_at, updated_at)
-values ($1, $2, $3, 0, null, null, now())
-on conflict (article_id, stage) do update set
-  status        = excluded.status,
-  attempts      = 0,
-  last_error    = null,
-  next_retry_at = null,
-  updated_at    = now();
-`;
-
-const RECORD_PENDING_SQL = `
-insert into article_pipeline_status (article_id, stage, status, attempts, last_error, next_retry_at, updated_at)
-values ($1, $2, 'pending', 0, null, null, now())
-on conflict (article_id, stage) do update set
-  status        = 'pending',
-  last_error    = null,
-  next_retry_at = null,
-  updated_at    = now();
-`;
-
-const RECORD_FAILED_SQL = `
-insert into article_pipeline_status (article_id, stage, status, attempts, last_error, next_retry_at, updated_at)
-values ($1, $2, 'failed', 1, $3, now() + interval '10 minutes', now())
-on conflict (article_id, stage) do update set
-  status        = 'failed',
-  attempts      = article_pipeline_status.attempts + 1,
-  last_error    = excluded.last_error,
-  next_retry_at = now() + (least((article_pipeline_status.attempts + 1) * 10, ${RETRY_BACKOFF_CAP_MINUTES}) || ' minutes')::interval,
-  updated_at    = now();
-`;
-
-const GET_EXISTING_URLS_SQL = `select url from articles where url = any($1::text[]);`;
-
-async function recordStageStatusWithClient(client, articleId, stage, status, error = null) {
-  if (!articleId || !stage || !status) return;
-  if (status === 'failed') {
-    await client.query(RECORD_FAILED_SQL, [articleId, stage, error ? String(error).slice(0, 500) : null]);
-  } else if (status === 'pending') {
-    await client.query(RECORD_PENDING_SQL, [articleId, stage]);
-  } else {
-    await client.query(RECORD_DONE_SQL, [articleId, stage, status]);
-  }
-}
-
-export async function recordStageStatus(articleId, stage, status, error = null) {
-  if (!isDbEnabled() || !articleId || !stage || !status) return;
-  const client = await getPool().connect();
-  try {
-    await recordStageStatusWithClient(client, articleId, stage, status, error);
-  } finally {
-    client.release();
-  }
-}
-
-export async function getExistingArticleUrls(urls) {
-  if (!isDbEnabled() || !Array.isArray(urls) || urls.length === 0) return new Set();
-  const client = await getPool().connect();
-  try {
-    const { rows } = await client.query(GET_EXISTING_URLS_SQL, [urls]);
-    return new Set(rows.map((row) => row.url));
-  } finally {
-    client.release();
-  }
-}
-
-const UPSERT_ARTICLE = `
-insert into articles
-  (source, country, title, url, published_at, author, section, body, description, fetched_at, tags, dedup_title, updated_at)
-values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now())
-on conflict (url) do update set
-  source       = excluded.source,
-  country      = excluded.country,
-  title        = excluded.title,
-  published_at = excluded.published_at,
-  author       = excluded.author,
-  section      = excluded.section,
-  body         = excluded.body,
-  description  = excluded.description,
-  fetched_at   = excluded.fetched_at,
-  tags         = excluded.tags,
-  dedup_title  = excluded.dedup_title,
-  updated_at   = now()
-returning id, url;
-`;
-
-const UPSERT_ARTICLE_KEEP_TAGS = `
-insert into articles
-  (source, country, title, url, published_at, author, section, body, description, fetched_at)
-values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-on conflict (url) do update set
-  source       = excluded.source,
-  country      = excluded.country,
-  title        = excluded.title,
-  published_at = excluded.published_at,
-  author       = excluded.author,
-  section      = excluded.section,
-  body         = excluded.body,
-  description  = excluded.description,
-  fetched_at   = excluded.fetched_at,
-  updated_at   = now()
-returning id, url;
-`;
-
-function toTimestamp(value) {
-  if (!value) return null;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date.toISOString();
-}
-
-async function upsertArticle(client, article) {
-  const params = [
-    article.source ?? null,
-    article.country ?? null,
-    article.title,
-    article.url,
-    toTimestamp(article.published_at),
-    article.author ?? null,
-    article.section ?? null,
-    article.body ?? null,
-    article.description ?? null,
-    toTimestamp(article.fetched_at)
-  ];
-  const { rows } = Array.isArray(article.tags)
-    ? await client.query(UPSERT_ARTICLE, [...params, article.tags, article.dedup_title ?? null])
-    : await client.query(UPSERT_ARTICLE_KEEP_TAGS, params);
-  return rows[0].id;
-}
-
-export async function persistArticles(articles) {
-  const idsByUrl = new Map();
-  if (!isDbEnabled() || !Array.isArray(articles) || articles.length === 0) return idsByUrl;
-
-  const client = await getPool().connect();
-  try {
-    await client.query('begin');
-    for (const article of articles) {
-      if (!article?.title || !article?.url) continue;
-      const id = await upsertArticle(client, article);
-      idsByUrl.set(article.url, id);
-      if (article.dedup_title) {
-        await recordStageStatusWithClient(client, id, 'distill', 'done');
-      } else if (article.dedup_error) {
-        await recordStageStatusWithClient(client, id, 'distill', 'failed', article.dedup_error);
-      }
-    }
-    await client.query('commit');
-  } catch (error) {
-    await client.query('rollback');
-    throw error;
-  } finally {
-    client.release();
-  }
-  return idsByUrl;
-}
-
-export async function getPipelineStageCounts() {
-  if (!isDbEnabled()) return [];
-  const client = await getPool().connect();
-  try {
-    const { rows } = await client.query(`
-      select stage, status, count(*)::integer as count
-      from article_pipeline_status
-      group by stage, status
-      order by stage, status;
-    `);
-    return rows;
-  } finally {
-    client.release();
   }
 }
 
