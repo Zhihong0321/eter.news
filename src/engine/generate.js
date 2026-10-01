@@ -143,8 +143,18 @@ export function publisherFromUrl(url) {
 // Validates + normalises model output into the shape stored in
 // article_enrichments.infographic_content and consumed by render.js.
 // Returns { problems } when the packet is unusable, otherwise { packet, meta }.
-export function normalizePacket(raw, candidate, topic) {
+// Some completions wrap the packet ({"result": {...}}); unwrap one level.
+function unwrapPacket(raw) {
+  if (!raw || typeof raw !== 'object' || raw.displayTitle) return raw;
+  for (const value of Object.values(raw)) {
+    if (value && typeof value === 'object' && !Array.isArray(value) && value.displayTitle) return { ...value, relevant: value.relevant ?? raw.relevant };
+  }
+  return raw;
+}
+
+export function normalizePacket(rawInput, candidate, topic) {
   const problems = [];
+  const raw = unwrapPacket(rawInput);
   if (!raw || typeof raw !== 'object') return { problems: ['output is not a JSON object'] };
   if (raw.relevant === false) throw new RejectedArticle(String(raw.reason || 'model judged source not a news report').slice(0, 200));
 
@@ -162,7 +172,11 @@ export function normalizePacket(raw, candidate, topic) {
   if (keyFacts.length < 3) problems.push(`keyFacts needs at least 3 bilingual items (got ${keyFacts.length})`);
   if (dimensions.length < 1) problems.push('dimensions needs at least 1 valid item with title and insight pairs');
   if (displayTitle && displayTitle.en.length > 140) problems.push('displayTitle.en must be at most 90 characters');
-  if (problems.length) return { problems };
+  if (problems.length) {
+    // Name what the model actually returned so the repair prompt and the dashboard show the real cause.
+    problems.push(`top-level keys returned: ${Object.keys(raw).slice(0, 12).join(', ') || '(none)'}`);
+    return { problems };
+  }
 
   const publishedAt = toIso(candidate.publishedAt) || new Date().toISOString();
   const publisher = (typeof raw.publisher === 'string' && raw.publisher.trim()) || publisherFromUrl(candidate.url);

@@ -520,3 +520,10 @@ test('cost guards: token budget stops new articles', async () => {
   assert.ok(run.published >= 1 && run.published < 5, `published ${run.published} of 5 before budget hit`);
   assert.equal(run.status, 'stopped');
 });
+
+test('wrapped packets are unwrapped, and failures name the keys actually returned', () => {
+  const wrapped = normalizePacket({ relevant: true, result: rawPacket() }, candidate, null);
+  assert.ok(wrapped.packet, 'unwrapped one level');
+  const bad = normalizePacket({ relevant: true, notes: 'hello', title: 'x' }, candidate, null);
+  assert.ok(bad.problems.at(-1).includes('relevant, notes, title'));
+});
