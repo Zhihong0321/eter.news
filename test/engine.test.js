@@ -404,3 +404,25 @@ test('publishes into the production-shaped enrichment table (url/provider/valida
   const portal = await pg.query(PUBLISHED_ARTICLES_SQL);
   assert.equal(portal.rows.length, 1);
 });
+
+test('network-level fetch failures are retried like router 5xx', async () => {
+  const { chat } = await import('../src/engine/llm.js');
+  process.env.LLM_API_KEY = 'test-llm';
+  const realFetch = globalThis.fetch;
+  const realTimeout = globalThis.setTimeout;
+  globalThis.setTimeout = (fn, ms, ...a) => realTimeout(fn, ms > 1000 ? 1 : ms, ...a); // skip backoff waits
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls += 1;
+    if (calls < 3) throw Object.assign(new TypeError('fetch failed'), { cause: { code: 'ECONNRESET' } });
+    return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: '{"ok":true}' } }], usage: {} }), { status: 200 });
+  };
+  try {
+    const out = await chat({ messages: [{ role: 'user', content: 'x' }], timeoutMs: 5000 });
+    assert.equal(out.text, '{"ok":true}');
+    assert.equal(calls, 3);
+  } finally {
+    globalThis.fetch = realFetch;
+    globalThis.setTimeout = realTimeout;
+  }
+});

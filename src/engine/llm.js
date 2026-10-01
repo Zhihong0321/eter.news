@@ -77,6 +77,8 @@ async function chatOnce({ messages, maxTokens = 9000, temperature = 0.3, json = 
     };
   } catch (err) {
     if (err.name === 'AbortError') throw new LlmError(`LLM request timed out after ${timeoutMs}ms`);
+    // Network-level failures (DNS, reset, TLS) surface as TypeError("fetch failed"); treat as transient.
+    if (!(err instanceof LlmError)) throw new LlmError(`LLM request failed: ${err.cause?.code || err.message}`);
     throw err;
   } finally {
     clearTimeout(timer);

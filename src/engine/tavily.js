@@ -30,6 +30,7 @@ async function post(path, body, { timeoutMs = 45_000 } = {}) {
     return json;
   } catch (err) {
     if (err.name === 'AbortError') throw new TavilyError(`Tavily request timed out after ${timeoutMs}ms`);
+    if (!(err instanceof TavilyError)) throw new TavilyError(`Tavily request failed: ${err.cause?.code || err.message}`);
     throw err;
   } finally {
     clearTimeout(timer);
