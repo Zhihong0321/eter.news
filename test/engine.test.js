@@ -375,3 +375,32 @@ test('first-run setup stores the admin password and API keys in Postgres, no env
   assert.equal((await call('POST', 'login', { body: { password: 'brand-new-password-2' } })).status, 200);
   delete process.env.DATABASE_URL;
 });
+
+test('publishes into the production-shaped enrichment table (url/provider/validation/provenance)', async () => {
+  const pg = new PGlite();
+  store.setDb({
+    query: (t, p) => pg.query(t, p),
+    tx: (fn) => pg.transaction((tx) => fn({ query: (t, p) => tx.query(t, p) }))
+  });
+  await pg.query(`create table article_enrichments (
+    id bigserial primary key, article_id bigint not null unique, url text not null, status text not null,
+    provider text, model text, infographic_content jsonb, validation jsonb not null default '{}'::jsonb,
+    provenance jsonb, error text, enriched_at timestamptz, updated_at timestamptz default now())`);
+  await store.ensureEngineSchema();
+  assert.equal((await store.schemaCheck()).ok, true);
+
+  const { packet, meta } = normalizePacket(rawPacket(), candidate, null);
+  const args = { candidate, topic: { query: 'q' }, packet, meta, bodyText: 'body', model: 'glm-5.3-flash', attempts: 2 };
+  const id = await store.persistPublishedArticle(args);
+  await store.persistPublishedArticle(args); // idempotent re-publish
+  const rows = (await pg.query('select * from article_enrichments')).rows;
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].article_id, id);
+  assert.equal(rows[0].url, candidate.url);
+  assert.equal(rows[0].status, 'enriched');
+  assert.equal(rows[0].provider, 'eter-router');
+  assert.equal(rows[0].validation.attempts, 2);
+  assert.equal(rows[0].provenance.searchEngine, 'tavily');
+  const portal = await pg.query(PUBLISHED_ARTICLES_SQL);
+  assert.equal(portal.rows.length, 1);
+});

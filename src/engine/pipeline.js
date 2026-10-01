@@ -197,7 +197,7 @@ async function processCandidate(runId, c, settings) {
 
     await upsertItem(runId, c.url, { ...base, stage: 'publish', status: 'running', attempts: out.attempts, tokens });
     const articleId = await persistPublishedArticle({
-      candidate: c, topic: c.topic, packet: out.packet, meta: out.meta, bodyText: text, model: engineEnv().llmModel
+      candidate: c, topic: c.topic, packet: out.packet, meta: out.meta, bodyText: text, model: engineEnv().llmModel, attempts: out.attempts
     });
     await bumpRun(runId, { published: 1 });
     await upsertItem(runId, c.url, { ...base, stage: 'publish', status: 'published', articleId, attempts: out.attempts, latencyMs: Date.now() - started });

@@ -120,8 +120,8 @@ export async function pingLlm() {
   const started = Date.now();
   const out = await chat({
     messages: [{ role: 'user', content: 'Reply with the JSON {"ok":true}.' }],
-    maxTokens: 400,
-    timeoutMs: 40_000
+    maxTokens: 2000,
+    timeoutMs: 60_000
   });
   const parsed = parseJsonObject(out.text);
   return { ok: parsed?.ok === true, latencyMs: Date.now() - started, model: out.model };

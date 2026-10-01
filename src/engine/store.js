@@ -592,7 +592,7 @@ async function enrichmentColumns() {
 // Columns this writer knows how to fill. Anything else that is NOT NULL with
 // no default would make the insert fail, so schemaCheck() reports it up front.
 const KNOWN_ENRICHMENT_COLUMNS = new Set([
-  'id', 'article_id', 'status', 'infographic_content', 'enriched_at', 'created_at', 'updated_at', 'model', 'provider', 'error', 'last_error', 'attempts'
+  'id', 'article_id', 'url', 'status', 'infographic_content', 'enriched_at', 'created_at', 'updated_at', 'model', 'provider', 'validation', 'provenance', 'error', 'last_error', 'attempts'
 ]);
 
 export async function schemaCheck() {
@@ -605,7 +605,7 @@ export async function schemaCheck() {
   return { ok: blockers.length === 0, columns: [...cols.keys()], blockers };
 }
 
-export async function persistPublishedArticle({ candidate, topic, packet, meta, bodyText, model }) {
+export async function persistPublishedArticle({ candidate, topic, packet, meta, bodyText, model, attempts }) {
   await ensureEngineSchema();
   const cols = await enrichmentColumns();
   const blockers = (await schemaCheck()).blockers;
@@ -640,21 +640,40 @@ export async function persistPublishedArticle({ candidate, topic, packet, meta, 
     const jsonCast = cols.get('infographic_content')?.data_type === 'jsonb' ? '::jsonb'
       : cols.get('infographic_content')?.data_type === 'json' ? '::json' : '';
 
-    const sets = [`status = 'enriched'`, `infographic_content = $2${jsonCast}`, 'enriched_at = now()'];
-    const params = [articleId, content];
-    if (cols.has('updated_at')) sets.push('updated_at = now()');
-    if (cols.has('model')) { params.push(model); sets.push(`model = $${params.length}`); }
-    if (cols.has('error')) sets.push('error = null');
-    if (cols.has('last_error')) sets.push('last_error = null');
+    // Fill every column the production table is known to have. JSON columns
+    // get a cast matching their declared type; text columns get a JSON string.
+    const jsonParam = (colName, value) => {
+      const type = cols.get(colName)?.data_type;
+      return { value: JSON.stringify(value), cast: type === 'jsonb' ? '::jsonb' : type === 'json' ? '::json' : '' };
+    };
+    const values = { status: { value: 'enriched' }, infographic_content: jsonParam('infographic_content', packet) };
+    if (cols.has('url')) values.url = { value: candidate.url };
+    if (cols.has('model')) values.model = { value: model };
+    if (cols.has('provider')) values.provider = { value: 'eter-router' };
+    if (cols.has('validation')) values.validation = jsonParam('validation', { ok: true, attempts: attempts || 1, normalizedBy: 'eter-engine' });
+    if (cols.has('provenance')) {
+      values.provenance = jsonParam('provenance', {
+        sourceUrl: candidate.url, publisher: meta.publisher, searchEngine: 'tavily', topic: topic?.query || null, model
+      });
+    }
+    if (cols.has('error')) values.error = { value: null };
+    if (cols.has('last_error')) values.last_error = { value: null };
 
-    const upd = await db.query(`update article_enrichments set ${sets.join(', ')} where article_id = $1`, params);
+    const names = Object.keys(values);
+    const params = [articleId];
+    const refs = names.map((n) => {
+      params.push(values[n].value);
+      return `$${params.length}${values[n].cast || ''}`;
+    });
+    const setSql = names.map((n, i) => `${n} = ${refs[i]}`);
+    setSql.push('enriched_at = now()');
+    if (cols.has('updated_at')) setSql.push('updated_at = now()');
+    const upd = await db.query(`update article_enrichments set ${setSql.join(', ')} where article_id = $1`, params);
     if (!upd.rowCount) {
-      const names = ['article_id', 'status', 'infographic_content', 'enriched_at'];
-      const placeholders = ['$1', `'enriched'`, `$2${jsonCast}`, 'now()'];
-      const ins = [articleId, content];
-      if (cols.has('model')) { ins.push(model); names.push('model'); placeholders.push(`$${ins.length}`); }
-      if (cols.has('updated_at')) { names.push('updated_at'); placeholders.push('now()'); }
-      await db.query(`insert into article_enrichments (${names.join(', ')}) values (${placeholders.join(', ')})`, ins);
+      const insNames = ['article_id', ...names, 'enriched_at'];
+      const insRefs = ['$1', ...refs, 'now()'];
+      if (cols.has('updated_at')) { insNames.push('updated_at'); insRefs.push('now()'); }
+      await db.query(`insert into article_enrichments (${insNames.join(', ')}) values (${insRefs.join(', ')})`, params);
     }
 
     await db.query(
