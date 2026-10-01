@@ -376,7 +376,9 @@ const SETTING_FIELDS = [
   ['searchDays', 'Look-back (days)', 'Only news from the last N days.'],
   ['maxArticlesPerRun', 'Max articles per run', 'Cap on LLM write calls per run.'],
   ['concurrency', 'Parallel writers', 'Simultaneous LLM calls.'],
-  ['minSourceChars', 'Min source length (chars)', 'Thinner pages are skipped.']
+  ['minSourceChars', 'Min source length (chars)', 'Thinner pages are skipped.'],
+  ['maxTokensPerRun', 'Token budget per run', 'Stops starting new articles once this many tokens are spent.'],
+  ['failureBreaker', 'Stop after N model errors in a row', 'Cost guard: pauses the run instead of hammering a struggling model.']
 ];
 
 async function renderSettings(body) {

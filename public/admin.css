@@ -186,3 +186,4 @@ a.btn { text-decoration: none; display: inline-block; }
 
 .login-card.wide { width: min(460px, 100%); }
 .login { align-content: center; }
+.chip.retrying { color: var(--warn); }

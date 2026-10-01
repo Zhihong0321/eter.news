@@ -426,3 +426,97 @@ test('network-level fetch failures are retried like router 5xx', async () => {
     globalThis.setTimeout = realTimeout;
   }
 });
+
+test('a slow/unavailable model is retried within the run, not failed', async () => {
+  const { LlmError } = await import('../src/engine/llm.js');
+  process.env.TAVILY_API_KEY = 'test-tavily';
+  process.env.LLM_API_KEY = 'test-llm';
+  await freshDb();
+  await store.updateSettings({ topicsPerRun: 1, concurrency: 2, minSourceChars: 200 });
+  const text = 'Body text. '.repeat(100);
+  const results = ['a', 'b', 'c'].map((k, i) => ({ url: `https://n.com/${k}`, title: `Story ${k}`, snippet: '', rawContent: text, publishedAt: null, score: 1 - i / 10 }));
+  const attempts = {};
+  setPipelineDeps({
+    retryDelayMs: 5,
+    searchNews: async () => ({ results, responseTime: 0.1 }),
+    extractUrl: async () => '',
+    generatePacket: async (cand, topic) => {
+      attempts[cand.url] = (attempts[cand.url] || 0) + 1;
+      if (cand.url.endsWith('/a') && attempts[cand.url] < 2) throw new LlmError('LLM 503: TimeoutError', 503);
+      return { ...normalizePacket(rawPacket({ displayTitle: pair(`T ${cand.title}`, `标题 ${cand.title}`) }), cand, topic), attempts: 1 };
+    }
+  });
+  const runId = await startRun('manual');
+  await waitIdle();
+  const run = await store.getRun(runId);
+  assert.equal(run.status, 'done');
+  assert.equal(run.published, 3);
+  assert.equal(run.failed, 0);
+  assert.equal(attempts['https://n.com/a'], 2, 'one slow attempt, then success on the retry pass');
+});
+
+test('a model that never recovers is failed only after the retry passes', async () => {
+  const { LlmError } = await import('../src/engine/llm.js');
+  process.env.TAVILY_API_KEY = 'test-tavily';
+  process.env.LLM_API_KEY = 'test-llm';
+  await freshDb();
+  await store.updateSettings({ topicsPerRun: 1, concurrency: 1, minSourceChars: 200 });
+  const text = 'Body text. '.repeat(100);
+  let calls = 0;
+  setPipelineDeps({
+    retryDelayMs: 5,
+    searchNews: async () => ({ results: [{ url: 'https://n.com/z', title: 'Z', snippet: '', rawContent: text, publishedAt: null, score: 1 }], responseTime: 0 }),
+    extractUrl: async () => '',
+    generatePacket: async () => { calls += 1; throw new LlmError('LLM 503: TimeoutError', 503); }
+  });
+  const runId = await startRun('manual');
+  await waitIdle();
+  const run = await store.getRun(runId);
+  assert.equal(calls, 2, 'two passes, not a retry storm');
+  assert.equal(run.failed, 1);
+  assert.equal(run.status, 'failed');
+});
+
+test('cost guards: a failing model trips the breaker and the run stops spending', async () => {
+  const { LlmError } = await import('../src/engine/llm.js');
+  process.env.TAVILY_API_KEY = 'test-tavily';
+  process.env.LLM_API_KEY = 'test-llm';
+  await freshDb();
+  await store.updateSettings({ topicsPerRun: 1, concurrency: 1, minSourceChars: 200, failureBreaker: 2 });
+  const text = 'Body text. '.repeat(100);
+  const results = Array.from({ length: 6 }, (_, i) => ({ url: `https://n.com/${i}`, title: `S${i}`, snippet: '', rawContent: text, publishedAt: null, score: 1 - i / 10 }));
+  let calls = 0;
+  setPipelineDeps({
+    retryDelayMs: 5,
+    searchNews: async () => ({ results, responseTime: 0 }),
+    extractUrl: async () => '',
+    generatePacket: async () => { calls += 1; throw new LlmError('LLM 503: TimeoutError', 503); }
+  });
+  const runId = await startRun('manual');
+  await waitIdle();
+  const run = await store.getRun(runId);
+  assert.equal(calls, 2, 'stopped after 2 consecutive model errors instead of trying all 6');
+  assert.equal(run.status, 'stopped');
+});
+
+test('cost guards: token budget stops new articles', async () => {
+  process.env.TAVILY_API_KEY = 'test-tavily';
+  process.env.LLM_API_KEY = 'test-llm';
+  await freshDb();
+  await store.updateSettings({ topicsPerRun: 1, concurrency: 1, minSourceChars: 200, maxTokensPerRun: 20000 });
+  const text = 'Body text. '.repeat(100);
+  const results = Array.from({ length: 5 }, (_, i) => ({ url: `https://n.com/${i}`, title: `S${i}`, snippet: '', rawContent: text, publishedAt: null, score: 1 - i / 10 }));
+  setPipelineDeps({
+    searchNews: async () => ({ results, responseTime: 0 }),
+    extractUrl: async () => '',
+    generatePacket: async (cand, topic, _t, { onUsage }) => {
+      onUsage({ promptTokens: 10000, completionTokens: 5000 });
+      return { ...normalizePacket(rawPacket({ displayTitle: pair(`T ${cand.title}`, `title ${cand.title}`) }), cand, topic), attempts: 1 };
+    }
+  });
+  const runId = await startRun('manual');
+  await waitIdle();
+  const run = await store.getRun(runId);
+  assert.ok(run.published >= 1 && run.published < 5, `published ${run.published} of 5 before budget hit`);
+  assert.equal(run.status, 'stopped');
+});

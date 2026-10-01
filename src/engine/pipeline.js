@@ -1,6 +1,7 @@
 import { engineEnv } from './config.js';
 import * as tavily from './tavily.js';
 import { generatePacket as realGenerate, RejectedArticle } from './generate.js';
+import { isTransient } from './llm.js';
 import {
   getSettings, getRun, pickTopicsForRun, createRun, setRunTotals, bumpRun, finishRun, logEvent,
   upsertItem, markTopicRan, existingUrls, recentTitleKeys, titleKey, persistPublishedArticle
@@ -9,8 +10,15 @@ import {
 // Seams so tests can drive the whole pipeline without network access.
 let deps = { searchNews: tavily.searchNews, extractUrl: tavily.extractUrl, generatePacket: realGenerate };
 
-export function setPipelineDeps(overrides) {
-  deps = { searchNews: tavily.searchNews, extractUrl: tavily.extractUrl, generatePacket: realGenerate, ...overrides };
+// Articles that hit a transient model/network error are parked and retried in
+// later passes of the same run (nothing is marked failed just for being slow).
+const RETRY_PASSES = 2;
+let retryDelayMs = 45_000;
+
+export function setPipelineDeps(overrides = {}) {
+  const { retryDelayMs: delay, ...rest } = overrides;
+  retryDelayMs = delay ?? 45_000;
+  deps = { searchNews: tavily.searchNews, extractUrl: tavily.extractUrl, generatePacket: realGenerate, ...rest };
 }
 
 let current = null;
@@ -142,17 +150,50 @@ async function execute(runId, handle) {
   await logEvent(runId, 'info', 'dedupe', `${candidates.length} candidates → ${fresh.length} new (${dupes} already known${overflow ? `, ${overflow} deferred by per-run cap` : ''})`);
 
   // ---- Stage 3: write + publish -------------------------------------------
-  const queue = [...fresh];
-  const worker = async () => {
-    while (queue.length && !handle.stop) {
-      const item = queue.shift();
-      await processCandidate(runId, item, settings);
-    }
+  // Cost guards: stop starting new articles when the model keeps failing
+  // (consecutive transient errors) or the run's token budget is spent.
+  const guard = { transientStreak: 0, tripped: null };
+  const budgetSpent = async () => {
+    const r = await getRun(runId);
+    return r.prompt_tokens + r.completion_tokens >= settings.maxTokensPerRun;
   };
-  await Promise.all(Array.from({ length: Math.min(settings.concurrency, queue.length) }, worker));
+  let queue = [...fresh];
+  for (let pass = 1; queue.length && !handle.stop; pass += 1) {
+    const parked = [];
+    const work = [...queue];
+    const worker = async () => {
+      while (work.length && !handle.stop && !guard.tripped) {
+        if (await budgetSpent()) {
+          guard.tripped = `token budget of ${settings.maxTokensPerRun} reached`;
+          break;
+        }
+        const item = work.shift();
+        const outcome = await processCandidate(runId, item, settings, pass < RETRY_PASSES);
+        if (outcome === 'retry' || outcome === 'failed-transient') {
+          guard.transientStreak += 1;
+          if (outcome === 'retry') parked.push(item);
+          if (guard.transientStreak >= settings.failureBreaker) {
+            guard.tripped = `${guard.transientStreak} model errors in a row - pausing instead of burning more tokens`;
+          }
+        } else if (outcome === 'ok') {
+          guard.transientStreak = 0;
+        }
+      }
+    };
+    const width = pass === 1 ? settings.concurrency : 1;
+    await Promise.all(Array.from({ length: Math.min(width, work.length) }, worker));
+    queue = guard.tripped ? [] : parked;
+    if (guard.tripped) {
+      await logEvent(runId, 'warn', 'run', `Stopped early: ${guard.tripped}. Remaining articles are left for the next run.`);
+    }
+    if (queue.length && !handle.stop) {
+      await logEvent(runId, 'warn', 'run', `${queue.length} article(s) hit a slow/unavailable model — retrying in ${Math.round(retryDelayMs / 1000)}s (pass ${pass + 1} of ${RETRY_PASSES})`);
+      await new Promise((r) => setTimeout(r, retryDelayMs));
+    }
+  }
 
   const rows = await getRun(runId);
-  const status = handle.stop ? 'stopped'
+  const status = handle.stop || guard.tripped ? 'stopped'
     : rows.failed > 0 && rows.published === 0 ? 'failed'
     : rows.failed > 0 ? 'partial'
     : 'done';
@@ -161,7 +202,7 @@ async function execute(runId, handle) {
   await finishRun(runId, status, status === 'failed' ? 'every article failed — see events' : null);
 }
 
-async function processCandidate(runId, c, settings) {
+async function processCandidate(runId, c, settings, canRetry = false) {
   const base = { title: c.title, topicId: c.topic.id };
   const started = Date.now();
   let tokens = 0;
@@ -202,15 +243,23 @@ async function processCandidate(runId, c, settings) {
     await bumpRun(runId, { published: 1 });
     await upsertItem(runId, c.url, { ...base, stage: 'publish', status: 'published', articleId, attempts: out.attempts, latencyMs: Date.now() - started });
     await logEvent(runId, 'info', 'publish', `#${articleId} ${out.meta.title}`, { url: c.url, country: out.meta.country, section: out.meta.section, tokens });
+    return 'ok';
   } catch (err) {
     if (err instanceof RejectedArticle) {
       await bumpRun(runId, { rejected: 1 });
       await upsertItem(runId, c.url, { ...base, stage: 'write', status: 'rejected', error: err.message, tokens, latencyMs: Date.now() - started });
       await logEvent(runId, 'info', 'write', `rejected "${c.title}": ${err.message}`, { url: c.url });
-      return;
+      return 'ok';
+    }
+    if (canRetry && isTransient(err)) {
+      await upsertItem(runId, c.url, { ...base, stage: 'write', status: 'retrying', error: err.message, tokens });
+      await logEvent(runId, 'warn', 'write', `slow/unavailable, will retry "${c.title}": ${err.message}`, { url: c.url });
+      return 'retry';
     }
     await bumpRun(runId, { failed: 1 });
     await upsertItem(runId, c.url, { ...base, stage: 'write', status: 'failed', error: err.message, tokens, latencyMs: Date.now() - started });
     await logEvent(runId, 'error', 'write', `failed "${c.title}": ${err.message}`, { url: c.url });
+    return isTransient(err) ? 'failed-transient' : 'done';
   }
+  return 'done';
 }

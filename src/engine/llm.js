@@ -8,9 +8,14 @@ export class LlmError extends Error {
   }
 }
 
-const RETRY_DELAYS_MS = [3_000, 8_000];
+// A slow response is never aborted by us: the request is already being billed,
+// so cutting it off and resending only pays twice. The client timeout below is
+// a safety net for a dead connection (15 min), not a speed limit. Retries are
+// reserved for errors where the router itself gave up (5xx/429/network) and are
+// few and spaced out, so a struggling upstream is not hammered.
+const RETRY_DELAYS_MS = [10_000, 30_000];
 
-function isTransient(err) {
+export function isTransient(err) {
   return err instanceof LlmError && (!err.status || [408, 425, 429, 500, 502, 503, 504].includes(err.status));
 }
 
@@ -34,7 +39,7 @@ export async function chat(opts) {
 // OpenAI-compatible chat completion against the Eter router. glm-5.3-flash is
 // a reasoning model, so reasoning tokens count against max_tokens — callers
 // must leave headroom or the visible answer comes back empty.
-async function chatOnce({ messages, maxTokens = 9000, temperature = 0.3, json = true, timeoutMs = 120_000, model }) {
+async function chatOnce({ messages, maxTokens = 9000, temperature = 0.3, json = true, timeoutMs = 900_000, model }) {
   const env = engineEnv();
   if (!env.llmKey) throw new LlmError('LLM_API_KEY is not set', 401);
   const body = {

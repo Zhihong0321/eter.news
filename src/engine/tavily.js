@@ -8,7 +8,7 @@ export class TavilyError extends Error {
   }
 }
 
-async function post(path, body, { timeoutMs = 45_000 } = {}) {
+async function post(path, body, { timeoutMs = 120_000 } = {}) {
   const env = engineEnv();
   if (!env.tavilyKey) throw new TavilyError('TAVILY_API_KEY is not set');
   const controller = new AbortController();
@@ -63,7 +63,7 @@ export async function searchNews({ query, days = 2, maxResults = 5 }) {
 
 // Fallback for results whose search payload had no usable page text.
 export async function extractUrl(url) {
-  const json = await post('/extract', { urls: [url], format: 'markdown', extract_depth: 'basic' }, { timeoutMs: 60_000 });
+  const json = await post('/extract', { urls: [url], format: 'markdown', extract_depth: 'basic' }, { timeoutMs: 120_000 });
   const hit = json?.results?.[0];
   return hit?.raw_content || '';
 }

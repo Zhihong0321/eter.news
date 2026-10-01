@@ -48,8 +48,10 @@ export const SETTING_DEFAULTS = {
   resultsPerTopic: 5,
   searchDays: 2,
   maxArticlesPerRun: 15,
-  concurrency: 3,
-  minSourceChars: 700
+  concurrency: 2,
+  minSourceChars: 700,
+  maxTokensPerRun: 300000,
+  failureBreaker: 3
 };
 
 export const SETTING_LIMITS = {
@@ -59,7 +61,9 @@ export const SETTING_LIMITS = {
   searchDays: [1, 14],
   maxArticlesPerRun: [1, 60],
   concurrency: [1, 6],
-  minSourceChars: [200, 5000]
+  minSourceChars: [200, 5000],
+  maxTokensPerRun: [20000, 5000000],
+  failureBreaker: [1, 20]
 };
 
 export const REGIONS = [
