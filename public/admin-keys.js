@@ -133,9 +133,9 @@ function card(c, reload) {
 async function load(message) {
   const { credentials, canEncrypt } = await api('credentials');
   $('enc').textContent = canEncrypt
-    ? 'Encryption key available — stored values are encrypted at rest.'
+    ? 'Stored values are encrypted at rest (key derived from the server DATABASE_URL).'
     : '';
-  if (!canEncrypt) showBanner('Set SECRETS_KEY (or HUB_API_KEY) on the server before saving keys — they are stored encrypted.', true);
+  if (!canEncrypt) showBanner('No DATABASE_URL on the server — keys cannot be stored.', true);
   const cards = $('cards');
   cards.replaceChildren(...credentials.map((c) => card(c, load)));
   if (message) {
@@ -150,6 +150,18 @@ $('btn-import').addEventListener('click', async () => {
     const out = await api('credentials', { method: 'POST', body: { importFromEnv: true } });
     await load(out.imported.length ? `Imported ${out.imported.length} value(s) from the environment.` : 'No environment variables to import.');
   } catch (err) { showBanner(err.message, true); }
+});
+
+$('pw-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    await api('password', { method: 'POST', body: { current: $('pw-current').value, next: $('pw-next').value } });
+    $('pw-current').value = '';
+    $('pw-next').value = '';
+    $('pw-result').textContent = 'Password changed.';
+  } catch (err) {
+    $('pw-result').textContent = err.message;
+  }
 });
 
 load().catch((err) => {

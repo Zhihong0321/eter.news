@@ -15,10 +15,30 @@
     <form id="login-form" class="login-card">
       <p class="eyebrow">Eter News</p>
       <h1>Gather Monitor</h1>
-      <label for="key">Admin key</label>
+      <label for="key">Admin password</label>
       <input id="key" type="password" autocomplete="current-password" required />
       <button class="btn primary" type="submit">Sign in</button>
       <p id="login-error" class="error" role="alert"></p>
+    </form>
+
+    <form id="setup-form" class="login-card wide" hidden>
+      <p class="eyebrow">First-time setup</p>
+      <h1>Set up Gather Monitor</h1>
+      <p class="muted">Everything is stored in your PostgreSQL database — no environment variables needed. API keys are encrypted at rest.</p>
+      <label for="setup-code">Setup code <span class="muted">(printed in the server / Railway deploy log)</span></label>
+      <input id="setup-code" autocomplete="off" spellcheck="false" required />
+      <label for="setup-pass">Choose an admin password <span class="muted">(10+ characters)</span></label>
+      <input id="setup-pass" type="password" autocomplete="new-password" minlength="10" required />
+      <label for="setup-tavily">Tavily API key</label>
+      <input id="setup-tavily" type="password" autocomplete="off" />
+      <label for="setup-llm">LLM router API key</label>
+      <input id="setup-llm" type="password" autocomplete="off" />
+      <label for="setup-url">LLM base URL</label>
+      <input id="setup-url" value="https://e-router.up.railway.app/v1" />
+      <label for="setup-model">LLM model</label>
+      <input id="setup-model" value="glm-5.3-flash" />
+      <button class="btn primary" type="submit">Save &amp; start</button>
+      <p id="setup-error" class="error" role="alert"></p>
     </form>
   </div>
 

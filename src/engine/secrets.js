@@ -1,21 +1,27 @@
 import crypto from 'node:crypto';
 
 // AES-256-GCM envelope for credentials stored in Postgres. The key is derived
-// from SECRETS_KEY (preferred) or HUB_API_KEY, so a database dump alone does
-// not reveal the API keys. Rotating that key makes stored values unreadable —
-// they are then reported as such and must be re-entered.
+// from SECRETS_KEY (preferred) or — with no extra configuration —
+// the DATABASE_URL connection string, which lives outside the database, so a
+// database dump alone does not reveal the API keys. Changing that value makes
+// stored credentials unreadable; they are then reported as such and must be
+// re-entered.
 const SALT = 'eter-news/engine-credentials/v1';
 let cached = { base: null, key: null };
 
+export function secretBase() {
+  return process.env.SECRETS_KEY || process.env.DATABASE_URL || process.env.SUPABASE_DB_URL || '';
+}
+
 function derive() {
-  const base = process.env.SECRETS_KEY || process.env.HUB_API_KEY || '';
-  if (!base) throw new Error('Set SECRETS_KEY (or HUB_API_KEY) on the server so stored credentials can be encrypted');
+  const base = secretBase();
+  if (!base) throw new Error('No DATABASE_URL (or SECRETS_KEY) available to derive the credential encryption key');
   if (cached.base !== base) cached = { base, key: crypto.scryptSync(base, SALT, 32) };
   return cached.key;
 }
 
 export function canEncrypt() {
-  return Boolean(process.env.SECRETS_KEY || process.env.HUB_API_KEY);
+  return Boolean(secretBase());
 }
 
 export function encrypt(plain) {

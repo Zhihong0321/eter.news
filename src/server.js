@@ -12,7 +12,7 @@ import {
   recordPageviewInDb,
   getAnalyticsReportFromDb
 } from './db.js';
-import { handleAdminApi } from './engine/admin.js';
+import { handleAdminApi, announceAdminSetup } from './engine/admin.js';
 import { startScheduler } from './engine/scheduler.js';
 import { renderInfographicDocument } from '../templates/infographic/render.js';
 
@@ -27,11 +27,8 @@ const PUBLIC_DIR = path.resolve(__dirname, '../public');
 const EDITORIAL_OUTPUT_DIR = path.resolve(__dirname, '../editorial-output');
 const PORT = Number(process.env.PORT) || 8080;
 
-// Admin key for /admin and /api/admin/* (news-gather monitoring dashboard).
-// Unset = the dashboard stays locked.
-if (!process.env.HUB_API_KEY) {
-  console.warn('\n  WARNING: HUB_API_KEY is not set. The /admin dashboard is LOCKED — no key will be accepted.\n');
-}
+// /admin needs no environment variable: the first visit sets the admin
+// password (one-time code printed in the server log) and it is stored in Postgres.
 
 async function readJsonBody(req) {
   const chunks = [];
@@ -357,6 +354,7 @@ if (!invokedPath || invokedPath.toLowerCase().endsWith('server.js')) {
   server.listen(PORT, '0.0.0.0', () => {
     console.log(`[eter.news] Public news portal running on 0.0.0.0:${PORT}`);
     startScheduler();
+    announceAdminSetup().catch((err) => console.error('[engine] admin setup check failed:', err.message));
   });
 }
 

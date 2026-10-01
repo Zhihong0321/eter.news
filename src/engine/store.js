@@ -1,5 +1,6 @@
 import { query as poolQuery, getPool, isDbEnabled } from '../db.js';
 import { SETTING_DEFAULTS, SETTING_LIMITS, CREDENTIALS, buildSeedTopics, setCredentialOverrides, credentialSource, engineEnv } from './config.js';
+import crypto from 'node:crypto';
 import { encrypt, decrypt, maskSecret, canEncrypt } from './secrets.js';
 
 // ---------------------------------------------------------------------------
@@ -145,6 +146,12 @@ const SCHEMA_SQL = [
      value_enc   text not null,
      updated_at  timestamptz not null default now()
    )`,
+  `create table if not exists engine_admin (
+     id          integer primary key default 1 check (id = 1),
+     pw_hash     text not null,
+     pw_salt     text not null,
+     updated_at  timestamptz not null default now()
+   )`,
   `create index if not exists engine_events_run_idx on engine_events (run_id, id)`,
   `create index if not exists engine_items_run_idx on engine_items (run_id)`
 ];
@@ -221,7 +228,7 @@ export async function saveCredentials(patch) {
     if (!(name in CREDENTIALS)) throw new Error(`Unknown credential "${name}"`);
   }
   if (entries.length && !canEncrypt()) {
-    throw new Error('Set SECRETS_KEY (or HUB_API_KEY) on the server first — credentials are stored encrypted');
+    throw new Error('No DATABASE_URL (or SECRETS_KEY) on the server — credentials cannot be stored encrypted');
   }
   const cleaned = entries.map(([name, raw]) => [name, validateCredential(name, raw)]);
   for (const [name, value] of cleaned) {
@@ -262,6 +269,49 @@ export async function credentialStatus() {
       updatedAt: updated[name] || null
     };
   });
+}
+
+// ---------------------------------------------------------------------------
+// Admin password — scrypt hash in Postgres, so the dashboard needs no env var
+// ---------------------------------------------------------------------------
+let adminCache = null;
+
+export function adminSalt() {
+  return adminCache?.salt || null;
+}
+
+export function adminConfigured() {
+  return Boolean(adminCache);
+}
+
+export async function loadAdmin() {
+  const { rows } = await q('select pw_hash, pw_salt from engine_admin where id = 1');
+  adminCache = rows[0] ? { hash: rows[0].pw_hash, salt: rows[0].pw_salt } : null;
+}
+
+function hashPassword(password, salt) {
+  return crypto.scryptSync(String(password), salt, 64).toString('hex');
+}
+
+export async function setAdminPassword(password) {
+  await ensureEngineSchema();
+  const value = String(password || '');
+  if (value.length < 10) throw new Error('Admin password must be at least 10 characters');
+  if (value.length > 200) throw new Error('Admin password is too long');
+  const salt = crypto.randomBytes(16).toString('hex');
+  await q(
+    `insert into engine_admin (id, pw_hash, pw_salt, updated_at) values (1, $1, $2, now())
+     on conflict (id) do update set pw_hash = excluded.pw_hash, pw_salt = excluded.pw_salt, updated_at = now()`,
+    [hashPassword(value, salt), salt]
+  );
+  await loadAdmin();
+}
+
+export function verifyAdminPassword(password) {
+  if (!adminCache) return false;
+  const a = Buffer.from(hashPassword(password, adminCache.salt), 'hex');
+  const b = Buffer.from(adminCache.hash, 'hex');
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 // ---------------------------------------------------------------------------

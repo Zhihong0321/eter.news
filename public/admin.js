@@ -27,7 +27,7 @@ async function api(path, { method = 'GET', body } = {}) {
     credentials: 'same-origin'
   });
   const json = await res.json().catch(() => ({ ok: false, error: `HTTP ${res.status}` }));
-  if (res.status === 401 && path !== 'login') {
+  if (res.status === 401 && path !== 'login' && path !== 'setup') {
     showLogin();
     throw new Error('Signed out');
   }
@@ -67,17 +67,44 @@ const chip = (status) => h('span', { class: `chip ${status}` }, status);
 // ---------------------------------------------------------------- state
 const S = { state: null, selectedRun: null, lastEventId: 0, events: [], tab: 'topics', busy: false };
 
-function showLogin() {
+async function showLogin() {
   $('app').hidden = true;
   $('login').hidden = false;
-  $('key').focus();
+  let configured = true;
+  try {
+    configured = (await api('status')).configured;
+  } catch (err) {
+    $('login-error').textContent = err.message;
+  }
+  $('login-form').hidden = !configured;
+  $('setup-form').hidden = configured;
+  (configured ? $('key') : $('setup-code')).focus();
 }
+
+$('setup-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('setup-error').textContent = '';
+  const credentials = {};
+  for (const [name, id] of [['tavilyKey', 'setup-tavily'], ['llmKey', 'setup-llm'], ['llmBaseUrl', 'setup-url'], ['llmModel', 'setup-model']]) {
+    if ($(id).value.trim()) credentials[name] = $(id).value.trim();
+  }
+  try {
+    await api('setup', { method: 'POST', body: { code: $('setup-code').value, password: $('setup-pass').value, credentials } });
+    for (const id of ['setup-code', 'setup-pass', 'setup-tavily', 'setup-llm']) $(id).value = '';
+    $('login').hidden = true;
+    $('app').hidden = false;
+    await refresh();
+    loadTab();
+  } catch (err) {
+    $('setup-error').textContent = err.message;
+  }
+});
 
 $('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   $('login-error').textContent = '';
   try {
-    await api('login', { method: 'POST', body: { key: $('key').value } });
+    await api('login', { method: 'POST', body: { password: $('key').value } });
     $('key').value = '';
     $('login').hidden = true;
     $('app').hidden = false;

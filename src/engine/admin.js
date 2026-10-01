@@ -5,12 +5,15 @@ import { engineStatus, enginePrereqs, startRun, requestStop } from './pipeline.j
 import { nextRunInfo, schedulerError } from './scheduler.js';
 import { pingTavily } from './tavily.js';
 import { pingLlm } from './llm.js';
-import { canEncrypt } from './secrets.js';
+import { canEncrypt, secretBase } from './secrets.js';
 
 const COOKIE = 'eter_admin';
 const SESSION_MS = 12 * 60 * 60 * 1000;
 
-function secret() {
+// Admin auth has no required environment variable: the password is a scrypt
+// hash in Postgres (set through the first-run setup form). HUB_API_KEY, when
+// set, still works as an additional admin password / x-hub-key header.
+function envKey() {
   return process.env.HUB_API_KEY || '';
 }
 
@@ -22,8 +25,12 @@ function safeEqual(a, b) {
   return crypto.timingSafeEqual(sha(a), sha(b));
 }
 
+function signingKey() {
+  return `${secretBase()}|${store.adminSalt() || 'env'}|${envKey()}`;
+}
+
 function sign(payload) {
-  return crypto.createHmac('sha256', secret()).update(payload).digest('hex');
+  return crypto.createHmac('sha256', signingKey()).update(payload).digest('hex');
 }
 
 function makeToken() {
@@ -45,10 +52,48 @@ function readCookie(req, name) {
   return '';
 }
 
+export function isAdminConfigured() {
+  return store.adminConfigured() || Boolean(envKey());
+}
+
+function passwordMatches(candidate) {
+  const value = String(candidate || '');
+  if (!value) return false;
+  if (envKey() && safeEqual(value, envKey())) return true;
+  return store.verifyAdminPassword(value);
+}
+
 export function isAdminAuthenticated(req) {
-  if (!secret()) return false;
-  if (req.headers['x-hub-key'] && safeEqual(req.headers['x-hub-key'], secret())) return true;
+  if (!isAdminConfigured()) return false;
+  if (envKey() && req.headers['x-hub-key'] && safeEqual(req.headers['x-hub-key'], envKey())) return true;
   return validToken(readCookie(req, COOKIE));
+}
+
+// One-time setup code, printed to the server log at boot while no admin
+// password exists. Whoever can read the deploy logs can claim the dashboard;
+// nobody else can, even though the setup endpoint is public.
+let setupCode = null;
+
+function ensureSetupCode() {
+  if (!setupCode) {
+    const raw = crypto.randomBytes(5).toString('hex').toUpperCase();
+    setupCode = `${raw.slice(0, 5)}-${raw.slice(5)}`;
+  }
+  return setupCode;
+}
+
+export async function announceAdminSetup() {
+  if (!store.engineDbEnabled()) return;
+  await store.ensureEngineSchema();
+  if (isAdminConfigured()) return;
+  console.log(`
+  ADMIN SETUP REQUIRED — open /admin and enter this one-time setup code: ${ensureSetupCode()}
+`);
+}
+
+function sessionCookie(req) {
+  const secure = req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : '';
+  return `${COOKIE}=${encodeURIComponent(makeToken())}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${SESSION_MS / 1000}${secure}`;
 }
 
 // Failed-login throttle: 8 attempts per 10 minutes per IP.
@@ -87,19 +132,37 @@ export async function handleAdminApi(req, res, pathname, url, { sendJson, readJs
   };
 
   try {
-    if (route === 'login' && method === 'POST') {
-      if (!secret()) return reply(503, { ok: false, error: 'HUB_API_KEY is not set on the server — admin is locked' });
+    if (route === 'status' && method === 'GET') {
+      if (!store.engineDbEnabled()) return reply(503, { ok: false, error: 'DATABASE_URL is not set — the engine needs the database' });
+      await store.ensureEngineSchema();
+      return reply(200, { ok: true, configured: isAdminConfigured() });
+    }
+
+    if ((route === 'login' || route === 'setup') && method === 'POST') {
+      if (!store.engineDbEnabled()) return reply(503, { ok: false, error: 'DATABASE_URL is not set — the engine needs the database' });
+      await store.ensureEngineSchema();
       const ip = clientIp(req);
       if (throttled(ip)) return reply(429, { ok: false, error: 'Too many attempts — try again in a few minutes' });
       const body = await readJsonBody(req);
-      if (!safeEqual(body.key || '', secret())) {
-        noteFailure(ip);
-        return reply(401, { ok: false, error: 'Wrong key' });
+
+      if (route === 'setup') {
+        if (isAdminConfigured()) return reply(409, { ok: false, error: 'Admin is already set up — sign in instead' });
+        if (!safeEqual(String(body.code || '').trim().toUpperCase(), ensureSetupCode())) {
+          noteFailure(ip);
+          return reply(401, { ok: false, error: 'Wrong setup code — it is printed in the server (Railway deploy) logs' });
+        }
+        await store.setAdminPassword(body.password);
+        if (body.credentials && typeof body.credentials === 'object') await store.saveCredentials(body.credentials);
+        setupCode = null;
+        return reply(200, { ok: true }, { 'set-cookie': sessionCookie(req) });
       }
-      const secure = req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : '';
-      return reply(200, { ok: true }, {
-        'set-cookie': `${COOKIE}=${encodeURIComponent(makeToken())}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${SESSION_MS / 1000}${secure}`
-      });
+
+      if (!isAdminConfigured()) return reply(409, { ok: false, needsSetup: true, error: 'Admin is not set up yet' });
+      if (!passwordMatches(body.password ?? body.key)) {
+        noteFailure(ip);
+        return reply(401, { ok: false, error: 'Wrong password' });
+      }
+      return reply(200, { ok: true }, { 'set-cookie': sessionCookie(req) });
     }
 
     if (route === 'logout' && method === 'POST') {
@@ -191,6 +254,14 @@ export async function handleAdminApi(req, res, pathname, url, { sendJson, readJs
 
     if (route === 'articles' && method === 'GET') {
       return reply(200, { ok: true, articles: await store.getRecentArticles() });
+    }
+
+    if (route === 'password' && method === 'POST') {
+      const body = await readJsonBody(req);
+      if (!passwordMatches(body.current)) return reply(401, { ok: false, error: 'Current password is wrong' });
+      await store.setAdminPassword(body.next);
+      // The signing key depends on the password salt, so every old session ends; keep this one.
+      return reply(200, { ok: true }, { 'set-cookie': sessionCookie(req) });
     }
 
     if (route === 'credentials' && method === 'GET') {

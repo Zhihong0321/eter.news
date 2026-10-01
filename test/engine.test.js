@@ -9,6 +9,7 @@ import { parseJsonObject } from '../src/engine/llm.js';
 import { renderInfographicDocument } from '../templates/infographic/render.js';
 import { PUBLISHED_ARTICLES_SQL } from '../src/db.js';
 import { engineEnv } from '../src/engine/config.js';
+import { handleAdminApi, announceAdminSetup } from '../src/engine/admin.js';
 
 process.env.TAVILY_API_KEY = 'test-tavily';
 process.env.LLM_API_KEY = 'test-llm';
@@ -269,7 +270,7 @@ test('persisting into a pre-existing enrichment table with extra required column
 });
 
 test('credentials are stored encrypted, override env, mask on read, and can be cleared', async () => {
-  process.env.HUB_API_KEY = 'unit-test-admin-key';
+  process.env.SECRETS_KEY = 'unit-test-secret-1';
   process.env.TAVILY_API_KEY = 'env-tavily-key-1234';
   const pg = await freshDb();
   assert.equal(engineEnv().tavilyKey, 'env-tavily-key-1234');
@@ -296,9 +297,81 @@ test('credentials are stored encrypted, override env, mask on read, and can be c
 
   // Rotating the encryption key makes stored values unreadable, and says so.
   await store.saveCredentials({ llmKey: 'sk-llm-secret-12345678' });
-  process.env.HUB_API_KEY = 'rotated-key';
+  process.env.SECRETS_KEY = 'rotated-secret';
   await store.loadCredentials();
   const after = await store.credentialStatus();
   assert.equal(after.find((c) => c.name === 'llmKey').storedUnreadable, true);
-  process.env.HUB_API_KEY = 'unit-test-admin-key';
+  process.env.SECRETS_KEY = 'unit-test-secret-1';
+});
+
+// ---------------------------------------------------------------------------
+// Admin auth with no environment variables: setup code → Postgres password
+// ---------------------------------------------------------------------------
+function call(method, route, { body, cookie } = {}) {
+  const req = {
+    method,
+    headers: { host: 'eter.test', ...(cookie ? { cookie } : {}) },
+    socket: { remoteAddress: '203.0.113.9' },
+    async *[Symbol.asyncIterator]() { if (body) yield Buffer.from(JSON.stringify(body)); }
+  };
+  return new Promise(async (resolve) => {
+    const res = {};
+    const sendJson = (_res, status, payload, headers = {}) => resolve({ status, payload, headers });
+    const url = new URL(`http://eter.test/api/admin/${route}`);
+    await handleAdminApi(req, res, url.pathname, url, { sendJson, readJsonBody: async (r) => { let s = ''; for await (const c of r) s += c; return s ? JSON.parse(s) : {}; } });
+  });
+}
+
+test('first-run setup stores the admin password and API keys in Postgres, no env vars', async () => {
+  delete process.env.HUB_API_KEY;
+  delete process.env.TAVILY_API_KEY;
+  delete process.env.LLM_API_KEY;
+  process.env.DATABASE_URL = 'postgres://u:p@h/db';
+  delete process.env.SECRETS_KEY;
+  const pg = await freshDb();
+  store.setDb({ query: (t, p) => pg.query(t, p), tx: (fn) => pg.transaction((tx) => fn({ query: (t, p) => tx.query(t, p) })) });
+
+  // Boot log prints the code; capture it.
+  const logs = [];
+  const realLog = console.log;
+  console.log = (...a) => logs.push(a.join(' '));
+  await announceAdminSetup();
+  console.log = realLog;
+  const code = logs.join(' ').match(/code: ([A-F0-9]{5}-[A-F0-9]{5})/)[1];
+
+  assert.deepEqual((await call('GET', 'status')).payload, { ok: true, configured: false });
+  assert.equal((await call('POST', 'login', { body: { password: 'whatever12345' } })).status, 409);
+  assert.equal((await call('GET', 'state')).status, 401, 'dashboard locked before setup');
+
+  const bad = await call('POST', 'setup', { body: { code: 'AAAAA-BBBBB', password: 'a-long-password-1' } });
+  assert.equal(bad.status, 401);
+  const short = await call('POST', 'setup', { body: { code, password: 'short' } });
+  assert.equal(short.status, 500);
+
+  const ok = await call('POST', 'setup', { body: { code, password: 'a-long-password-1', credentials: { tavilyKey: 'tvly-setup-key-12345', llmKey: 'sk-setup-key-123456', llmModel: 'glm-5.3-flash' } } });
+  assert.equal(ok.status, 200);
+  const cookie = ok.headers['set-cookie'].split(';')[0];
+
+  const state = await call('GET', 'state', { cookie });
+  assert.equal(state.status, 200);
+  assert.equal(state.payload.config.tavilyConfigured, true);
+  assert.deepEqual(state.payload.config.missing, []);
+
+  const stored = (await pg.query('select name, value_enc from engine_credentials order by name')).rows;
+  assert.deepEqual(stored.map((r) => r.name), ['llmKey', 'llmModel', 'tavilyKey']);
+  assert.ok(stored.every((r) => !r.value_enc.includes('setup-key')), 'encrypted at rest');
+  const adminRow = (await pg.query('select pw_hash from engine_admin')).rows[0];
+  assert.ok(adminRow.pw_hash && !adminRow.pw_hash.includes('long-password'));
+
+  // Setup is one-shot; login works with the new password only.
+  assert.equal((await call('POST', 'setup', { body: { code, password: 'another-password-9' } })).status, 409);
+  assert.equal((await call('POST', 'login', { body: { password: 'wrong-password-1' } })).status, 401);
+  assert.equal((await call('POST', 'login', { body: { password: 'a-long-password-1' } })).status, 200);
+
+  // Password change ends old sessions and the new password works.
+  const changed = await call('POST', 'password', { cookie, body: { current: 'a-long-password-1', next: 'brand-new-password-2' } });
+  assert.equal(changed.status, 200);
+  assert.equal((await call('GET', 'state', { cookie })).status, 401, 'old session invalidated');
+  assert.equal((await call('POST', 'login', { body: { password: 'brand-new-password-2' } })).status, 200);
+  delete process.env.DATABASE_URL;
 });
