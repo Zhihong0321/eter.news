@@ -14,6 +14,7 @@ import {
 } from './db.js';
 import { handleAdminApi, announceAdminSetup } from './engine/admin.js';
 import { startScheduler } from './engine/scheduler.js';
+import { pipelineHealth } from './engine/health.js';
 import { renderInfographicDocument } from '../templates/infographic/render.js';
 
 try {
@@ -235,12 +236,23 @@ const server = http.createServer(async (req, res) => {
       return await serveStatic(req, res, '/admin-keys.html', { noStore: true });
     }
 
-    if (pathname === '/health' || pathname === '/api/health') {
+    // /health stays 200 so Railway's deploy healthcheck never restarts the app over a
+    // stale feed; /health/pipeline returns 503 when unhealthy, for uptime monitors.
+    if (pathname === '/health' || pathname === '/api/health' || pathname === '/health/pipeline') {
       const dbHealth = await checkDbHealth();
-      return sendJson(res, 200, {
+      let pipeline;
+      try {
+        pipeline = await pipelineHealth();
+      } catch (err) {
+        pipeline = { healthy: false, state: 'error', problems: [`pipeline check failed: ${err.message}`] };
+      }
+      const healthy = Boolean(dbHealth.connected) && pipeline.healthy;
+      return sendJson(res, pathname === '/health/pipeline' && !healthy ? 503 : 200, {
         ok: true,
+        healthy,
         service: 'eter-news-portal',
         db: dbHealth,
+        pipeline,
         timestamp: new Date().toISOString()
       });
     }

@@ -15,7 +15,7 @@ export function setDb(db) {
   enrichmentColsCache = null;
 }
 
-function q(text, params) {
+export function q(text, params) {
   return injected ? injected.query(text, params) : poolQuery(text, params);
 }
 

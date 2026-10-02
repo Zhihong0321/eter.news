@@ -10,6 +10,7 @@ import { renderInfographicDocument } from '../templates/infographic/render.js';
 import { PUBLISHED_ARTICLES_SQL } from '../src/db.js';
 import { engineEnv } from '../src/engine/config.js';
 import { handleAdminApi, announceAdminSetup } from '../src/engine/admin.js';
+import { pipelineHealth } from '../src/engine/health.js';
 
 process.env.TAVILY_API_KEY = 'test-tavily';
 process.env.LLM_API_KEY = 'test-llm';
@@ -526,4 +527,48 @@ test('wrapped packets are unwrapped, and failures name the keys actually returne
   assert.ok(wrapped.packet, 'unwrapped one level');
   const bad = normalizePacket({ relevant: true, notes: 'hello', title: 'x' }, candidate, null);
   assert.ok(bad.problems.at(-1).includes('relevant, notes, title'));
+});
+
+test('pipelineHealth: flags an idle engine, then tracks overdue, stale, failed and paused states', async () => {
+  process.env.TAVILY_API_KEY = 'test-tavily';
+  process.env.LLM_API_KEY = 'test-llm';
+  await freshDb();
+  const empty = await pipelineHealth();
+  assert.equal(empty.healthy, false);
+  assert.equal(empty.state, 'scheduled');
+  assert.ok(empty.problems.some((p) => /no published articles/.test(p)));
+
+  await store.updateSettings({ topicsPerRun: 1, concurrency: 1, minSourceChars: 200 });
+  const text = 'Body text. '.repeat(100);
+  setPipelineDeps({
+    searchNews: async () => ({ results: [{ url: 'https://n.com/h', title: 'Health story', snippet: '', rawContent: text, publishedAt: null, score: 1 }], responseTime: 0 }),
+    extractUrl: async () => '',
+    generatePacket: async (cand, topic) => ({ ...normalizePacket(rawPacket(), cand, topic), attempts: 1 })
+  });
+  const runId = await startRun('manual');
+  await waitIdle();
+
+  const ok = await pipelineHealth();
+  assert.deepEqual(ok.problems, []);
+  assert.equal(ok.healthy, true);
+  assert.equal(ok.publishedLast24h, 1);
+  assert.equal(ok.lastRun.status, 'done');
+  assert.equal(ok.lastRun.published, 1);
+  assert.ok(ok.lastSuccessAt && ok.lastPublishedAt && ok.schedule.nextRunAt);
+
+  const overdue = await pipelineHealth(Date.now() + 2 * 3_600_000);
+  assert.ok(overdue.problems.some((p) => /has not started/.test(p)), 'run 2h past its due time is flagged');
+
+  await currentPg.query(`update article_enrichments set enriched_at = now() - interval '10 hours'`);
+  const stale = await pipelineHealth();
+  assert.ok(stale.problems.some((p) => /no new article for 10h/.test(p)));
+
+  await currentPg.query(`update engine_runs set status = 'failed' where id = $1`, [runId]);
+  const failed = await pipelineHealth();
+  assert.ok(failed.problems.some((p) => p.includes(`last run #${runId} failed`)));
+
+  await store.updateSettings({ paused: true });
+  const paused = await pipelineHealth();
+  assert.equal(paused.state, 'paused');
+  assert.ok(paused.problems.some((p) => /paused/.test(p)));
 });
