@@ -67,14 +67,14 @@ function card(c, reload) {
     type: c.secret ? 'password' : 'text',
     autocomplete: 'off',
     spellcheck: 'false',
-    placeholder: c.secret ? 'Paste a new key to replace' : 'Enter new value',
+    placeholder: c.keyCount !== undefined ? 'Paste key(s), separated by commas' : c.secret ? 'Paste a new key to replace' : 'Enter new value',
     id: `in-${c.name}`,
     'aria-label': `New ${c.label}`
   });
   const result = h('span', { class: 'muted' });
   const busy = (btn, on) => { btn.disabled = on; };
 
-  const save = h('button', { class: 'btn primary' }, 'Save to database');
+  const save = h('button', { class: c.keyCount !== undefined ? 'btn' : 'btn primary' }, c.keyCount !== undefined ? 'Replace all keys' : 'Save to database');
   save.addEventListener('click', async () => {
     if (!input.value.trim()) { result.textContent = 'Nothing to save.'; return; }
     busy(save, true);
@@ -91,6 +91,25 @@ function card(c, reload) {
 
   const actions = [save];
 
+  if (c.keyCount !== undefined) {
+    // Requests rotate round-robin across every key in the pool.
+    const add = h('button', { class: 'btn primary' }, 'Add to pool');
+    add.addEventListener('click', async () => {
+      if (!input.value.trim()) { result.textContent = 'Nothing to add.'; return; }
+      busy(add, true);
+      try {
+        await api('credentials', { method: 'POST', body: { addTavilyKeys: input.value } });
+        input.value = '';
+        showBanner('');
+        await reload(`Keys added to the ${c.label} pool.`);
+      } catch (err) {
+        result.textContent = err.message;
+        busy(add, false);
+      }
+    });
+    actions.unshift(add);
+  }
+
   const target = TESTS[c.name];
   const test = h('button', { class: 'btn' }, 'Test connection');
   test.addEventListener('click', async () => {
@@ -98,7 +117,9 @@ function card(c, reload) {
     result.textContent = 'testing…';
     try {
       const out = (await api('test', { method: 'POST', body: { target } }))[target];
-      result.textContent = out.ok ? `OK · ${out.latencyMs} ms${out.model ? ` · ${out.model}` : ''}` : `FAILED: ${out.error}`;
+      result.textContent = out.ok
+        ? `OK · ${out.keys ? `${out.keys.length} key(s) working · ` : ''}${out.latencyMs} ms${out.model ? ` · ${out.model}` : ''}`
+        : `FAILED: ${out.error}`;
     } catch (err) {
       result.textContent = err.message;
     }

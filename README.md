@@ -30,7 +30,7 @@ Only `DATABASE_URL` is required. Everything else lives in PostgreSQL:
 2. Open `/admin`, enter the setup code, choose an admin password and paste the Tavily + LLM keys. They are stored in Postgres (keys AES-256-GCM encrypted, password scrypt-hashed).
 3. From then on `/admin/keys` edits/tests/removes the keys and changes the admin password. Changes apply immediately, no redeploy.
 
-Optional env: `SECRETS_KEY` (encryption key; defaults to one derived from `DATABASE_URL`), `HUB_API_KEY` (extra admin password / `x-hub-key` header), `TAVILY_API_KEY` / `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` (fallbacks when nothing is stored; "Import from environment" copies them into the database).
+Optional env: `SECRETS_KEY` (encryption key; defaults to one derived from `DATABASE_URL`), `HUB_API_KEY` (extra admin password / `x-hub-key` header), `TAVILY_API_KEY` (one key, or several separated by commas - requests rotate round-robin and a rate-limited or out-of-credit key is benched for a while) / `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` (fallbacks when nothing is stored; "Import from environment" copies them into the database).
 
 ---
 

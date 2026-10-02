@@ -1,5 +1,5 @@
 import { query as poolQuery, getPool, isDbEnabled } from '../db.js';
-import { SETTING_DEFAULTS, SETTING_LIMITS, CREDENTIALS, buildSeedTopics, setCredentialOverrides, credentialSource, engineEnv } from './config.js';
+import { SETTING_DEFAULTS, SETTING_LIMITS, CREDENTIALS, buildSeedTopics, setCredentialOverrides, credentialSource, engineEnv, parseKeyList } from './config.js';
 import crypto from 'node:crypto';
 import { encrypt, decrypt, maskSecret, canEncrypt } from './secrets.js';
 
@@ -206,7 +206,19 @@ export async function loadCredentials() {
   setCredentialOverrides(values);
 }
 
+const MAX_POOLED_KEYS = 40;
+
 function validateCredential(name, raw) {
+  if (CREDENTIALS[name].multi) {
+    const keys = parseKeyList(raw);
+    if (!keys.length) throw new Error(`${CREDENTIALS[name].label} cannot be empty`);
+    if (keys.length > MAX_POOLED_KEYS) throw new Error(`${CREDENTIALS[name].label}: at most ${MAX_POOLED_KEYS} keys`);
+    return keys.map((key) => validateSingle(name, key)).join(',');
+  }
+  return validateSingle(name, raw);
+}
+
+function validateSingle(name, raw) {
   const value = String(raw ?? '').trim();
   if (!value) throw new Error(`${CREDENTIALS[name].label} cannot be empty`);
   if (/\s/.test(value)) throw new Error(`${CREDENTIALS[name].label} must not contain whitespace`);
@@ -242,6 +254,14 @@ export async function saveCredentials(patch) {
   return credentialStatus();
 }
 
+// Adds keys to the Tavily pool without the caller needing to know (or re-send)
+// the existing ones, which are never shown in full after saving.
+export async function addTavilyKeys(raw) {
+  const added = parseKeyList(raw);
+  if (!added.length) throw new Error(`${CREDENTIALS.tavilyKey.label} cannot be empty`);
+  return saveCredentials({ tavilyKey: [...engineEnv().tavilyKeys, ...added].join(',') });
+}
+
 export async function clearCredential(name) {
   await ensureEngineSchema();
   if (!(name in CREDENTIALS)) throw new Error(`Unknown credential "${name}"`);
@@ -264,7 +284,9 @@ export async function credentialStatus() {
       secret: def.secret,
       source: unreadable.has(name) && credentialSource(name) !== 'database' ? `${credentialSource(name)} (stored value unreadable)` : credentialSource(name),
       storedUnreadable: unreadable.has(name),
-      value: def.secret ? maskSecret(effective) : effective,
+      value: def.multi ? parseKeyList(effective).map(maskSecret).join(', ')
+        : def.secret ? maskSecret(effective) : effective,
+      keyCount: def.multi ? parseKeyList(effective).length : undefined,
       set: Boolean(effective),
       updatedAt: updated[name] || null
     };

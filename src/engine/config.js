@@ -4,7 +4,7 @@
 // the engine_settings table (see store.js) and override the defaults below.
 
 export const CREDENTIALS = {
-  tavilyKey: { env: 'TAVILY_API_KEY', label: 'Tavily API key', secret: true },
+  tavilyKey: { env: 'TAVILY_API_KEY', label: 'Tavily API keys', secret: true, multi: true },
   llmKey: { env: 'LLM_API_KEY', label: 'LLM router API key', secret: true },
   llmBaseUrl: { env: 'LLM_BASE_URL', label: 'LLM base URL', secret: false, fallback: 'https://e-router.up.railway.app/v1' },
   llmModel: { env: 'LLM_MODEL', label: 'LLM model', secret: false, fallback: 'glm-5.3-flash' }
@@ -30,9 +30,15 @@ function resolve(name) {
   return String(overrides[name] || process.env[def.env] || def.fallback || '').trim();
 }
 
+// Several keys in one value, separated by commas, semicolons or newlines.
+export function parseKeyList(raw) {
+  return [...new Set(String(raw || '').split(/[,;\r\n]+/).map((k) => k.trim()).filter(Boolean))];
+}
+
 export function engineEnv() {
   return {
     tavilyKey: resolve('tavilyKey'),
+    tavilyKeys: parseKeyList(resolve('tavilyKey')),
     tavilyUrl: (process.env.TAVILY_BASE_URL || 'https://api.tavily.com').replace(/\/+$/, ''),
     llmBaseUrl: resolve('llmBaseUrl').replace(/\/+$/, ''),
     llmKey: resolve('llmKey'),

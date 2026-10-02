@@ -453,7 +453,7 @@ async function renderHealth(body) {
     h('div', {}, h('b', {}, label), h('div', { class: 'muted' }, detail)),
     h('div', { class: 'row', style: 'margin:0' }, rows[key], h('button', { class: 'btn small', onclick: test(key) }, 'Test')));
   body.replaceChildren(h('div', { class: 'health' },
-    row('Tavily search', cfg.tavilyConfigured ? 'API key set (1 credit per test)' : 'TAVILY_API_KEY missing', 'tavily'),
+    row('Tavily search', cfg.tavilyConfigured ? `${cfg.tavilyKeys || 1} key(s) in rotation (1 credit per key per test)` : 'TAVILY_API_KEY missing', 'tavily'),
     row('LLM router', `${cfg.llmModel} @ ${cfg.llmBaseUrl}${cfg.llmConfigured ? '' : ' — LLM_API_KEY missing'}`, 'llm'),
     row('Database schema', 'article_enrichments writable by the engine', 'schema')));
 }

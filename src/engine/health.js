@@ -2,6 +2,7 @@ import { engineEnv } from './config.js';
 import { engineDbEnabled, ensureEngineSchema, q } from './store.js';
 import { nextRunInfo, schedulerError } from './scheduler.js';
 import { engineStatus } from './pipeline.js';
+import { tavilyPoolStatus } from './tavily.js';
 
 const HOUR = 3_600_000;
 // The scheduler ticks every 30s, so a run this late means the loop is stuck.
@@ -40,6 +41,8 @@ export async function pipelineHealth(now = Date.now()) {
     if (lateMs > OVERDUE_GRACE_MS) problems.push(`next run was due ${Math.round(lateMs / 60_000)} min ago and has not started`);
   }
   if (last?.status === 'failed') problems.push(`last run #${last.id} failed`);
+  const tavily = tavilyPoolStatus();
+  if (tavily.keys && tavily.cooling === tavily.keys) problems.push(`all ${tavily.keys} Tavily key(s) are rate limited or out of credits`);
 
   const staleAfterMs = Math.max(MIN_STALE_MS, 3 * schedule.settings.intervalMinutes * 60_000);
   const publishedAt = pub?.at ? new Date(pub.at) : null;
@@ -53,6 +56,7 @@ export async function pipelineHealth(now = Date.now()) {
     state: running ? 'running' : schedule.state,
     problems,
     schedule: { intervalMinutes: schedule.settings.intervalMinutes, nextRunAt: schedule.nextRunAt },
+    tavily,
     lastRun: last && {
       id: last.id, status: last.status, trigger: last.trigger,
       startedAt: iso(last.started_at), finishedAt: iso(last.finished_at),

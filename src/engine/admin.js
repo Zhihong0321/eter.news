@@ -194,6 +194,7 @@ export async function handleAdminApi(req, res, pathname, url, { sendJson, readJs
           llmBaseUrl: env.llmBaseUrl,
           llmModel: env.llmModel,
           tavilyConfigured: Boolean(env.tavilyKey),
+          tavilyKeys: env.tavilyKeys.length,
           llmConfigured: Boolean(env.llmKey),
           missing: enginePrereqs()
         },
@@ -270,6 +271,7 @@ export async function handleAdminApi(req, res, pathname, url, { sendJson, readJs
     if (route === 'credentials' && method === 'POST') {
       const body = await readJsonBody(req);
       if (body.clear) return reply(200, { ok: true, credentials: await store.clearCredential(String(body.clear)) });
+      if (body.addTavilyKeys) return reply(200, { ok: true, credentials: await store.addTavilyKeys(body.addTavilyKeys) });
       if (body.importFromEnv) {
         const patch = {};
         for (const [name, def] of Object.entries(CREDENTIALS)) {

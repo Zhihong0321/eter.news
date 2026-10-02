@@ -8,7 +8,8 @@ import { startRun, setPipelineDeps, engineStatus, normalizeUrl } from '../src/en
 import { parseJsonObject } from '../src/engine/llm.js';
 import { renderInfographicDocument } from '../templates/infographic/render.js';
 import { PUBLISHED_ARTICLES_SQL } from '../src/db.js';
-import { engineEnv } from '../src/engine/config.js';
+import { engineEnv, setCredentialOverrides } from '../src/engine/config.js';
+import { searchNews, pingTavily, resetTavilyPool, tavilyPoolStatus } from '../src/engine/tavily.js';
 import { handleAdminApi, announceAdminSetup } from '../src/engine/admin.js';
 import { pipelineHealth } from '../src/engine/health.js';
 
@@ -571,4 +572,89 @@ test('pipelineHealth: flags an idle engine, then tracks overdue, stale, failed a
   const paused = await pipelineHealth();
   assert.equal(paused.state, 'paused');
   assert.ok(paused.problems.some((p) => /paused/.test(p)));
+});
+
+// ---------------------------------------------------------------------------
+// Tavily key pool (fake keys, mocked fetch)
+// ---------------------------------------------------------------------------
+async function withTavilyFetch(keys, handler, fn) {
+  const realFetch = globalThis.fetch;
+  const used = [];
+  setCredentialOverrides({});
+  process.env.TAVILY_API_KEY = keys.join(',');
+  resetTavilyPool();
+  globalThis.fetch = async (_url, init) => {
+    const key = init.headers.authorization.replace('Bearer ', '');
+    used.push(key);
+    const { status = 200, body = { results: [] } } = handler(key, used.length) || {};
+    return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+  };
+  try {
+    await fn(used);
+  } finally {
+    globalThis.fetch = realFetch;
+    process.env.TAVILY_API_KEY = 'test-tavily';
+    resetTavilyPool();
+  }
+}
+
+test('tavily pool: requests rotate round-robin across every key', async () => {
+  const keys = ['tvly-test-key-aaaa1111', 'tvly-test-key-bbbb2222', 'tvly-test-key-cccc3333'];
+  await withTavilyFetch(keys, () => ({}), async (used) => {
+    for (let i = 0; i < 6; i += 1) await searchNews({ query: 'q' });
+    assert.deepEqual(used, [...keys, ...keys]);
+    assert.deepEqual(tavilyPoolStatus(), { keys: 3, cooling: 0 });
+  });
+});
+
+test('tavily pool: an exhausted or rate-limited key is benched and the request moves on', async () => {
+  const [a, b, c] = ['tvly-test-key-aaaa1111', 'tvly-test-key-bbbb2222', 'tvly-test-key-cccc3333'];
+  await withTavilyFetch([a, b, c], (key) => (key === b ? { status: 432, body: { detail: { error: 'usage limit' } } } : {}), async (used) => {
+    await searchNews({ query: 'q' });
+    await searchNews({ query: 'q' }); // starts on b: 432, falls through to c
+    assert.deepEqual(used, [a, b, c]);
+    assert.deepEqual(tavilyPoolStatus(), { keys: 3, cooling: 1 });
+    used.length = 0;
+    for (let i = 0; i < 4; i += 1) await searchNews({ query: 'q' });
+    assert.ok(!used.includes(b), 'benched key is skipped');
+    assert.ok(used.includes(a) && used.includes(c));
+  });
+
+  await withTavilyFetch([a, b], () => ({ status: 432, body: { detail: { error: 'usage limit' } } }), async () => {
+    await assert.rejects(() => searchNews({ query: 'q' }), (err) => err.status === 432);
+    assert.deepEqual(tavilyPoolStatus(), { keys: 2, cooling: 2 });
+    await assert.rejects(() => searchNews({ query: 'q' }), /All 2 Tavily key\(s\) are unavailable/);
+  });
+
+  // A bad request is the caller's fault: it must not bench anyone.
+  await withTavilyFetch([a, b], () => ({ status: 400, body: { detail: { error: 'bad query' } } }), async (used) => {
+    await assert.rejects(() => searchNews({ query: 'q' }), (err) => err.status === 400);
+    assert.equal(used.length, 1);
+    assert.equal(tavilyPoolStatus().cooling, 0);
+  });
+});
+
+test('tavily pool: pingTavily names the bad key; adding keys merges, dedupes and masks', async () => {
+  const [a, b] = ['tvly-test-key-aaaa1111', 'tvly-test-key-bbbb2222'];
+  await withTavilyFetch([a, b], (key) => (key === b ? { status: 401, body: { detail: { error: 'Unauthorized' } } } : {}), async () => {
+    const out = await pingTavily();
+    assert.equal(out.ok, false);
+    assert.equal(out.keys.length, 2);
+    assert.match(out.error, /1 of 2 key\(s\) failed/);
+    assert.ok(!out.error.includes(b), 'full key never reported');
+  });
+
+  process.env.SECRETS_KEY = 'unit-test-secret-1';
+  setCredentialOverrides({});
+  process.env.TAVILY_API_KEY = a;
+  await freshDb();
+  const status = await store.addTavilyKeys(`${a}, ${b}\ntvly-test-key-cccc3333`);
+  const tav = status.find((c) => c.name === 'tavilyKey');
+  assert.equal(tav.keyCount, 3, 'env key + new keys, duplicate dropped');
+  assert.ok(!JSON.stringify(status).includes('bbbb2222'), 'full keys never returned');
+  assert.equal(engineEnv().tavilyKeys.length, 3);
+  await assert.rejects(() => store.addTavilyKeys('  ,  '), /cannot be empty/);
+  await assert.rejects(() => store.saveCredentials({ tavilyKey: `${a},short` }), /too short/);
+  setCredentialOverrides({});
+  process.env.TAVILY_API_KEY = 'test-tavily';
 });
