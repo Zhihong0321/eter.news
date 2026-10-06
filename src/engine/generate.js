@@ -27,7 +27,7 @@ OUTPUT SHAPE (all keys required unless marked optional)
   "relevant": true,
   "country": "ISO 3166-1 alpha-2 of the country the story is primarily about, e.g. MY, SG, CN, JP, KR, US, GB. Empty string if multinational.",
   "section": "one of: business | energy | technology | economy | policy | society | markets",
-  "tags": ["3-6 short lowercase English tags"],
+  "tags": ["3-6 short lowercase English tags; always include the tag solar for solar/PV stories and renewable-energy for any renewable or clean-power story (solar, wind, hydro, bioenergy, geothermal, storage)"],
   "publisher": "name of the publication that wrote the source",
   "displayTitle": {"en": "<=90 chars, factual headline", "zh": "..."},
   "summary": {"en": "2-3 sentences, 40-80 words", "zh": "..."},

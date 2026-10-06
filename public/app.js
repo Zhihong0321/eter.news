@@ -4,6 +4,7 @@ const searchInput = document.getElementById('news-search');
 const countryFilter = document.getElementById('country-filter');
 const loadStatus = document.getElementById('load-status');
 const editionCount = document.getElementById('edition-count');
+const categoryShortcuts = document.getElementById('category-shortcuts');
 const articleById = new Map();
 
 const tagTrigger = document.getElementById('tag-trigger');
@@ -93,6 +94,12 @@ const copy = {
     done: 'Show stories',
     tagsSelected: '{n} tags selected',
     allTagsSelected: 'All tags selected',
+    shortcutsLabel: 'Jump to',
+    categoryAll: 'All stories',
+    categories: { renewable: 'Renewable', tech: 'Tech', finance: 'Finance' },
+    spotlightKicker: 'Spotlight',
+    spotlightTitle: 'Solar & renewables in Southeast Asia',
+    spotlightAll: 'All renewable stories',
     regions: {
       Malaysia: 'Malaysia',
       ASEAN: 'ASEAN',
@@ -143,6 +150,12 @@ const copy = {
     done: '显示报道',
     tagsSelected: '已选择 {n} 个标签',
     allTagsSelected: '已选择所有标签',
+    shortcutsLabel: '快速前往',
+    categoryAll: '全部报道',
+    categories: { renewable: '可再生能源', tech: '科技', finance: '金融' },
+    spotlightKicker: '焦点',
+    spotlightTitle: '东南亚太阳能与可再生能源',
+    spotlightAll: '全部可再生能源报道',
     regions: {
       Malaysia: '马来西亚',
       ASEAN: '东盟国家',
@@ -164,12 +177,39 @@ const westernCountries = new Set([
   'GR', 'HR', 'SI', 'EE', 'LV', 'LT', 'UA', 'MD', 'AL', 'BA', 'ME', 'MK', 'RS'
 ]);
 
+// Front-page shortcuts. An article's `section` is coarse and its tags are free-form
+// model output, so a category is derived from both, and one story can fall in
+// several (solar financing is both Renewable and Finance). `text` categories are
+// also matched against the headline and summary, since solar stories are often
+// filed under a generic section.
+const renewablePattern = /\b(solar|photovoltaics?|pv|renewables?|clean (energy|power)|green (energy|hydrogen)|wind (power|farm|turbine|energy)|offshore wind|hydropower|geothermal|biomass|biogas|(battery|energy) storage|net energy metering|feed-in tariff)\b/;
+const categories = [
+  { id: 'renewable', sections: [], pattern: renewablePattern, text: true },
+  {
+    id: 'tech',
+    sections: ['technology'],
+    pattern: /\b(tech|technology|ai|artificial intelligence|semiconductors?|chips?|software|cloud|cyber\w*|data cent(er|re)s?|robot\w*|5g|quantum)\b/
+  },
+  {
+    id: 'finance',
+    sections: ['markets', 'economy'],
+    pattern: /\b(financ\w*|fintech|bank\w*|invest\w*|stocks?|equity|bonds?|funds?|ipo|forex|currency|ringgit|interest rates?|inflation|monetary|loans?|credit|insurance|capital|earnings)\b/
+  }
+];
+const categoryCache = new WeakMap();
+
+function categoryFromUrl() {
+  const id = new URLSearchParams(window.location.search).get('category');
+  return categories.some((category) => category.id === id) ? id : '';
+}
+
 const savedCountries = getCookie('meridian-countries');
 const savedTags = getCookie('meridian-tags');
 
 const state = {
   articles: [],
   query: '',
+  category: categoryFromUrl(),
   countries: Array.isArray(savedCountries) ? savedCountries : (typeof savedCountries === 'string' && savedCountries ? [savedCountries] : []),
   tags: Array.isArray(savedTags) ? savedTags : (typeof savedTags === 'string' && savedTags ? [savedTags] : []),
   language: localStorage.getItem('meridian-language') === 'cn' ? 'cn' : 'en'
@@ -228,6 +268,66 @@ function articleTags(article) {
 function tagLabel(tag) {
   const label = String(tag || '').replace(/-/g, ' ').trim();
   return label ? label.charAt(0).toLocaleUpperCase(locale()) + label.slice(1) : '';
+}
+
+function articleCategories(article) {
+  let found = categoryCache.get(article);
+  if (!found) {
+    const tagText = articleTags(article).join(' ').replace(/-/g, ' ').toLowerCase();
+    const fullText = [tagText, article.displayTitle?.en, article.summary?.en].filter(Boolean).join(' ').toLowerCase();
+    const section = String(article.section || '').toLowerCase();
+    found = new Set(categories
+      .filter((category) => category.sections.includes(section) || category.pattern.test(category.text ? fullText : tagText))
+      .map((category) => category.id));
+    categoryCache.set(article, found);
+  }
+  return found;
+}
+
+function isSoutheastAsia(country) {
+  const code = String(country || '').toUpperCase();
+  return code === 'MY' || aseanCountries.has(code);
+}
+
+function isSoutheastAsiaRenewable(article) {
+  return isSoutheastAsia(article.country) && articleCategories(article).has('renewable');
+}
+
+function setCategory(id) {
+  state.category = state.category === id ? '' : id;
+  const url = new URL(window.location.href);
+  if (state.category) url.searchParams.set('category', state.category);
+  else url.searchParams.delete('category');
+  window.history.replaceState(null, '', url);
+  renderNews();
+}
+
+function renderCategoryShortcuts() {
+  const loaded = state.articles.length > 0;
+  const pool = filteredArticles({ ignoreCategory: true });
+  const focusedId = categoryShortcuts.contains(document.activeElement) ? document.activeElement.dataset.category : null;
+
+  const makeChip = (id, label, count) => {
+    const chip = makeElement('button', 'category-chip');
+    chip.type = 'button';
+    chip.dataset.category = id;
+    chip.setAttribute('aria-pressed', String(state.category === id));
+    chip.append(makeElement('span', '', label));
+    if (loaded) chip.append(makeElement('span', 'category-count', String(count)));
+    return chip;
+  };
+
+  const chips = [
+    makeChip('', currentCopy().categoryAll, pool.length),
+    ...categories.map((category) => makeChip(
+      category.id,
+      currentCopy().categories[category.id],
+      pool.filter((article) => articleCategories(article).has(category.id)).length
+    ))
+  ];
+  categoryShortcuts.replaceChildren(...chips);
+  // Re-rendering replaces the buttons; keep keyboard focus on the one just used.
+  if (focusedId !== null) chips.find((chip) => chip.dataset.category === focusedId)?.focus();
 }
 
 function replaceFilterOptions(select, allLabel, values, labelForValue) {
@@ -423,9 +523,15 @@ function createRegionSection(region, articles, index) {
   return section;
 }
 
-function filteredArticles() {
+function hasActiveFilter() {
+  return Boolean(state.category || state.countries.length || state.tags.length || state.query.trim());
+}
+
+// ignoreCategory lets the shortcut chips count what each would show on click.
+function filteredArticles({ ignoreCategory = false } = {}) {
   const query = state.query.trim().toLocaleLowerCase(locale());
   return state.articles.filter((article) => {
+    if (!ignoreCategory && state.category && !articleCategories(article).has(state.category)) return false;
     if (state.countries.length > 0) {
       const artCountry = String(article.country || '').toUpperCase();
       if (!state.countries.includes(artCountry)) return false;
@@ -439,17 +545,47 @@ function filteredArticles() {
   });
 }
 
+const SPOTLIGHT_SIZE = 3;
+
+function createSpotlight(articles) {
+  const section = makeElement('section', 'spotlight');
+  section.setAttribute('aria-label', currentCopy().spotlightTitle);
+
+  const head = makeElement('div', 'spotlight-head');
+  const titles = makeElement('div');
+  titles.append(makeElement('span', 'spotlight-kicker', currentCopy().spotlightKicker));
+  titles.append(makeElement('h2', 'spotlight-title', currentCopy().spotlightTitle));
+  const all = makeElement('button', 'spotlight-all', `${currentCopy().spotlightAll} ↗`);
+  all.type = 'button';
+  all.dataset.category = 'renewable';
+  head.append(titles, all);
+
+  const list = makeElement('div', 'spotlight-list');
+  articles.forEach((article) => list.append(createStory(article)));
+  section.append(head, list);
+  return section;
+}
+
 function renderNews() {
-  const articles = filteredArticles();
+  renderCategoryShortcuts();
+  const matches = filteredArticles();
   newsRoot.replaceChildren();
 
-  if (!articles.length) {
+  if (!matches.length) {
     newsRoot.append(makeElement('p', 'empty-state', state.articles.length ? currentCopy().noMatch : currentCopy().empty));
     editionCount.textContent = state.articles.length ? `0 ${currentCopy().stories}` : '';
     return;
   }
 
-  editionCount.textContent = `${articles.length} ${currentCopy().stories}`;
+  editionCount.textContent = `${matches.length} ${currentCopy().stories}`;
+
+  // Southeast Asia solar/renewables leads the unfiltered front page. Its stories
+  // move out of the regular feed so nothing appears twice, but at least one story
+  // is always left for the cover layout.
+  const spotlight = hasActiveFilter() ? [] : matches.filter(isSoutheastAsiaRenewable).slice(0, SPOTLIGHT_SIZE);
+  const showSpotlight = spotlight.length > 0 && spotlight.length < matches.length;
+  const articles = showSpotlight ? matches.filter((article) => !spotlight.includes(article)) : matches;
+  if (showSpotlight) newsRoot.append(createSpotlight(spotlight));
 
   const featuredLayout = makeElement('section', 'featured-layout');
   featuredLayout.setAttribute('aria-label', currentCopy().topStory);
@@ -556,7 +692,17 @@ async function loadNews() {
   }
 }
 
+categoryShortcuts.addEventListener('click', (event) => {
+  const chip = event.target.closest('[data-category]');
+  if (chip) setCategory(chip.dataset.category);
+});
+
 newsRoot.addEventListener('click', (event) => {
+  const categoryButton = event.target.closest('[data-category]');
+  if (categoryButton) {
+    setCategory(categoryButton.dataset.category);
+    return;
+  }
   const button = event.target.closest('[data-article-id]');
   if (!button) return;
   const article = articleById.get(button.dataset.articleId);

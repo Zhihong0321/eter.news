@@ -1,5 +1,5 @@
 import { query as poolQuery, getPool, isDbEnabled } from '../db.js';
-import { SETTING_DEFAULTS, SETTING_LIMITS, CREDENTIALS, buildSeedTopics, setCredentialOverrides, credentialSource, engineEnv, parseKeyList } from './config.js';
+import { SETTING_DEFAULTS, SETTING_LIMITS, CREDENTIALS, PRIORITY_TOPICS_VERSION, buildSeedTopics, buildPriorityTopics, setCredentialOverrides, credentialSource, engineEnv, parseKeyList } from './config.js';
 import crypto from 'node:crypto';
 import { encrypt, decrypt, maskSecret, canEncrypt } from './secrets.js';
 
@@ -163,6 +163,7 @@ export function ensureEngineSchema() {
     schemaReady = (async () => {
       for (const sql of SCHEMA_SQL) await q(sql);
       await seedTopicsIfEmpty();
+      await seedPriorityTopics();
       await loadCredentials();
       // A process that died mid-run leaves a 'running' row behind.
       await q(`update engine_runs set status = 'interrupted', finished_at = now(),
@@ -176,16 +177,36 @@ export function ensureEngineSchema() {
   return schemaReady;
 }
 
-async function seedTopicsIfEmpty() {
-  const { rows } = await q('select count(*)::int as n from engine_topics');
-  if (rows[0].n > 0) return;
-  for (const t of buildSeedTopics()) {
+const PRIORITY_TOPICS_KEY = 'priority_topics_version';
+
+async function insertSeedTopics(topics) {
+  for (const t of topics) {
     await q(
       `insert into engine_topics (query, region, country, section) values ($1, $2, $3, $4)
        on conflict (query) do nothing`,
       [t.query, t.region, t.country, t.section]
     );
   }
+}
+
+async function seedTopicsIfEmpty() {
+  const { rows } = await q('select count(*)::int as n from engine_topics');
+  if (rows[0].n > 0) return;
+  await insertSeedTopics(buildSeedTopics());
+}
+
+// Unlike the base seed this also reaches databases that are already populated.
+// The applied version is remembered so a topic an operator later deletes stays
+// deleted on the next boot (disable it, or bump the version, to change that).
+async function seedPriorityTopics() {
+  const { rows } = await q(`select value from engine_settings where key = $1`, [PRIORITY_TOPICS_KEY]);
+  if (Number(rows[0]?.value) >= PRIORITY_TOPICS_VERSION) return;
+  await insertSeedTopics(buildPriorityTopics());
+  await q(
+    `insert into engine_settings (key, value, updated_at) values ($1, $2::jsonb, now())
+     on conflict (key) do update set value = excluded.value, updated_at = now()`,
+    [PRIORITY_TOPICS_KEY, JSON.stringify(PRIORITY_TOPICS_VERSION)]
+  );
 }
 
 // ---------------------------------------------------------------------------

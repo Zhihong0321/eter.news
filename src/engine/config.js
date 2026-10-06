@@ -89,6 +89,34 @@ export const SECTIONS = [
   { id: 'policy', terms: 'government policy regulation' }
 ];
 
+// Solar and renewable energy in Southeast Asia is the desk's priority beat (the
+// publisher is a Malaysian solar EPC). The generic seed above only searches
+// "energy" per region, so these add a dedicated search for each SEA market.
+// Bump the version to roll out an edited list to databases that are already seeded.
+export const PRIORITY_TOPICS_VERSION = 1;
+
+const SEA_MARKETS = [
+  { region: 'ASEAN', country: 'SG', terms: 'Singapore' },
+  { region: 'ASEAN', country: 'ID', terms: 'Indonesia' },
+  { region: 'ASEAN', country: 'TH', terms: 'Thailand' },
+  { region: 'ASEAN', country: 'VN', terms: 'Vietnam' },
+  { region: 'ASEAN', country: 'PH', terms: 'Philippines' }
+];
+
+export function buildPriorityTopics() {
+  const topic = (query, region, country) => ({ query, region, country, section: 'energy' });
+  return [
+    topic('Malaysia solar power news', 'Malaysia', 'MY'),
+    topic('Malaysia renewable energy policy investment news', 'Malaysia', 'MY'),
+    topic('Malaysia rooftop solar NEM LSS CRESS SEDA news', 'Malaysia', 'MY'),
+    topic('Southeast Asia solar renewable energy ASEAN power grid news', 'ASEAN', ''),
+    ...SEA_MARKETS.flatMap((m) => [
+      topic(`${m.terms} solar power news`, m.region, m.country),
+      topic(`${m.terms} renewable energy policy investment news`, m.region, m.country)
+    ])
+  ];
+}
+
 export function buildSeedTopics() {
   const topics = [];
   for (const region of REGIONS) {

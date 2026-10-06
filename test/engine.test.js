@@ -8,7 +8,7 @@ import { startRun, setPipelineDeps, engineStatus, normalizeUrl } from '../src/en
 import { parseJsonObject } from '../src/engine/llm.js';
 import { renderInfographicDocument } from '../templates/infographic/render.js';
 import { PUBLISHED_ARTICLES_SQL } from '../src/db.js';
-import { engineEnv, setCredentialOverrides } from '../src/engine/config.js';
+import { engineEnv, setCredentialOverrides, buildSeedTopics, buildPriorityTopics } from '../src/engine/config.js';
 import { searchNews, pingTavily, resetTavilyPool, tavilyPoolStatus } from '../src/engine/tavily.js';
 import { handleAdminApi, announceAdminSetup } from '../src/engine/admin.js';
 import { pipelineHealth } from '../src/engine/health.js';
@@ -166,13 +166,47 @@ async function waitIdle() {
 test('schema bootstraps, seeds topics, and clamps settings', async () => {
   await freshDb();
   const topics = await store.listTopics();
-  assert.equal(topics.length, 30);
+  assert.equal(topics.length, buildSeedTopics().length + buildPriorityTopics().length);
   const settings = await store.updateSettings({ intervalMinutes: 1, concurrency: 99, paused: true });
   assert.equal(settings.intervalMinutes, 5);
   assert.equal(settings.concurrency, 6);
   assert.equal(settings.paused, true);
   await assert.rejects(() => store.updateSettings({ nope: 1 }), /Unknown setting/);
   assert.equal((await store.schemaCheck()).ok, true);
+});
+
+test('SEA solar/renewable topics reach an already-seeded database once, and deletions stick', async () => {
+  const pg = await freshDb();
+  const priority = buildPriorityTopics();
+  assert.ok(priority.length >= 10 && priority.every((t) => t.section === 'energy'));
+  assert.ok(priority.some((t) => t.country === 'MY' && /solar/i.test(t.query)), 'Malaysia solar is covered');
+
+  // Simulate a production database seeded before this beat existed.
+  await pg.query('delete from engine_topics where query = any($1)', [priority.map((t) => t.query)]);
+  await pg.query(`delete from engine_settings where key = 'priority_topics_version'`);
+  const base = (await store.listTopics()).length;
+  assert.equal(base, buildSeedTopics().length);
+
+  const reboot = async () => {
+    store.setDb({
+      query: (text, params) => pg.query(text, params),
+      tx: (fn) => pg.transaction((t) => fn({ query: (text, params) => t.query(text, params) }))
+    });
+    await store.ensureEngineSchema();
+    return store.listTopics();
+  };
+
+  const topics = await reboot();
+  assert.equal(topics.length, base + priority.length, 'priority topics added to the existing topics');
+
+  // The established topics have all run before; the new ones have not, so the next runs pick them first.
+  await pg.query('update engine_topics set last_run_at = now() where query <> all($1)', [priority.map((t) => t.query)]);
+  const next = await store.pickTopicsForRun(priority.length);
+  assert.deepEqual(new Set(next.map((t) => t.query)), new Set(priority.map((t) => t.query)));
+
+  const dropped = topics.find((t) => t.query === priority[0].query);
+  await store.deleteTopic(dropped.id);
+  assert.equal((await reboot()).length, base + priority.length - 1, 'a deleted priority topic is not resurrected on the next boot');
 });
 
 test('full run: search → dedupe → write → publish, with rejects and failures tracked', async () => {
